@@ -1,0 +1,2 @@
+C:\Data\Code\Game Engine Foundations\Game-Engine\x64\Debug\SDL2d.dll
+C:\Data\Code\Game Engine Foundations\Game-Engine\Game-Engine\x64\Debug\Game-Eng.A01516FD.Up2Date
