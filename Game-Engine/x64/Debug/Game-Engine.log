@@ -1,4 +1,6 @@
-﻿  init.cpp
+﻿  input.cpp
   main.cpp
+  init.cpp
   Generating Code...
+MSVCRTD.lib(initializers.obj) : warning LNK4098: defaultlib 'msvcrt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
   Game-Engine.vcxproj -> C:\Data\Code\Game Engine Foundations\Game-Engine\x64\Debug\Game-Engine.exe

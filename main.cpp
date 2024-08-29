@@ -15,6 +15,8 @@ int main(int argc, char* argv[])
 	{
 		prepareScene(myColor);
 
+		doInput();
+
 		presentScene();
 	}
 
