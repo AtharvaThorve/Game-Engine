@@ -6,3 +6,5 @@ extern App* app;
 
 void prepareScene(SDL_Color);
 void presentScene(void);
+void drawRect(int x, int y, int h, int w);
+void colorRect(SDL_Color);

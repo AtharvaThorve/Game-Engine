@@ -50,6 +50,9 @@
     <ClInclude Include="input.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="shape.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
