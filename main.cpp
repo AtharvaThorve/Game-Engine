@@ -1,34 +1,43 @@
 #include "main.hpp"
 #include <memory>
+#include <iostream>
 
 int main(int argc, char* argv[]) 
 {
 	initSDL();
 
-	SDL_Color screenColor;
-	screenColor.r = 0x00;
-	screenColor.g = 0x00;
-	screenColor.b = 0xFF;
-	screenColor.a = 0x00;
+	initPhysics(0.0f, 9.8f);
 
-	SDL_Color rectColor;
-	rectColor.r = 0xFF;
-	rectColor.g = 0x00;
-	rectColor.b = 0x00;
-	rectColor.a = 0x00;
+	EntityManager entityManager;
+
+	auto rectEntity1 = createRectEntity(Vector2{ 100, 100 }, Vector2{ 0, 0 }, SDL_Color{ 255, 0, 0, 0 }, 1.0f, 50, 100, true, true, true);
+	auto rectEntity2 = createRectEntity(Vector2{ 200, 200 }, Vector2{ 0, 0 }, SDL_Color{ 0, 255, 0, 0 }, 1.0f, 100, 50, true, true, true);
+
+	entityManager.addEntity(rectEntity1);
+	entityManager.addEntity(rectEntity2);
+
+	Uint32 lastTime = SDL_GetTicks();
 
 	while (1)
 	{
-		prepareScene(screenColor);
-
 		doInput();
 
-		drawRect((SCREEN_WIDTH / 2) - 100, (SCREEN_HEIGHT / 2) - 200, 200, 400);
+		Uint32 currentTime = SDL_GetTicks();
+		float deltaTime = (currentTime - lastTime) / 1000.0f;
+		lastTime = currentTime;
 
-		colorRect(rectColor);
+		entityManager.updateEntities(deltaTime);
 
+		prepareScene(SDL_Color{0, 0, 255, 0});
+		entityManager.renderEntities();
 		presentScene();
+
+		SDL_RenderPresent(app->renderer);
 	}
+
+	clean_up_entities(&entityManager);
+	clean_up_physics_system();
+	clean_up_sdl();
 
 	return 0;
 }
