@@ -2,9 +2,12 @@
 #include <memory>
 #include <iostream>
 
-int main(int argc, char* argv[]) 
+int rectX = (SCREEN_WIDTH / 2) - 100; // Initialize X position
+int rectY = (SCREEN_HEIGHT / 2) - 200; // Initialize Y position
+
+int main(int argc, char* argv[])
 {
-	initSDL();
+    initSDL();
 
 	initPhysics(0.0f, 9.8f);
 
