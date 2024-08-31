@@ -137,7 +137,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="Rectangle.cpp" />
-    <ClCompile Include="rect_collision_detection.cpp" />
     <ClCompile Include="structs.cpp" />
   </ItemGroup>
   <ItemGroup>

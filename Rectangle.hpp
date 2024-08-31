@@ -9,7 +9,7 @@ public:
 
 	void Draw(int x, int y, int w, int h);
 
-	//SDL_bool IsColliding(Rectangle& obj);
+	SDL_bool IsColliding(Rectangle& obj);
 
 	void Render(SDL_Renderer*& renderer);
 

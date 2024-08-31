@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 		obj1.Draw(0, 0, 100, 100);
 		obj2.Draw(10, 10, 100, 100);
 
-		/*obj1.IsColliding(obj2);*/
+		obj1.IsColliding(obj2);
 
 		obj1.Render(app->renderer);
 		obj2.Render(app->renderer);
