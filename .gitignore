@@ -1,1 +1,6 @@
-.vs/*
+.vs/
+
+# Ignore the x64/Debug folders and vcpkg_installed directory
+/Game-Engine/x64/Debug/
+/x64/Debug/
+/vcpkg_installed/

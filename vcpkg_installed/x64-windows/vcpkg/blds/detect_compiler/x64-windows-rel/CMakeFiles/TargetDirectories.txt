@@ -1,2 +1,0 @@
-C:/Data/Code/Game Engine Foundations/Game-Engine/vcpkg_installed/x64-windows/vcpkg/blds/detect_compiler/x64-windows-rel/CMakeFiles/edit_cache.dir
-C:/Data/Code/Game Engine Foundations/Game-Engine/vcpkg_installed/x64-windows/vcpkg/blds/detect_compiler/x64-windows-rel/CMakeFiles/rebuild_cache.dir
