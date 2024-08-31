@@ -1,1 +1,74 @@
-.vs/*
+# Build folders
+/build/
+/bin/
+/obj/
+/out/
+/Debug/
+/Release/
+
+# Visual Studio files
+.vs/
+.vscode/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# CMake build directories
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Executables and libraries
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.obj
+*.o
+*.pdb
+*.idb
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Debugging files
+*.pdb
+*.ilk
+*.ipdb
+*.iobj
+
+# IDE-specific files
+.idea/
+*.code-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# SDL2 generated files
+*.generated.*
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Coverage and profiling
+*.gcov
+*.gcda
+*.gcno
+*.gcovr.*
+
+# Generated files
+*.gch
+*.pch
