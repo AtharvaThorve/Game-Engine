@@ -34,4 +34,5 @@ SDL_bool Rectangle::IsColliding(Rectangle& obj) {
 
 void Rectangle::Render(SDL_Renderer*& renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE); // default white color
+    SDL_RenderFillRect(app->renderer, &rectangle);
 }

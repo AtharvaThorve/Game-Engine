@@ -1,6 +1,9 @@
 #include "main.hpp"
 #include <memory>
 
+int obj2_X = 100;
+int obj2_Y = 100;
+
 int main(int argc, char* argv[]) 
 {
 	initSDL();
@@ -19,7 +22,6 @@ int main(int argc, char* argv[])
 
 	Rectangle obj1(app->renderer);
 	Rectangle obj2(app->renderer);
-	
 
 	while (1)
 	{
@@ -27,12 +29,8 @@ int main(int argc, char* argv[])
 
 		doInput();
 
-		//drawRect((SCREEN_WIDTH / 2) - 100, (SCREEN_HEIGHT / 2) - 200, 200, 400);
-		//colorRect(rectColor);
-		//presentScene();
-
 		obj1.Draw(0, 0, 100, 100);
-		obj2.Draw(10, 10, 100, 100);
+		obj2.Draw(obj2_X, obj2_Y, 100, 100);
 
 		obj1.IsColliding(obj2);
 

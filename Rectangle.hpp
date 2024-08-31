@@ -1,4 +1,7 @@
 #include <SDL2/SDL.h>
+#include "structs.hpp"
+
+extern App* app;
 
 class Rectangle {
 public:
