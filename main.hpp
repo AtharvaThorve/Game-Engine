@@ -3,6 +3,7 @@
 #include "init.hpp"
 #include "draw.hpp"
 #include "input.hpp"
+#include "Rectangle.hpp"
 #include <memory>
 #include "SDL2/SDL.h"
 
