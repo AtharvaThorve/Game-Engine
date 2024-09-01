@@ -139,6 +139,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="scaling.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="structs.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="input.hpp" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="Physics.hpp" />
+    <ClInclude Include="scaling.hpp" />
     <ClInclude Include="shape.hpp" />
     <ClInclude Include="structs.hpp" />
   </ItemGroup>

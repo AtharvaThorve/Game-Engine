@@ -2,25 +2,12 @@
 #include <memory>
 #include <iostream>
 
-void setRenderScale(float scaleX, float scaleY) {
-    SDL_RenderSetScale(app->renderer, scaleX, scaleY);
-}
-
-void updateScaleFactors(float& scale) {
-    int currentScreenWidth, currentScreenHeight;
-    SDL_GetWindowSize(app->window, &currentScreenWidth, &currentScreenHeight);
-
-    // Calculate the scale factor based on the smaller dimension
-    float widthScale = static_cast<float>(currentScreenWidth) / SCREEN_WIDTH;
-    float heightScale = static_cast<float>(currentScreenHeight) / SCREEN_HEIGHT;
-
-    // Use the smaller scale to maintain the aspect ratio
-    scale = std::min(widthScale, heightScale);
-}
-
 int main(int argc, char* argv[])
 {
     initSDL();
+    // Define scale factors
+    float scale = 1.0f;
+    float cached_scale = scale;
 
     // Initialize the physics system with gravity (e.g., 9.8 m/s^2 in the y-direction)
     PhysicsSystem physicsSystem(0.0f, 9.8f);
@@ -52,13 +39,6 @@ int main(int argc, char* argv[])
     SDL_Point center1 = { 0, 0 };
     int radius1 = 0;
 
-    // Define scale factors
-    float scaleX = 1.0f;
-    //float scaleY = 1.0f;
-
-    updateScaleFactors(scaleX);
-    setRenderScale(scaleX, scaleX);
-
     Entity entity1(initialPosition1, initialVelocity1, mass1, isAffectedByGravity1, isMovable1, isHittable1, shapeType1, color1, rect1, center1, radius1);
 
     Uint32 lastTime = SDL_GetTicks();
@@ -87,9 +67,13 @@ int main(int argc, char* argv[])
         entity.draw();
         entity1.draw();
 
-        updateScaleFactors(scaleX);
-        setRenderScale(scaleX, scaleX);
-
+        updateScaleFactor(scale);
+        if (allowScaling && cached_scale != scale)
+        {
+            setRenderScale(scale, scale);
+            cached_scale = scale;
+        }
+ 
         auto collision = entity.isColliding(entity1);
         if(collision) {
             break;
@@ -97,6 +81,7 @@ int main(int argc, char* argv[])
 
         // Present the updated scene
         presentScene();
+        SDL_Delay(16);
     }
 
     clean_up_sdl();

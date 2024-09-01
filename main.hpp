@@ -8,6 +8,7 @@
 #include "cleanup.hpp"
 #include <memory>
 #include "SDL2/SDL.h"
+#include "scaling.hpp"
 
 // SDL render and window context
 extern App* app;

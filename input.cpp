@@ -21,16 +21,20 @@ void doInput(Entity* entity, float move_speed = 5)
         /*entity->velocity.x = 0;
         entity->velocity.y = 0;*/
         if (state[SDL_SCANCODE_UP]) {
-            entity->velocity.y = -move_speed; // Move up
+            entity->velocity.y = -move_speed;
         }
         if (state[SDL_SCANCODE_DOWN]) {
-            entity->velocity.y = move_speed;  // Move down
+            entity->velocity.y = move_speed;
         }
         if (state[SDL_SCANCODE_LEFT]) {
-            entity->velocity.x = -move_speed; // Move left
+            entity->velocity.x = -move_speed;
         }
         if (state[SDL_SCANCODE_RIGHT]) {
-            entity->velocity.x = move_speed;  // Move right
+            entity->velocity.x = move_speed;
+        }
+        if (state[SDL_SCANCODE_RSHIFT]) {
+            std::cout << "allowscaling pressed\n";
+            allowScaling = !allowScaling;
         }
     }
 }
