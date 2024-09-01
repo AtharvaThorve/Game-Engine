@@ -6,6 +6,18 @@ void setRenderScale(float scaleX, float scaleY) {
     SDL_RenderSetScale(app->renderer, scaleX, scaleY);
 }
 
+void updateScaleFactors(float& scale) {
+    int currentScreenWidth, currentScreenHeight;
+    SDL_GetWindowSize(app->window, &currentScreenWidth, &currentScreenHeight);
+
+    // Calculate the scale factor based on the smaller dimension
+    float widthScale = static_cast<float>(currentScreenWidth) / SCREEN_WIDTH;
+    float heightScale = static_cast<float>(currentScreenHeight) / SCREEN_HEIGHT;
+
+    // Use the smaller scale to maintain the aspect ratio
+    scale = std::min(widthScale, heightScale);
+}
+
 int main(int argc, char* argv[])
 {
     initSDL();
@@ -42,9 +54,10 @@ int main(int argc, char* argv[])
 
     // Define scale factors
     float scaleX = 1.0f;
-    float scaleY = 1.0f;
+    //float scaleY = 1.0f;
 
-    setRenderScale(scaleX, scaleY);
+    updateScaleFactors(scaleX);
+    setRenderScale(scaleX, scaleX);
 
     Entity entity1(initialPosition1, initialVelocity1, mass1, isAffectedByGravity1, isMovable1, isHittable1, shapeType1, color1, rect1, center1, radius1);
 
@@ -73,6 +86,9 @@ int main(int argc, char* argv[])
         // Draw the entity in its new position
         entity.draw();
         entity1.draw();
+
+        updateScaleFactors(scaleX);
+        setRenderScale(scaleX, scaleX);
 
         auto collision = entity.isColliding(entity1);
         if(collision) {
