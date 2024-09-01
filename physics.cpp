@@ -21,7 +21,4 @@ void update_entity(Entity* entity, float deltaTime)
 {
 	entity->position.x += entity->velocity.x * deltaTime;
 	entity->position.y += entity->velocity.y * deltaTime;
-
-	entity->rect.x = static_cast<int>(round(entity->position.x));
-	entity->rect.y = static_cast<int>(round(entity->position.y));
 }

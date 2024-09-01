@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <string>
+#include "Rectangle.hpp"
 
 
 //A struct to contain the pointers to the SDL Renderer and SDL window.
@@ -23,7 +24,7 @@ typedef struct {
 	bool isAffectedByGravity;
 	bool isMovable;
 	bool isHittable;
-	SDL_Rect rect;
+	Rectangle* rect;
 	SDL_Color color;
 } Entity;
 

@@ -11,7 +11,8 @@ Entity* createRectEntity(Vector2 position, Vector2 velocity, SDL_Color color, fl
     entity->isMovable = isMovable;
     entity->isAffectedByGravity = isAffectedByGravity;
     entity->isHittable = isHittable;
-    entity->rect = SDL_Rect{ (int)position.x, (int)position.y, height, width };
+    entity->rect = new Rectangle(app->renderer);
+    entity->rect->Draw(static_cast<int>(position.x), static_cast<int>(position.y), width, height);
     return entity;
 }
 
@@ -34,7 +35,7 @@ void EntityManager::renderEntities()
 {
     for (auto& entity : entities) {
         SDL_SetRenderDrawColor(app->renderer, entity->color.r, entity->color.g, entity->color.b, entity->color.a);
-        SDL_RenderFillRect(app->renderer, &entity->rect);
+        // SDL_RenderFillRect(app->renderer, &entity->rect);
     }
 }
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include "structs.hpp"
 #include "physics.hpp"
+#include "Rectangle.hpp"
 
 extern App* app;
 

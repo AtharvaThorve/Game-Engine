@@ -39,9 +39,9 @@ int main(int argc, char* argv[])
 
 		// entityManager.updateEntities(deltaTime);
 
-		// prepareScene(SDL_Color{0, 0, 255, 0});
+		prepareScene(SDL_Color{0, 0, 255, 0});
 		// entityManager.renderEntities();
-		// presentScene();
+		presentScene();
 
 		obj1.Draw(0, 0, 100, 100);
 		obj2.Draw(obj2_X, obj2_Y, 100, 100);
