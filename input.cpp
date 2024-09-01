@@ -1,12 +1,8 @@
 #include "input.hpp"
 #include <SDL2/SDL.h>
 
-// Assuming these are defined elsewhere, such as in a header or another source file
-extern int obj2_X;
-extern int obj2_Y;
-const int MOVE_SPEED = 5;
 
-void doInput(void)
+void doInput(Entity* entity, int move_speed = 5)
 {
     // Update the state of the keyboard
     const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -24,36 +20,36 @@ void doInput(void)
     // Check if the UP key is pressed
     if (state[SDL_SCANCODE_UP])
     {
-        if (obj2_Y - MOVE_SPEED >= 0) // Check upper boundary
+        if (entity->position.y - move_speed >= 0) // Check upper boundary
         {
-            obj2_Y -= MOVE_SPEED;
+            entity->position.y -= move_speed;
         }
     }
 
     // Check if the DOWN key is pressed
     if (state[SDL_SCANCODE_DOWN])
     {
-        if (obj2_Y + 400 + MOVE_SPEED <= SCREEN_HEIGHT) // Check lower boundary
+        if (entity->position.y + 400 + move_speed <= SCREEN_HEIGHT) // Check lower boundary
         {
-            obj2_Y += MOVE_SPEED;
+            entity->position.y += move_speed;
         }
     }
 
     // Check if the LEFT key is pressed
     if (state[SDL_SCANCODE_LEFT])
     {
-        if (obj2_X - MOVE_SPEED >= 0) // Check left boundary
+        if (entity->position.x - move_speed >= 0) // Check left boundary
         {
-            obj2_X -= MOVE_SPEED;
+            entity->position.x -= move_speed;
         }
     }
 
     // Check if the RIGHT key is pressed
     if (state[SDL_SCANCODE_RIGHT])
     {
-        if (obj2_X + 200 + MOVE_SPEED <= SCREEN_WIDTH) // Check right boundary
+        if (entity->position.x + 200 + move_speed <= SCREEN_WIDTH) // Check right boundary
         {
-            obj2_X += MOVE_SPEED;
+            entity->position.x += move_speed;
         }
     }
 }

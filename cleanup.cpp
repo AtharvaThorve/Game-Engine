@@ -17,6 +17,6 @@ void clean_up_physics_system() {
     physicsSystem = nullptr;
 }
 
-void clean_up_entities(EntityManager* entityManager) {
-    entityManager->cleanUp();
-}
+//void clean_up_entities(EntityManager* entityManager) {
+//    entityManager->cleanUp();
+//}
