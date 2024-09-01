@@ -2,6 +2,10 @@
 #include <memory>
 #include <iostream>
 
+void setRenderScale(float scaleX, float scaleY) {
+    SDL_RenderSetScale(app->renderer, scaleX, scaleY);
+}
+
 int main(int argc, char* argv[])
 {
     initSDL();
@@ -35,6 +39,12 @@ int main(int argc, char* argv[])
     SDL_Rect rect1 = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 }; // Size of rectangle
     SDL_Point center1 = { 0, 0 };
     int radius1 = 0;
+
+    // Define scale factors
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    setRenderScale(scaleX, scaleY);
 
     Entity entity1(initialPosition1, initialVelocity1, mass1, isAffectedByGravity1, isMovable1, isHittable1, shapeType1, color1, rect1, center1, radius1);
 

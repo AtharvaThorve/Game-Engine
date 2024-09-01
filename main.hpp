@@ -13,3 +13,5 @@
 extern App* app;
 
 int main(int argc, char* argv[]);
+
+void setRenderScale(float scaleX, float scaleY);
