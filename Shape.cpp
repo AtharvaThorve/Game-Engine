@@ -1,4 +1,5 @@
 #include "Shape.hpp"
+#include <iostream>
 
 RectangleShape::RectangleShape(const SDL_Rect& rectangle) : rect(rectangle) {
     type = ShapeType::RECTANGLE;
@@ -9,7 +10,23 @@ void RectangleShape::draw(const SDL_Color& color) {
     SDL_RenderFillRect(app->renderer, &rect);
 }
 
-CircleShape::CircleShape(int radius, const SDL_Point& center)
+SDL_bool RectangleShape::IsColliding(const SDL_Rect& rectangle) {
+    return SDL_HasIntersection(&rect, &rectangle);
+}
+
+bool RectangleShape::isColliding(const Shape& other) const {
+    switch (other.type) {
+    case ShapeType::RECTANGLE:
+        return SDL_HasIntersection(&rect, &static_cast<const RectangleShape&>(other).rect);
+    case ShapeType::CIRCLE:
+        return false;
+        //return IsColliding(static_cast<const CircleShape&>(other).circleToRect());
+    default:
+        return false;
+    }
+}
+
+CircleShape::CircleShape(int radius, const SDL_Point& center) : radius(radius), center(center)
 {
     type = ShapeType::CIRCLE;
 }
@@ -48,4 +65,30 @@ void CircleShape::drawCircle(int x, int y, int radius) {
             offsetX += 1;
         }
     }
+}
+
+bool CircleShape::isColliding(const Shape& other) const {
+    switch (other.type) {
+    case ShapeType::RECTANGLE:
+        return other.isColliding(*this);
+    case ShapeType::CIRCLE: {
+        const CircleShape& otherCircle = static_cast<const CircleShape&>(other);
+        int dx = center.x - otherCircle.center.x;
+        int dy = center.y - otherCircle.center.y;
+        int distanceSquared = dx * dx + dy * dy;
+        int radiusSum = radius + otherCircle.radius;
+        return distanceSquared <= radiusSum * radiusSum;
+    }
+    default:
+        return false;
+    }
+}
+
+SDL_Rect CircleShape::circleToRect() const {
+    return SDL_Rect{
+        center.x - radius,
+        center.y - radius,
+        2 * radius,
+        2 * radius
+    };
 }

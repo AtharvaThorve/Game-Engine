@@ -64,6 +64,11 @@ int main(int argc, char* argv[])
         entity.draw();
         entity1.draw();
 
+        auto collision = entity.isColliding(entity1);
+        if(collision) {
+            break;
+        }
+
         // Present the updated scene
         presentScene();
     }

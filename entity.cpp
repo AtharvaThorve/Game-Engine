@@ -51,3 +51,10 @@ void Entity::draw() {
         shape->draw(color);
     }
 }
+
+bool Entity::isColliding(const Entity& other) const {
+    if (shape && other.shape) {
+        return shape->isColliding(*other.shape);
+    }
+    return false;
+}

@@ -17,8 +17,10 @@ public:
     Shape() = default;
     virtual ~Shape() = default; // Virtual destructor
 
-    // Optionally, add virtual methods for drawing, updating, etc.
     virtual void draw(const SDL_Color& color) = 0;
+
+    // Virtual method for collision detection
+    virtual bool isColliding(const Shape& other) const = 0;
 };
 
 class RectangleShape : public Shape {
@@ -29,7 +31,11 @@ public:
 
     void draw(const SDL_Color& color) override;
 
-    // Additional methods specific to RectangleShape
+    SDL_bool IsColliding(const SDL_Rect& rectangle);
+
+    // Override for collision detection
+    bool isColliding(const Shape& other) const override;
+
 };
 
 
@@ -41,6 +47,8 @@ public:
     CircleShape(int radius, const SDL_Point& center);
     void draw(const SDL_Color& color) override;
 
-private:
     void drawCircle(int x, int y, int radius);
+    // Override for collision detection
+    bool isColliding(const Shape& other) const override;
+    SDL_Rect circleToRect() const;
 };

@@ -38,4 +38,7 @@ public:
 
     // Method to draw the entity
     void draw();
+
+    // Method to check for collisions with another entity
+    bool isColliding(const Entity& other) const;
 };

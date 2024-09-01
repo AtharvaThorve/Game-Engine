@@ -11,4 +11,4 @@ extern App* app;
 // Initialize SDL rendering window
 void initSDL(void);
 
-void initPhysics(float gravityX, float gravityY);
+// void initPhysics(float gravityX, float gravityY);
