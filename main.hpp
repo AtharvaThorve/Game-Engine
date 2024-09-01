@@ -3,7 +3,7 @@
 #include "init.hpp"
 #include "draw.hpp"
 #include "input.hpp"
-#include "physics.hpp"
+#include "Physics.hpp"
 #include "Entity.hpp"
 #include "cleanup.hpp"
 #include <memory>

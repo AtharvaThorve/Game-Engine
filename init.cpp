@@ -24,8 +24,3 @@ void initSDL(void) {
 		exit(3);
 	}
 }
-
-void initPhysics(float gravityX, float gravityY) 
-{
-	init_physics_system(gravityX, gravityY);
-}

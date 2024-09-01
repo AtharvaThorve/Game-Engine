@@ -1,7 +1,13 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "structs.hpp"
+#include "Entity.hpp"
 
-void init_physics_system(float gravityX, float gravityY);
-//void apply_gravity(Entity* entity, float deltaTime);
-//void update_entity(Entity* entity, float deltaTime);
+class PhysicsSystem {
+public:
+	Vector2 gravity;
+
+	PhysicsSystem(float gravityX, float gravityY);
+
+	void applyGravity(Entity& entity, float deltaTime);
+};

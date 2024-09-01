@@ -1,24 +1,11 @@
-#include "physics.hpp"
-#include <iostream>
+#include "Physics.hpp"
 
-PhysicsSystem* physicsSystem = new PhysicsSystem();
+PhysicsSystem::PhysicsSystem(float gravityX, float gravityY) : 
+	gravity{ gravityX, gravityY } {}
 
-void init_physics_system(float gravityX, float gravityY)
-{
-	physicsSystem->gravity.x = gravityX;
-	physicsSystem->gravity.y = gravityY;
+void PhysicsSystem::applyGravity(Entity& entity, float deltaTime) {
+	if (entity.isAffectedByGravity) {
+		entity.velocity.x += gravity.x * deltaTime;
+		entity.velocity.y += gravity.y * deltaTime;
+	}
 }
-
-//void apply_gravity(Entity* entity, float deltaTime)
-//{
-//	if (entity->isAffectedByGravity) {
-//		entity->velocity.x += physicsSystem->gravity.x * deltaTime;
-//		entity->velocity.y += physicsSystem->gravity.y * deltaTime;
-//	}
-//}
-
-//void update_entity(Entity* entity, float deltaTime)
-//{
-//	entity->position.x += entity->velocity.x * deltaTime;
-//	entity->position.y += entity->velocity.y * deltaTime;
-//}

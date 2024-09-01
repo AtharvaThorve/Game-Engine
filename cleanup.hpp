@@ -6,7 +6,7 @@
 class EntityManager;
 
 extern App* app;
-extern PhysicsSystem* physicsSystem;
+//extern PhysicsSystem* physicsSystem;
 
 void clean_up_sdl(void);
 void clean_up_physics_system(void);

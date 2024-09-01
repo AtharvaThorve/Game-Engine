@@ -12,10 +12,10 @@ void clean_up_sdl() {
     SDL_Quit();
 }
 
-void clean_up_physics_system() {
-    delete physicsSystem;
-    physicsSystem = nullptr;
-}
+//void clean_up_physics_system() {
+//    delete physicsSystem;
+//    physicsSystem = nullptr;
+//}
 
 //void clean_up_entities(EntityManager* entityManager) {
 //    entityManager->cleanUp();

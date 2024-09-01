@@ -18,8 +18,8 @@ void doInput(Entity* entity, float move_speed = 5)
 
     // Set velocity based on input
     if (entity->isMovable) {
-        entity->velocity.x = 0;
-        entity->velocity.y = 0;
+        /*entity->velocity.x = 0;
+        entity->velocity.y = 0;*/
         if (state[SDL_SCANCODE_UP]) {
             entity->velocity.y = -move_speed; // Move up
         }

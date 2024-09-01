@@ -13,8 +13,3 @@ typedef struct {
 	float x;
 	float y;
 } Vector2;
-
-
-typedef struct {
-	Vector2 gravity;
-} PhysicsSystem;
