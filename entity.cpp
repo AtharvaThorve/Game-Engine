@@ -12,7 +12,7 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, boo
         shape = std::make_unique<RectangleShape>(rect);
         break;
     case ShapeType::CIRCLE:
-        shape = std::make_unique<CircleShape>(center, radius);
+        shape = std::make_unique<CircleShape>(radius, center);
         break;
         // Add more cases as needed
     default:
@@ -20,6 +20,31 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, boo
         break;
     }
 }
+
+void Entity::updatePosition(float deltaTime) {
+    if (isMovable) {
+        // Update the position based on velocity and delta time
+        position.x += velocity.x * deltaTime;
+        position.y += velocity.y * deltaTime;
+
+        // Update the shape's position
+        if (shape->type == ShapeType::RECTANGLE) {
+            RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
+            if (rectShape) {
+                rectShape->rect.x = static_cast<int>(position.x);
+                rectShape->rect.y = static_cast<int>(position.y);
+            }
+        }
+        else if (shape->type == ShapeType::CIRCLE) {
+            CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
+            if (circleShape) {
+                circleShape->center.x = static_cast<int>(position.x);
+                circleShape->center.y = static_cast<int>(position.y);
+            }
+        }
+    }
+}
+
 
 void Entity::draw() {
     if (shape) {

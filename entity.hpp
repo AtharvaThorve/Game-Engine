@@ -33,6 +33,9 @@ public:
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
 
+    void updatePosition(float deltaTime);
+
+
     // Method to draw the entity
     void draw();
 };

@@ -139,7 +139,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="physics.cpp" />
-    <ClCompile Include="Rectangle.cpp" />
+    <ClCompile Include="Shape.cpp" />
     <ClCompile Include="structs.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,8 +151,7 @@
     <ClInclude Include="input.hpp" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="physics.hpp" />
-    <ClInclude Include="Rectangle.hpp" />
-    <ClInclude Include="shape.hpp" />
+    <ClInclude Include="Shape.hpp" />
     <ClInclude Include="structs.hpp" />
   </ItemGroup>
   <ItemGroup>

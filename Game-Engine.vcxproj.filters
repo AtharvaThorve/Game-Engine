@@ -36,8 +36,9 @@
     <ClCompile Include="entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cleanup.cpp"></ClCompile>
-    <ClCompile Include="Rectangle.cpp">
+    <ClCompile Include="cleanup.cpp">
+    </ClCompile>
+    <ClCompile Include="Shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,7 +61,7 @@
     <ClInclude Include="input.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="shape.hpp">
+    <ClInclude Include="Shape.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="physics.hpp">
@@ -69,9 +70,7 @@
     <ClInclude Include="entity.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="cleanup.hpp"></ClInclude>
-    <ClInclude Include="Rectangle.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="cleanup.hpp">
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

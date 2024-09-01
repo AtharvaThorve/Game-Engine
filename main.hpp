@@ -4,7 +4,7 @@
 #include "draw.hpp"
 #include "input.hpp"
 #include "physics.hpp"
-#include "entity.hpp"
+#include "Entity.hpp"
 #include "cleanup.hpp"
 #include <memory>
 #include "SDL2/SDL.h"
