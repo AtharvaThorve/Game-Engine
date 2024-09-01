@@ -36,7 +36,8 @@
     <ClCompile Include="entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cleanup.cpp">
+    <ClCompile Include="cleanup.cpp"></ClCompile>
+    <ClCompile Include="Rectangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,7 +69,8 @@
     <ClInclude Include="entity.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="cleanup.hpp">
+    <ClInclude Include="cleanup.hpp"></ClInclude>
+    <ClInclude Include="Rectangle.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

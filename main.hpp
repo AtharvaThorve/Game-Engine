@@ -6,6 +6,7 @@
 #include "physics.hpp"
 #include "entity.hpp"
 #include "cleanup.hpp"
+#include "Rectangle.hpp"
 #include <memory>
 #include "SDL2/SDL.h"
 
