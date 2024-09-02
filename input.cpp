@@ -18,19 +18,19 @@ void doInput(Entity* entity, float move_speed = 5)
 
     // Set velocity based on input
     if (entity->isMovable) {
-        /*entity->velocity.x = 0;
-        entity->velocity.y = 0;*/
+        entity->inputVelocity.x = 0;
+        entity->inputVelocity.y = 0;
         if (state[SDL_SCANCODE_UP]) {
-            entity->velocity.y = -move_speed;
+            entity->inputVelocity.y = -move_speed;
         }
         if (state[SDL_SCANCODE_DOWN]) {
-            entity->velocity.y = move_speed;
+            entity->inputVelocity.y = move_speed;
         }
         if (state[SDL_SCANCODE_LEFT]) {
-            entity->velocity.x = -move_speed;
+            entity->inputVelocity.x = -move_speed;
         }
         if (state[SDL_SCANCODE_RIGHT]) {
-            entity->velocity.x = move_speed;
+            entity->inputVelocity.x = move_speed;
         }
         if (state[SDL_SCANCODE_RSHIFT]) {
             std::cout << "allowscaling pressed\n";

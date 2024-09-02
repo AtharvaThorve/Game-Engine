@@ -1,9 +1,10 @@
 #include "Entity.hpp"
+#include <iostream>
 
-Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
+Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& inputVelocity, float mass, bool isAffectedByGravity,
     bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color,
     const SDL_Rect& rect, const SDL_Point& center, int radius)
-    : position(position), velocity(velocity), mass(mass),
+    : position(position), velocity(velocity), inputVelocity(inputVelocity), mass(mass),
     isAffectedByGravity(isAffectedByGravity), isMovable(isMovable),
     isHittable(isHittable), shape(nullptr), color(color)
 {
@@ -23,11 +24,14 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, boo
 
 void Entity::updatePosition(float deltaTime) {
     if (isMovable) {
-        // Update the position based on velocity and delta time
-        position.x += velocity.x * deltaTime;
-        position.y += velocity.y * deltaTime;
+        Vector2 finalVelocity = velocity;
 
-        // Update the shape's position
+        finalVelocity.x += inputVelocity.x;
+        finalVelocity.y += inputVelocity.y;
+
+        position.x += finalVelocity.x * deltaTime;
+        position.y += finalVelocity.y * deltaTime;
+
         if (shape->type == ShapeType::RECTANGLE) {
             RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
             if (rectShape) {
@@ -44,6 +48,7 @@ void Entity::updatePosition(float deltaTime) {
         }
     }
 }
+
 
 
 void Entity::draw() {

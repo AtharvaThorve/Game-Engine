@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
     // Define entity's initial properties
     Vector2 initialPosition{ 100, 100 };  // Starting position of the entity
     Vector2 initialVelocity{ 0, 0 };      // Starting velocity of the entity
+    Vector2 inputInitialVelocity{ 0, 0 };
     float mass = 1.0f;                    // Mass of the entity
     bool isAffectedByGravity = true;      // Gravity is applied
     bool isMovable = true;                // Entity can move
@@ -25,10 +26,11 @@ int main(int argc, char* argv[])
     SDL_Point center = { 0, 0 };
     int radius = 0;
 
-    Entity entity(initialPosition, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius);
+    Entity entity(initialPosition, initialVelocity, inputInitialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius);
 
     Vector2 initialPosition1{ 200, 100 };  // Starting position of the entity
     Vector2 initialVelocity1{ 0, 0 };      // Starting velocity of the entity
+    Vector2 inputInitialVelocity1{ 0, 0 };
     float mass1 = 1.0f;                    // Mass of the entity
     bool isAffectedByGravity1 = true;      // Gravity is applied
     bool isMovable1 = true;                // Entity can move
@@ -39,7 +41,7 @@ int main(int argc, char* argv[])
     SDL_Point center1 = { 0, 0 };
     int radius1 = 0;
 
-    Entity entity1(initialPosition1, initialVelocity1, mass1, isAffectedByGravity1, isMovable1, isHittable1, shapeType1, color1, rect1, center1, radius1);
+    Entity entity1(initialPosition1, initialVelocity1, inputInitialVelocity1, mass1, isAffectedByGravity1, isMovable1, isHittable1, shapeType1, color1, rect1, center1, radius1);
 
     Uint32 lastTime = SDL_GetTicks();
 
