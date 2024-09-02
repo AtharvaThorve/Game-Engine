@@ -1,6 +1,6 @@
 #include "scaling.hpp"
 
-bool allowScaling = true;
+bool allowScaling = false;
 
 void setRenderScale(float scaleX, float scaleY) {
     SDL_RenderSetScale(app->renderer, scaleX, scaleY);
