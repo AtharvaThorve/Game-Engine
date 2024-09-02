@@ -1,8 +1,8 @@
 #include "Entity.hpp"
 #include <iostream>
 
-Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& inputVelocity, float mass, bool isAffectedByGravity,
-    bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color,
+Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& inputVelocity, float mass, 
+    bool isAffectedByGravity,bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color,
     const SDL_Rect& rect, const SDL_Point& center, int radius)
     : position(position), velocity(velocity), inputVelocity(inputVelocity), mass(mass),
     isAffectedByGravity(isAffectedByGravity), isMovable(isMovable),
@@ -23,28 +23,30 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& 
 }
 
 void Entity::updatePosition(float deltaTime) {
-    if (isMovable) {
-        Vector2 finalVelocity = velocity;
+    Vector2 finalVelocity = velocity;
 
-        finalVelocity.x += inputVelocity.x;
-        finalVelocity.y += inputVelocity.y;
+    finalVelocity.x += inputVelocity.x;
+    finalVelocity.y += inputVelocity.y;
+    if (hasMovementPattern) {
+        finalVelocity.x += patternVelocity.x;
+        finalVelocity.y += patternVelocity.y;
+    }
 
-        position.x += finalVelocity.x * deltaTime;
-        position.y += finalVelocity.y * deltaTime;
+    position.x += finalVelocity.x * deltaTime;
+    position.y += finalVelocity.y * deltaTime;
 
-        if (shape->type == ShapeType::RECTANGLE) {
-            RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
-            if (rectShape) {
-                rectShape->rect.x = static_cast<int>(position.x);
-                rectShape->rect.y = static_cast<int>(position.y);
-            }
+    if (shape->type == ShapeType::RECTANGLE) {
+        RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
+        if (rectShape) {
+            rectShape->rect.x = static_cast<int>(position.x);
+            rectShape->rect.y = static_cast<int>(position.y);
         }
-        else if (shape->type == ShapeType::CIRCLE) {
-            CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
-            if (circleShape) {
-                circleShape->center.x = static_cast<int>(position.x);
-                circleShape->center.y = static_cast<int>(position.y);
-            }
+    }
+    else if (shape->type == ShapeType::CIRCLE) {
+        CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
+        if (circleShape) {
+            circleShape->center.x = static_cast<int>(position.x);
+            circleShape->center.y = static_cast<int>(position.y);
         }
     }
 }

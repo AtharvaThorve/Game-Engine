@@ -9,6 +9,7 @@
 #include <memory>
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
+#include "EntityManager.hpp"
 
 // SDL render and window context
 extern App* app;

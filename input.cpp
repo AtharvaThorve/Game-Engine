@@ -1,7 +1,7 @@
 #include "input.hpp"
 #include <SDL2/SDL.h>
 
-void doInput(Entity* entity, float move_speed = 5)
+void doInput(std::shared_ptr<Entity> entity, float move_speed = 5)
 {
     // Update the state of the keyboard
     const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -33,7 +33,6 @@ void doInput(Entity* entity, float move_speed = 5)
             entity->inputVelocity.x = move_speed;
         }
         if (state[SDL_SCANCODE_RSHIFT]) {
-            std::cout << "allowscaling pressed\n";
             allowScaling = !allowScaling;
         }
     }
