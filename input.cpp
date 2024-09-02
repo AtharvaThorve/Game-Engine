@@ -32,8 +32,13 @@ void doInput(std::shared_ptr<Entity> entity, float move_speed = 5)
         if (state[SDL_SCANCODE_RIGHT]) {
             entity->inputVelocity.x = move_speed;
         }
-        if (state[SDL_SCANCODE_RSHIFT]) {
-            allowScaling = !allowScaling;
+
+        // Set allowScaling based on shift keys
+        if (state[SDL_SCANCODE_LSHIFT]) {
+            allowScaling = false;
+        }
+        else if (state[SDL_SCANCODE_RSHIFT]) {
+            allowScaling = true;
         }
     }
 }
