@@ -67,12 +67,21 @@ int main(int argc, char* argv[])
         float deltaTime = (currentTime - lastTime) / 1000.0f; // Time in seconds since last frame
         lastTime = currentTime;
 
-        entityManager.updateEntities(deltaTime, physicsSystem);
+        //Create a bounding box
+        int boxX = 100, boxY = 100, boxWidth = 600, boxHeight = 400;
+        BoundingBox boundingBox(boxX, boxY, boxWidth, boxHeight);
+
+        entityManager.updateEntities(deltaTime, physicsSystem, boundingBox);
 
         // Clear the screen with a blue background
         prepareScene(SDL_Color{ 0, 0, 255, 255 });
 
         entityManager.drawEntities();
+        
+        //Bounding box Debug
+        SDL_Rect boundingRect = boundingBox.getRect();
+        SDL_SetRenderDrawColor(app->renderer, 255, 255, 255, 255); 
+        SDL_RenderDrawRect(app->renderer, &boundingRect);
 
         updateScaleFactor(scale);
         if (allowScaling && cached_scale != scale)

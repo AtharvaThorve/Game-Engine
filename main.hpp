@@ -10,6 +10,7 @@
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
 #include "EntityManager.hpp"
+#include "BoundingBox.hpp"
 
 // SDL render and window context
 extern App* app;
