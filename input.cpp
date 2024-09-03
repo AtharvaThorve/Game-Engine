@@ -33,11 +33,11 @@ void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speed
             entity->inputVelocity.x = move_speedX;
         }
 
-        // Check if the right shift key is pressed
-        if (state[SDL_SCANCODE_RSHIFT]) {
-            allowScaling = true;
-        } else {
+        if (state[SDL_SCANCODE_LSHIFT]) {
             allowScaling = false;
+        }
+        else if (state[SDL_SCANCODE_RSHIFT]) {
+            allowScaling = true;
         }
     }
 }
