@@ -15,11 +15,10 @@ public:
     ShapeType type;
 
     Shape() = default;
-    virtual ~Shape() = default; // Virtual destructor
+    virtual ~Shape() = default;
 
     virtual void draw(const SDL_Color& color) = 0;
 
-    // Virtual method for collision detection
     virtual bool isColliding(const Shape& other) const = 0;
 };
 

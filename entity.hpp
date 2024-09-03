@@ -40,7 +40,6 @@ public:
 
     void updatePosition(float deltaTime);
 
-
     // Method to draw the entity
     void draw();
 

@@ -51,8 +51,6 @@ void Entity::updatePosition(float deltaTime) {
     }
 }
 
-
-
 void Entity::draw() {
     if (shape) {
         shape->draw(color);

@@ -5,4 +5,4 @@
 #include "entity.hpp"
 #include "scaling.hpp"
 
-void doInput(std::shared_ptr<Entity> entity, float moveSpeed);
+void doInput(std::shared_ptr<Entity> entity, float move_speedX=5, float move_speedY=5);

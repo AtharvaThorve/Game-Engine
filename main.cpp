@@ -36,24 +36,32 @@ int main(int argc, char* argv[])
     SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
     auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, inputInitialVelocity, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius);
 
+    Vector2 initialPosition3{ 600, 100 };
+    SDL_Rect rect3 = { static_cast<int>(initialPosition3.x), static_cast<int>(initialPosition3.y), 50, 50 };
+    auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, inputInitialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
+
     MovementPattern pattern;
-    pattern.addStep(MovementStep({ 50, 0 }, 2.0f)); // Move right for 2 secs at a speed of 50
+    pattern.addStep(MovementStep({ 50, 50 }, 2.0f)); // Move right for 2 secs at an acceleration of 50
     pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-    pattern.addStep(MovementStep({ -50, 0 }, 2.0f)); // Move left for 2 secs at a speed of 50
+    pattern.addStep(MovementStep({ -50, -50 }, 2.0f)); // Move left for 2 secs at an acceleratopn of 50
     pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
     patternEntity->hasMovementPattern = true;
     patternEntity->movementPattern = pattern;
 
+    patternEntity1->hasMovementPattern = true;
+    patternEntity1->movementPattern = pattern;
+
     entityManager.addEntity(entity);
     entityManager.addEntity(entity1);
     entityManager.addEntity(patternEntity);
+    entityManager.addEntity(patternEntity1);
 
     Uint32 lastTime = SDL_GetTicks();
 
     while (1)
     {
         // Handle input, which might modify the entity's velocity
-        doInput(entity, 50.0f);
+        doInput(entity, 50.0f, 100.0f);
 
         Uint32 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f; // Time in seconds since last frame
