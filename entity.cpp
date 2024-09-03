@@ -1,12 +1,10 @@
 #include "Entity.hpp"
 #include <iostream>
 
-Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& inputVelocity, float mass, 
-    bool isAffectedByGravity,bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color,
-    const SDL_Rect& rect, const SDL_Point& center, int radius)
-    : position(position), velocity(velocity), inputVelocity(inputVelocity), mass(mass),
-    isAffectedByGravity(isAffectedByGravity), isMovable(isMovable),
-    isHittable(isHittable), shape(nullptr), color(color)
+Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
+    bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius)
+    : position(position), velocity(velocity), mass(mass), isAffectedByGravity(isAffectedByGravity), 
+    isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color)
 {
     switch (shapeType) {
     case ShapeType::RECTANGLE:
