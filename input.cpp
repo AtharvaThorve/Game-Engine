@@ -20,16 +20,16 @@ void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speed
     if (entity->isMovable) {
         entity->inputVelocity.x = 0;
         entity->inputVelocity.y = 0;
-        if (state[SDL_SCANCODE_UP]) {
+        if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) {
             entity->inputVelocity.y = -move_speedY;
         }
-        if (state[SDL_SCANCODE_DOWN]) {
+        if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S]) {
             entity->inputVelocity.y = move_speedY;
         }
-        if (state[SDL_SCANCODE_LEFT]) {
+        if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
             entity->inputVelocity.x = -move_speedX;
         }
-        if (state[SDL_SCANCODE_RIGHT]) {
+        if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D]) {
             entity->inputVelocity.x = move_speedX;
         }
 
