@@ -1,8 +1,8 @@
 #pragma once
-#pragma once
-#include "structs.hpp"
+#include <iostream>
 #include <SDL2/SDL.h>
 #include <memory>
+#include "structs.hpp"
 #include "Shape.hpp"
 #include "MovementPattern.hpp"
 
@@ -23,10 +23,9 @@ public:
     bool hasMovementPattern = false;
     MovementPattern movementPattern;
 
-    Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity, 
-        bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect, 
+    Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
+        bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect,
         const SDL_Point& center, int radius);
-
 
     ~Entity() = default;
 

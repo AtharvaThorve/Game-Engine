@@ -1,12 +1,13 @@
 #include "input.hpp"
 #include <SDL2/SDL.h>
 
+static bool wasRShiftPressed = false;
+
 void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speedY)
 {
-    // Update the state of the keyboard
+
     const Uint8* state = SDL_GetKeyboardState(NULL);
 
-    // Check if the SDL_QUIT event has been triggered
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -33,11 +34,13 @@ void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speed
             entity->inputVelocity.x = move_speedX;
         }
 
-        if (state[SDL_SCANCODE_LSHIFT]) {
-            allowScaling = false;
-        }
-        else if (state[SDL_SCANCODE_RSHIFT]) {
-            allowScaling = true;
+        bool isRShiftPressed = state[SDL_SCANCODE_RSHIFT];
+
+        if (isRShiftPressed != wasRShiftPressed) {
+            if (!isRShiftPressed) {
+                allowScaling = !allowScaling;
+            }
+            wasRShiftPressed = isRShiftPressed;
         }
     }
 }
