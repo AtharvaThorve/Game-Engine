@@ -1,5 +1,17 @@
 #include "rushil_game1.hpp"
 
+/*
+    Simple single player game
+    Player controls the box on the left side of the screen 
+    
+    Goal: make the player box reach the green goal on the right side of the screen without touching the floating obstacles
+    
+    Input: up, down, left, right
+
+    Difficulty: the player box is under downwards and leftwards gravity and the longer player takes more difficult the game becomes
+*/
+
+
 int rushil_game1()
 {
     // Define scale factors
