@@ -9,3 +9,5 @@ This is a C++ based Visual Studio solution for Game Engine. More information in 
     - `vcpkg integrate install`
     - `vcpkg install`
 4. Build the Project
+
+**Note: Scaling can be toggled by pressing the Right Shift key, by default scaling is not enabled *(Constant Size)***
