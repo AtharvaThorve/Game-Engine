@@ -32,7 +32,6 @@ public:
 
     SDL_bool IsColliding(const SDL_Rect& rectangle);
 
-    // Override for collision detection
     bool isColliding(const Shape& other) const override;
 
 };
@@ -47,7 +46,7 @@ public:
     void draw(const SDL_Color& color) override;
 
     void drawCircle(int x, int y, int radius);
-    // Override for collision detection
+
     bool isColliding(const Shape& other) const override;
     SDL_Rect circleToRect() const;
 };

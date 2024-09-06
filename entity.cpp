@@ -12,7 +12,6 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, boo
     case ShapeType::CIRCLE:
         shape = std::make_unique<CircleShape>(radius, center);
         break;
-        // Add more cases as needed
     default:
         shape = nullptr;
         break;

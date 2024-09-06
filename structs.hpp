@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 
-//A struct to contain the pointers to the SDL Renderer and SDL window.
+//Define struct that contains pointers to the renderer and window
 typedef struct {
 	SDL_Renderer* renderer;
 	SDL_Window* window;
