@@ -10,11 +10,10 @@
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
 #include "EntityManager.hpp"
-#include "rushil_game1.hpp"
+#include "main.hpp"
+#include "MovementPattern.hpp"
 
 // SDL render and window context
 extern App* app;
 
-int main(int argc, char* argv[]);
-
-void setRenderScale(float scaleX, float scaleY);
+int rushil_game1();

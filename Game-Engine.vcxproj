@@ -141,6 +141,7 @@
     <ClCompile Include="init.cpp" />
     <ClCompile Include="MovementPattern.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="rushil_game1.cpp" />
     <ClCompile Include="scaling.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="structs.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="main.hpp" />
     <ClInclude Include="MovementPattern.hpp" />
     <ClInclude Include="Physics.hpp" />
+    <ClInclude Include="rushil_game1.hpp" />
     <ClInclude Include="scaling.hpp" />
     <ClInclude Include="shape.hpp" />
     <ClInclude Include="structs.hpp" />
