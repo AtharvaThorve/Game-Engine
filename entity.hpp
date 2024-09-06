@@ -29,11 +29,9 @@ public:
 
     ~Entity() = default;
 
-    // Move constructor and move assignment operator (Rule of Five)
     Entity(Entity&&) noexcept = default;
     Entity& operator=(Entity&&) noexcept = default;
 
-    // Delete copy constructor and copy assignment to enforce unique ownership
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
 
