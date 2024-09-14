@@ -5,6 +5,7 @@
 #include "structs.hpp"
 #include "Shape.hpp"
 #include "MovementPattern.hpp"
+#include "Timeline.hpp"
 
 extern App* app;
 
@@ -22,10 +23,12 @@ public:
     SDL_Color color;
     bool hasMovementPattern = false;
     MovementPattern movementPattern;
+    Timeline timeline;
+    int64_t lastUpdateTime;
 
     Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
         bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect,
-        const SDL_Point& center, int radius);
+        const SDL_Point& center, int radius, Timeline* anchor, int64_t tic = 1);
 
     ~Entity() = default;
 

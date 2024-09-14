@@ -1,9 +1,12 @@
 #include "Entity.hpp"
 
-Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
-    bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius)
+Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
+    bool isAffectedByGravity, bool isMovable, bool isHittable, ShapeType shapeType,
+    const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius,
+    Timeline* anchor, int64_t tic)
     : position(position), velocity(velocity), mass(mass), isAffectedByGravity(isAffectedByGravity),
-    isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color)
+    isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color), timeline(anchor, tic),
+    lastUpdateTime(timeline.getTime())
 {
     switch (shapeType) {
     case ShapeType::RECTANGLE:
@@ -19,6 +22,10 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, boo
 }
 
 void Entity::updatePosition(float deltaTime) {
+    int64_t currentTime = timeline.getTime();
+    deltaTime = (currentTime - lastUpdateTime) / 1000000000.0f; // Nanoseconds to seconds
+    lastUpdateTime = currentTime;
+
     Vector2 finalVelocity = velocity;
 
     finalVelocity.x += inputVelocity.x;
