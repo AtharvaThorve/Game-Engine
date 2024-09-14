@@ -144,6 +144,7 @@
     <ClCompile Include="scaling.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="structs.cpp" />
+    <ClCompile Include="Timeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cleanup.hpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="scaling.hpp" />
     <ClInclude Include="shape.hpp" />
     <ClInclude Include="structs.hpp" />
+    <ClInclude Include="Timeline.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
