@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     while (1)
     {
         // Handle input, which might modify the entity's velocity
-        doInput(entity, 50.0f, 50.0f);
+        doInput(entity,&globalTimeline ,50.0f, 50.0f);
 
         
         int64_t currentTime = globalTimeline.getTime();

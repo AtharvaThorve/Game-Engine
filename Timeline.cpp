@@ -27,6 +27,9 @@ Timeline::Timeline(Timeline* anchor, int64_t tic) :
 
 int64_t Timeline::getTime() {
     std::lock_guard<std::mutex> lock(m);
+    if (paused) {
+        return last_paused_time - start_time - elapsed_paused_time;
+    }
     int64_t current_time = anchor ? anchor->getTime() : getCurrentSystemTime();
     int64_t elapsed_time = current_time - start_time - elapsed_paused_time;
     return elapsed_time / tic;

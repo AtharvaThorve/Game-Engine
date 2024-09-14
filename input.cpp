@@ -2,8 +2,9 @@
 #include <SDL2/SDL.h>
 
 static bool wasRShiftPressed = false;
+static bool wasEscPressed = false;
 
-void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speedY)
+void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float move_speedX, float move_speedY)
 {
 
     const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -16,6 +17,21 @@ void doInput(std::shared_ptr<Entity> entity, float move_speedX, float move_speed
             exit(0);
         }
     }
+
+    // Toggle pause/unpause when Escape key is pressed
+    bool isEscPressed = state[SDL_SCANCODE_ESCAPE];
+    if (isEscPressed != wasEscPressed) {
+        if (isEscPressed) {
+            if (globalTimeline->isPaused()) {
+                globalTimeline->unpause();
+            }
+            else {
+                globalTimeline->pause();
+            }
+        }
+        wasEscPressed = isEscPressed;
+    }
+
 
     // Set velocity based on input
     if (entity->isMovable) {
