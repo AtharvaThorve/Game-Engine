@@ -10,6 +10,8 @@
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
 #include "EntityManager.hpp"
+#include <vector>
+#include <random>
 
 // SDL render and window context
 extern App* app;

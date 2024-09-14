@@ -1,6 +1,4 @@
 #include "main.hpp"
-#include <memory>
-#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -9,59 +7,135 @@ int main(int argc, char* argv[])
     float scale = 1.0f;
     float cached_scale = scale;
 
-    PhysicsSystem physicsSystem(50.0f, 100.0f);
+    PhysicsSystem physicsSystem(0.0f, 13.0f);
 
-    Vector2 initialPosition{ 100, 100 };
-    Vector2 initialVelocity{ 0, 0 };
-    Vector2 inputInitialVelocity{ 0, 0 };
-    float mass = 1.0f;
-    bool isAffectedByGravity = true;
-    bool isMovable = true;
-    bool isHittable = true;
-    ShapeType shapeType = ShapeType::RECTANGLE;
-    SDL_Color color = { 255, 0, 0, 255 };
-    SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
-    SDL_Point center = { 0, 0 };
-    int radius = 0;
+    Vector2 userInitialPosition{ (SCREEN_WIDTH/2) - 25, 100 };
+    Vector2 userInitialVelocity{ 0, 0 };
+    float userMass = 1.0f;
+    bool isUserAffectedByGravity = false;
+    bool isUserMovable = true;
+    bool isUserHittable = true;
+    ShapeType userShapeType = ShapeType::RECTANGLE;
+    SDL_Color userColor = { 160, 32, 240, 255 };
+    SDL_Rect userRect = { static_cast<int>(userInitialPosition.x), static_cast<int>(userInitialPosition.y), 50, 75 };
+    SDL_Point userCenter = { 0, 0 };
+    int userRadius = 0;
 
-    Vector2 initialPosition1{ 200, 100 };
-    SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
+    Vector2 fallingBlockInitialPosition{ 0, 0 };
+    Vector2 fallingBlockInitialVelocity{ 0, 0 };
+    float fallingBlockMass = 10.0f;
+    bool isFallingBlockAffectedByGravity = true;
+    bool isFallingBlockMovable = true;
+    bool isFallingBlockHittable = true;
+    ShapeType fallingBlockShapeType = ShapeType::RECTANGLE;
+    SDL_Color fallingBlockColor = { 128, 128, 128, 255 };
+    SDL_Rect fallingBlockRect = { static_cast<int>(fallingBlockInitialPosition.x), static_cast<int>(fallingBlockInitialPosition.y), SCREEN_WIDTH, 50 };
+    SDL_Point fallingBlockCenter = { 0, 0 };
+    int fallingBlockRadius = 0;
+
+    auto userEntity = std::make_shared<Entity>(userInitialPosition, userInitialVelocity, userMass, isUserAffectedByGravity, isUserMovable, isUserHittable, userShapeType, userColor, userRect, userCenter, userRadius);
+    auto fallingBlock = std::make_shared<Entity>(fallingBlockInitialPosition, fallingBlockInitialVelocity, fallingBlockMass, isFallingBlockAffectedByGravity, isFallingBlockMovable, isFallingBlockHittable, fallingBlockShapeType, fallingBlockColor, fallingBlockRect, fallingBlockCenter, fallingBlockRadius);
 
     EntityManager entityManager;
+    entityManager.addEntity(userEntity);
+    entityManager.addEntity(fallingBlock);
 
-    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius);
-    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius);
+    MovementPattern rightToLeft;
+    rightToLeft.addStep(MovementStep({ 50, 0 }, 2.0f)); // Move right for 2 secs at an acceleration of 50
+    rightToLeft.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
+    rightToLeft.addStep(MovementStep({ -50, 0 }, 2.0f)); // Move left for 2 secs at an acceleratopn of 50
+    rightToLeft.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
 
-    Vector2 initialPosition2{ 300, 300 };
-    SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
-    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius);
+    MovementPattern leftToRight;
+    leftToRight.addStep(MovementStep({ -50, 0 }, 2.0f)); // Move left for 2 secs at an acceleration of 50
+    leftToRight.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
+    leftToRight.addStep(MovementStep({ 50, 0 }, 2.0f)); // Move right for 2 secs at an acceleratopn of 50
+    leftToRight.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
 
-    Vector2 initialPosition3{ 600, 100 };
-    SDL_Rect rect3 = { static_cast<int>(initialPosition3.x), static_cast<int>(initialPosition3.y), 50, 50 };
-    auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
+    std::vector<std::shared_ptr<Entity>> patternEntities;
+    for (int i = 0; i < 20; ++i) {
+        Vector2 patternEntityInitialPosition{ i * 100, i % 2 == 0 ? 600 : 300 };
+        Vector2 patternEntityInitialVelocity{ 0, 0 };
+        float patternEntityMass = 1.0f;
+        bool isPatternEntityAffectedByGravity = false;
+        bool isPatternEntityMovable = false;
+        bool isPatternEntityHittable = true;
+        ShapeType patternEntityShapeType = ShapeType::RECTANGLE;
+        SDL_Color patternEntityColor = { 255, 0, 0, 255 };
+        SDL_Rect patternEntityRect = { static_cast<int>(patternEntityInitialPosition.x), static_cast<int>(patternEntityInitialPosition.y), 50, 50 };
+        SDL_Point patternEntityCenter = { 0, 0 };
+        int patternEntityRadius = 0;
 
-    MovementPattern pattern;
-    pattern.addStep(MovementStep({ 50, 50 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
-    pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-    pattern.addStep(MovementStep({ -50, -50 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
-    pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-    patternEntity->hasMovementPattern = true;
-    patternEntity->movementPattern = pattern;
+        auto patternEntity = std::make_shared<Entity>(patternEntityInitialPosition, patternEntityInitialVelocity, patternEntityMass, isPatternEntityAffectedByGravity, isPatternEntityMovable, isPatternEntityHittable, patternEntityShapeType, patternEntityColor, patternEntityRect, patternEntityCenter, patternEntityRadius);
 
-    patternEntity1->hasMovementPattern = true;
-    patternEntity1->movementPattern = pattern;
+        patternEntity->hasMovementPattern = true;
+        patternEntity->movementPattern = i % 2 == 0 ? rightToLeft : leftToRight;
+        
+        entityManager.addEntity(patternEntity);
+        patternEntities.push_back(patternEntity);
+    }
 
-    entityManager.addEntity(entity);
-    entityManager.addEntity(entity1);
-    entityManager.addEntity(patternEntity);
-    entityManager.addEntity(patternEntity1);
+    std::vector<float> possibleXCoordinates = { 162.5f, 362.5f, 562.5f, 762.5f, 962.5f, 1162.5f };
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    float yellowEntityX1, yellowEntityX2;
+    do {
+        std::shuffle(possibleXCoordinates.begin(), possibleXCoordinates.end(), gen);
+        yellowEntityX1 = possibleXCoordinates[0];
+        yellowEntityX2 = possibleXCoordinates[1];
+    } while (std::abs(yellowEntityX1 - yellowEntityX2) >= 600.0f);
+
+    Vector2 yellowEntityPosition1{ yellowEntityX1, 612.5f };
+    Vector2 yellowEntityVelocity1{ 0, 0 };
+    float yellowEntityMass = 1.0f;
+    bool isYellowEntityAffectedByGravity1 = false;
+    bool isYellowEntityMovable1 = false;
+    bool isYellowEntityHittable1 = true;
+    ShapeType yellowEntityShapeType = ShapeType::RECTANGLE;
+    SDL_Color yellowEntityColor = { 255, 215, 0, 255 };
+    SDL_Rect yellowEntityRect1 = { static_cast<int>(yellowEntityPosition1.x), static_cast<int>(yellowEntityPosition1.y), 25, 25 };
+    SDL_Point yellowEntityCenter1 = { 0, 0 };
+    int yellowEntityRadius1 = 0;
+
+    auto yellowEntity1 = std::make_shared<Entity>(yellowEntityPosition1, yellowEntityVelocity1, yellowEntityMass, isYellowEntityAffectedByGravity1, isYellowEntityMovable1, isYellowEntityHittable1, yellowEntityShapeType, yellowEntityColor, yellowEntityRect1, yellowEntityCenter1, yellowEntityRadius1);
+    entityManager.addEntity(yellowEntity1);
+
+    Vector2 yellowEntityPosition2{ yellowEntityX2, 312.5f };
+    Vector2 yellowEntityVelocity2{ 0, 0 };
+    bool isYellowEntityAffectedByGravity2 = false;
+    bool isYellowEntityMovable2 = false;
+    bool isYellowEntityHittable2 = true;
+    SDL_Rect yellowEntityRect2 = { static_cast<int>(yellowEntityPosition2.x), static_cast<int>(yellowEntityPosition2.y), 25, 25 };
+
+    auto yellowEntity2 = std::make_shared<Entity>(yellowEntityPosition2, yellowEntityVelocity2, yellowEntityMass, isYellowEntityAffectedByGravity2, isYellowEntityMovable2, isYellowEntityHittable2, yellowEntityShapeType, yellowEntityColor, yellowEntityRect2, yellowEntityCenter1, yellowEntityRadius1);
+    entityManager.addEntity(yellowEntity2);
+
+    Vector2 whiteEntityPosition{ 0, SCREEN_HEIGHT - 50 };
+    Vector2 whiteEntityVelocity{ 0, 0 };
+    float whiteEntityMass = 1.0f;
+    bool isWhiteEntityAffectedByGravity = false;
+    bool isWhiteEntityMovable = false;
+    bool isWhiteEntityHittable = true;
+    ShapeType whiteEntityShapeType = ShapeType::RECTANGLE;
+    SDL_Color whiteEntityColor = { 255, 255, 255, 255 };
+    SDL_Rect whiteEntityRect = { static_cast<int>(whiteEntityPosition.x), static_cast<int>(whiteEntityPosition.y), SCREEN_WIDTH, 50 };
+    SDL_Point whiteEntityCenter = { 0, 0 };
+    int whiteEntityRadius = 0;
+
+    auto whiteEntity = std::make_shared<Entity>(whiteEntityPosition, whiteEntityVelocity, whiteEntityMass, isWhiteEntityAffectedByGravity, isWhiteEntityMovable, isWhiteEntityHittable, whiteEntityShapeType, whiteEntityColor, whiteEntityRect, whiteEntityCenter, whiteEntityRadius);
+
+    entityManager.addEntity(whiteEntity);
 
     Uint32 lastTime = SDL_GetTicks();
+
+    int coinsColected = 0;
+    bool hitYellow1 = false;
+    bool hitYellow2 = false;
 
     while (1)
     {
         // Handle input, which might modify the entity's velocity
-        doInput(entity, 50.0f, 150.0f);
+        doInput(userEntity, 80.0f, 80.0f);
 
         Uint32 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f; // Time in seconds since last frame
@@ -69,8 +143,26 @@ int main(int argc, char* argv[])
 
         entityManager.updateEntities(deltaTime, physicsSystem);
 
-        // Clear the screen with a blue background
-        prepareScene(SDL_Color{ 0, 0, 255, 255 });
+        SDL_Color backgroundColor = { 0, 0, 255, 255 };
+
+        if (userEntity->isColliding(*yellowEntity1)) {
+            entityManager.removeEntity(yellowEntity1);
+            
+            if (coinsColected < 2 && !hitYellow1) {
+                coinsColected++;
+                hitYellow1 = true;
+            }
+        }
+
+        if (userEntity->isColliding(*yellowEntity2)) {
+            entityManager.removeEntity(yellowEntity2);
+            if (coinsColected < 2 && !hitYellow2) {
+                coinsColected++;
+                hitYellow2 = true;
+            }
+        }
+
+        prepareScene(backgroundColor);
 
         entityManager.drawEntities();
 
@@ -81,8 +173,25 @@ int main(int argc, char* argv[])
             cached_scale = scale;
         }
  
-        auto collision = entity->isColliding(*entity1);
-        if(collision) {
+        auto gameOver = userEntity->isColliding(*fallingBlock);
+
+        for (auto entity : patternEntities) {
+            if (userEntity->isColliding(*entity)) {
+                gameOver = true;
+                break;
+            }
+        }
+        if(gameOver) {
+            break;
+        }
+
+        
+        if (userEntity->isColliding(*whiteEntity) && coinsColected == 2) {
+            backgroundColor = { 0, 255, 0, 255 }; // Turn the screen green
+            prepareScene(backgroundColor);
+            entityManager.drawEntities();
+            presentScene();
+            SDL_Delay(1500);
             break;
         }
 
