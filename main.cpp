@@ -9,9 +9,9 @@ int main(int argc, char* argv[])
     float scale = 1.0f;
     float cached_scale = scale;
 
-    PhysicsSystem physicsSystem(0.0f, 10.0f);
     EntityManager entityManager;
     Timeline globalTimeline(nullptr, 1);
+    PhysicsSystem physicsSystem(0.0f, 10.0f);
 
     Vector2 initialPosition{ 100, 100 };
     Vector2 initialVelocity{ 0, 0 };
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
 
     auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
-    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 1);
+    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
 
     //Vector2 initialPosition2{ 300, 300 };
     //SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
@@ -57,16 +57,17 @@ int main(int argc, char* argv[])
     //entityManager.addEntity(patternEntity);
     //entityManager.addEntity(patternEntity1);
 
-    Uint32 lastTime = SDL_GetTicks();
+    int64_t lastUpdateTime = globalTimeline.getTime();
 
     while (1)
     {
         // Handle input, which might modify the entity's velocity
         doInput(entity, 50.0f, 50.0f);
 
-        Uint32 currentTime = SDL_GetTicks();
-        float deltaTime = (currentTime - lastTime) / 1000.0f; // Time in seconds since last frame
-        lastTime = currentTime;
+        
+        int64_t currentTime = globalTimeline.getTime();
+        float deltaTime = (currentTime - lastUpdateTime) / 1000000000.0f; // nanosecond to sec
+        lastUpdateTime = currentTime;
 
         entityManager.updateEntities(deltaTime, physicsSystem);
 
