@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     float cached_scale = scale;
 
     EntityManager entityManager;
-    Timeline globalTimeline(nullptr, 1);
+    Timeline globalTimeline(nullptr, 2);
     PhysicsSystem physicsSystem(0.0f, 10.0f);
 
     Vector2 initialPosition{ 100, 100 };

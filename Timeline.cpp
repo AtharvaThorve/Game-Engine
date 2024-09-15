@@ -61,3 +61,8 @@ bool Timeline::isPaused() {
     std::lock_guard<std::mutex> lock(m);
     return paused;
 }
+
+int64_t Timeline::getTic() {
+    std::lock_guard<std::mutex> lock(m);
+    return tic;
+}

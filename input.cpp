@@ -4,6 +4,9 @@
 static bool wasRShiftPressed = false;
 static bool wasEscPressed = false;
 
+static bool wasPlusPressed = false;
+static bool wasMinusPressed = false;
+
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float move_speedX, float move_speedY)
 {
 
@@ -32,6 +35,24 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float mov
         wasEscPressed = isEscPressed;
     }
 
+    bool game_speed_up = state[SDL_SCANCODE_P];
+
+    bool game_speed_down = state[SDL_SCANCODE_M];
+
+    if (game_speed_up != wasPlusPressed) {
+        if (game_speed_up && globalTimeline->getTic()>1) {
+            globalTimeline->changeTic(globalTimeline->getTic() * 0.5);
+        }
+        wasPlusPressed = game_speed_up;
+    }
+
+    if (game_speed_down != wasMinusPressed) {
+        if (game_speed_down && globalTimeline->getTic()<8)
+        {
+            globalTimeline->changeTic(globalTimeline->getTic() * 2.0);
+        }
+        wasMinusPressed = game_speed_down;
+    }
 
     // Set velocity based on input
     if (entity->isMovable) {
