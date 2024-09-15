@@ -25,6 +25,7 @@ public:
     MovementPattern movementPattern;
     Timeline timeline;
     int64_t lastUpdateTime;
+    int64_t lastGlobalTicSize;
 
     Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
         bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect,
@@ -45,4 +46,6 @@ public:
 
     // Method to check for collisions with another entity
     bool isColliding(const Entity& other) const;
+
+    void rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTicSize);
 };

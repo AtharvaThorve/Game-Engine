@@ -6,7 +6,7 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
     Timeline* anchor, int64_t tic)
     : position(position), velocity(velocity), mass(mass), isAffectedByGravity(isAffectedByGravity),
     isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color), timeline(anchor, tic),
-    lastUpdateTime(timeline.getTime())
+    lastUpdateTime(timeline.getTime()), lastGlobalTicSize(timeline.getAnchorTic())
 {
     switch (shapeType) {
     case ShapeType::RECTANGLE:
@@ -22,6 +22,13 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
 }
 
 void Entity::updatePosition(float deltaTime) {
+
+    int64_t currentGlobalTicSize = timeline.getAnchorTic();
+    if (currentGlobalTicSize != lastGlobalTicSize) {
+        rescaleLastUpdateTime(lastGlobalTicSize, currentGlobalTicSize);
+        lastGlobalTicSize = currentGlobalTicSize;
+    }
+
     int64_t currentTime = timeline.getTime();
     deltaTime = (currentTime - lastUpdateTime) / 1000000000.0f; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
@@ -64,4 +71,12 @@ bool Entity::isColliding(const Entity& other) const {
         return shape->isColliding(*other.shape);
     }
     return false;
+}
+
+void Entity::rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTicSize) {
+    if (oldGlobalTicSize != newGlobalTicSize) {
+        double scaleFactor = static_cast<double>(oldGlobalTicSize) / newGlobalTicSize;
+
+        lastUpdateTime = static_cast<int64_t>(lastUpdateTime * scaleFactor);
+    }
 }

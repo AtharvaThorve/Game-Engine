@@ -66,3 +66,8 @@ int64_t Timeline::getTic() {
     std::lock_guard<std::mutex> lock(m);
     return tic;
 }
+
+int64_t Timeline::getAnchorTic() {
+    std::lock_guard<std::mutex> lock(m);
+    return anchor ? anchor->getAnchorTic() : tic;
+}

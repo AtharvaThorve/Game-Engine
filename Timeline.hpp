@@ -23,4 +23,5 @@ public:
     void changeTic(int new_tic);
     bool isPaused();
     int64_t getTic();
+    int64_t getAnchorTic();
 };
