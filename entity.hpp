@@ -6,6 +6,7 @@
 #include "Shape.hpp"
 #include "MovementPattern.hpp"
 #include "Timeline.hpp"
+#include "defs.hpp"
 
 extern App* app;
 

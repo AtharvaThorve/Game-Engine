@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 
         
         int64_t currentTime = globalTimeline.getTime();
-        float deltaTime = (currentTime - lastUpdateTime) / 1000000000.0f; // nanosecond to sec
+        float deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
         lastUpdateTime = currentTime;
 
         entityManager.updateEntities(deltaTime, physicsSystem);

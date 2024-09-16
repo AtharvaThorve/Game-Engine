@@ -30,7 +30,7 @@ void Entity::updatePosition(float deltaTime) {
     }
 
     int64_t currentTime = timeline.getTime();
-    deltaTime = (currentTime - lastUpdateTime) / 1000000000.0f; // Nanoseconds to seconds
+    deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
     Vector2 finalVelocity = velocity;
 
