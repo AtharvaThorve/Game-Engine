@@ -7,9 +7,12 @@
 #include "Entity.hpp"
 #include "cleanup.hpp"
 #include <memory>
+#include <thread>
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
 #include "EntityManager.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
 
 // SDL render and window context
 extern App* app;
