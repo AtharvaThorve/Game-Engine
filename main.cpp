@@ -65,9 +65,9 @@ int main(int argc, char* argv[])
     //patternEntity1->hasMovementPattern = true;
     //patternEntity1->movementPattern = pattern;
 
-    //entityManager.addEntity(entity);
+    entityManager.addEntity(entity);
     //entityManager.addEntity(entity1);
-    entityManager.addEntity(patternEntity);
+    //entityManager.addEntity(patternEntity);
     //entityManager.addEntity(patternEntity1);
 
     std::thread clientThread1(runClient, 1, std::ref(entityManager));

@@ -50,9 +50,10 @@ public:
     // Deleted copy constructor and assignment operator
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
+    
+    float getDeltaTime();
 
-    // Method to update the entity's position
-    void updatePosition(float deltaTime);
+    void updatePosition();
 
     // Method to draw the entity
     void draw();

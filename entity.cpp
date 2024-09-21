@@ -24,7 +24,7 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
     }
 }
 
-void Entity::updatePosition(float deltaTime) {
+float Entity::getDeltaTime() {
     int64_t currentGlobalTicSize = timeline.getAnchorTic();
     if (currentGlobalTicSize != lastGlobalTicSize) {
         rescaleLastUpdateTime(lastGlobalTicSize, currentGlobalTicSize);
@@ -32,8 +32,15 @@ void Entity::updatePosition(float deltaTime) {
     }
 
     int64_t currentTime = timeline.getTime();
-    deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
+    float deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
+
+    return deltaTime;
+}
+
+void Entity::updatePosition() {
+
+    float deltaTime = getDeltaTime();
     Vector2 finalVelocity = velocity;
 
     finalVelocity.x += inputVelocity.x;

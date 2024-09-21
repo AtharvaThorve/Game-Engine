@@ -13,7 +13,7 @@ void EntityManager::updateEntities(float deltaTime) {
 		if (entity->hasMovementPattern) {
 			entity->movementPattern.update(deltaTime, *entity);
 		}
-		entity->updatePosition(deltaTime);
+		entity->updatePosition();
 	}
 }
 
