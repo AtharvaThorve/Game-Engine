@@ -7,7 +7,7 @@ static bool wasEscPressed = false;
 static bool wasPlusPressed = false;
 static bool wasMinusPressed = false;
 
-void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float move_speedX, float move_speedY)
+void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float accelerationRate)
 {
 
     const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -54,21 +54,26 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float mov
         wasMinusPressed = game_speed_down;
     }
 
-    // Set velocity based on input
+
     if (entity->isMovable) {
-        entity->inputVelocity.x = 0;
-        entity->inputVelocity.y = 0;
         if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) {
-            entity->inputVelocity.y = -move_speedY;
+            entity->inputAcceleration.y = -accelerationRate;
         }
-        if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S]) {
-            entity->inputVelocity.y = move_speedY;
+        else if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S]) {
+            entity->inputAcceleration.y = accelerationRate;
         }
+        else {
+            entity->inputAcceleration.y = 0; // no input, no acceleration
+        }
+
         if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
-            entity->inputVelocity.x = -move_speedX;
+            entity->inputAcceleration.x  = -accelerationRate;
         }
-        if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D]) {
-            entity->inputVelocity.x = move_speedX;
+        else if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D]) {
+            entity->inputAcceleration.x  = accelerationRate;
+        }
+        else {
+            entity->inputAcceleration.x = 0; // no input, no acceleration
         }
 
         bool isRShiftPressed = state[SDL_SCANCODE_RSHIFT];

@@ -5,7 +5,8 @@ PhysicsSystem::PhysicsSystem(float gravityX, float gravityY) :
 
 void PhysicsSystem::applyGravity(Entity& entity, float deltaTime) {
 	if (entity.isAffectedByGravity) {
-		entity.velocity.x += gravity.x * deltaTime;
-		entity.velocity.y += gravity.y * deltaTime;
+		entity.acceleration.x = gravity.x;
+		entity.acceleration.y = gravity.y;
+
 	}
 }

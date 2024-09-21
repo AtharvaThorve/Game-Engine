@@ -3,11 +3,11 @@
 // Initialize the static member variable.
 int64_t Entity::nextID = 0;  // Start the unique ID from 0 or any other value.
 
-Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
+Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& acceleration, float mass,
     bool isAffectedByGravity, bool isMovable, bool isHittable, ShapeType shapeType,
     const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius,
     Timeline* anchor, int64_t tic)
-    : position(position), velocity(velocity), mass(mass), isAffectedByGravity(isAffectedByGravity),
+    : position(position), velocity(velocity), acceleration(acceleration), mass(mass), isAffectedByGravity(isAffectedByGravity),
     isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color), timeline(anchor, tic),
     lastUpdateTime(timeline.getTime()), lastGlobalTicSize(timeline.getAnchorTic()), id(nextID++)  // Assign unique ID
 {
@@ -30,8 +30,8 @@ float Entity::getDeltaTime() {
         rescaleLastUpdateTime(lastGlobalTicSize, currentGlobalTicSize);
         lastGlobalTicSize = currentGlobalTicSize;
     }
-
     int64_t currentTime = timeline.getTime();
+    std::cout << lastUpdateTime << " " << currentTime << std::endl;
     float deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
 
@@ -41,17 +41,35 @@ float Entity::getDeltaTime() {
 void Entity::updatePosition() {
 
     float deltaTime = getDeltaTime();
-    Vector2 finalVelocity = velocity;
+    //Vector2 finalVelocity = velocity;
+    Vector2 finalAcceleration = acceleration;
 
-    finalVelocity.x += inputVelocity.x;
-    finalVelocity.y += inputVelocity.y;
+    finalAcceleration.x += inputAcceleration.x;
+    finalAcceleration.y += inputAcceleration.y;
+    //std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
+
+    velocity.x += finalAcceleration.x * deltaTime * 100;
+    velocity.y += finalAcceleration.y * deltaTime * 100;
+    //std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
+
+
+    float maxVelocity = 300.0f; // You can tune this value
+    if (velocity.x > maxVelocity) velocity.x = maxVelocity;
+    if (velocity.x < -maxVelocity) velocity.x = -maxVelocity;
+    if (velocity.y > maxVelocity) velocity.y = maxVelocity;
+    if (velocity.y < -maxVelocity) velocity.y = -maxVelocity;
+
+    //std::cout << finalVelocity.x << " " << finalVelocity.y << " " << deltaTime << std::endl;
+
     if (hasMovementPattern) {
-        finalVelocity.x += patternVelocity.x;
-        finalVelocity.y += patternVelocity.y;
+        velocity.x += patternVelocity.x;
+        velocity.y += patternVelocity.y;
     }
+    std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
 
-    position.x += finalVelocity.x * deltaTime;
-    position.y += finalVelocity.y * deltaTime;
+
+    position.x += velocity.x * deltaTime;
+    position.y += velocity.y * deltaTime;
 
     if (shape->type == ShapeType::RECTANGLE) {
         RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());

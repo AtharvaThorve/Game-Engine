@@ -15,7 +15,7 @@ void runClient(int client_id, EntityManager& entityManager) {
 
 int main(int argc, char* argv[])
 {
-    std::thread serverThread(runServer);
+    //std::thread serverThread(runServer);
     
     initSDL();
     // Define scale factors
@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
     Vector2 initialPosition{ 100, 100 };
     Vector2 initialVelocity{ 0, 0 };
     Vector2 inputInitialVelocity{ 0, 0 };
+    Vector2 initialAcceleration{ 0 , 0 };
     float mass = 1.0f;
     bool isAffectedByGravity = true;
     bool isMovable = true;
@@ -43,12 +44,12 @@ int main(int argc, char* argv[])
     SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
 
 
-    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
-    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
+    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
 
     Vector2 initialPosition2{ 300, 300 };
     SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
-    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
 
     //Vector2 initialPosition3{ 600, 100 };
     //SDL_Rect rect3 = { static_cast<int>(initialPosition3.x), static_cast<int>(initialPosition3.y), 50, 50 };
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
     while (1)
     {
         // Handle input, which might modify the entity's velocity
-        doInput(entity,&globalTimeline ,50.0f, 50.0f);
+        doInput(entity, &globalTimeline, 10.0f);
 
         
         int64_t currentTime = globalTimeline.getTime();
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
 
         auto collision = entity->isColliding(*entity1);
         if (collision) {
-            break;
+            //break;
         }
 
         // Present the updated scene
@@ -108,7 +109,7 @@ int main(int argc, char* argv[])
     }
 
     clean_up_sdl();
-    serverThread.join();
+    //serverThread.join();
     clientThread1.join();
 
     return 0;

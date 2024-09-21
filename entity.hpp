@@ -17,6 +17,8 @@ public:
     Vector2 velocity;
     Vector2 inputVelocity = { 0, 0 };
     Vector2 patternVelocity = { 0, 0 };
+    Vector2 acceleration = { 0 , 0 };
+    Vector2 inputAcceleration = { 0 ,0 };
     float mass;
     bool isAffectedByGravity;
     bool isMovable;
@@ -36,7 +38,7 @@ public:
     int64_t id;
 
     // Constructor
-    Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
+    Entity(const Vector2& position, const Vector2& velocity, const Vector2& acceleration, float mass, bool isAffectedByGravity,
         bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect,
         const SDL_Point& center, int radius, Timeline* anchor, int64_t tic = 1);
 
