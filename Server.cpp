@@ -1,7 +1,5 @@
 #include "Server.hpp"
-#include <iostream>
-#include <thread>
-#include <chrono>
+
 
 Server::Server(const std::string& address)
     : context(1), responder(context, ZMQ_REP), iteration(0) {
@@ -36,4 +34,17 @@ void Server::handle_client(const std::string& received_data) {
     responder.send(reply_message, zmq::send_flags::none);
 
     std::cout << "Sent data back to client: " << received_data << std::endl;
+}
+
+void Server::parseString(const std::string& input, int64_t& clientID, std::map<int, std::pair<float, float>>& entityPositionMap) {
+    std::istringstream stream(input);
+    stream >> clientID; 
+
+    int entityID;
+    float x, y;
+
+    while (stream >> entityID >> x >> y) {
+        entityPositionMap[entityID] = std::make_pair(x, y);
+    }
+    std::cout << entityPositionMap.size() << std::endl;
 }

@@ -12,9 +12,9 @@ void Client::start() {
 
     while (true) {
         // Serialize positions of all entities in the EntityManager
-        std::string message = std::to_string(client_id) + "_";
+        std::string message = std::to_string(client_id) + " ";
         for (const auto& entity : entityManager.getEntities()) {
-            message += std::to_string(entity->getID()) + "_" + std::to_string(entity->position.x) + "_" + std::to_string(entity->position.y) + "_";
+            message += std::to_string(entity->getID()) + " " + std::to_string(entity->position.x) + " " + std::to_string(entity->position.y) + " ";
         }
 
         zmq::message_t request(message.size());

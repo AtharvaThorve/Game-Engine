@@ -9,7 +9,7 @@ void runServer() {
 }
 
 void runClient(int client_id, EntityManager& entityManager) {
-    Client client(client_id, "tcp://localhost:5556", entityManager);
+    Client client(client_id, "tcp://10.154.55.57:5556", entityManager);
     client.start();
 }
 
