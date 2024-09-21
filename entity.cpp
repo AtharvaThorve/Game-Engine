@@ -45,28 +45,22 @@ void Entity::updatePosition() {
     Vector2 finalAcceleration = acceleration;
 
     finalAcceleration.x += inputAcceleration.x;
-    finalAcceleration.y += inputAcceleration.y;
-    //std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
+    finalAcceleration.y += inputAcceleration.y;    
 
-    velocity.x += finalAcceleration.x * deltaTime * 100;
-    velocity.y += finalAcceleration.y * deltaTime * 100;
-    //std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
+    velocity.x += finalAcceleration.x * deltaTime;
+    velocity.y += finalAcceleration.y * deltaTime;
 
 
-    float maxVelocity = 300.0f; // You can tune this value
+    float maxVelocity = 300.0f;
     if (velocity.x > maxVelocity) velocity.x = maxVelocity;
     if (velocity.x < -maxVelocity) velocity.x = -maxVelocity;
     if (velocity.y > maxVelocity) velocity.y = maxVelocity;
     if (velocity.y < -maxVelocity) velocity.y = -maxVelocity;
 
-    //std::cout << finalVelocity.x << " " << finalVelocity.y << " " << deltaTime << std::endl;
-
     if (hasMovementPattern) {
         velocity.x += patternVelocity.x;
         velocity.y += patternVelocity.y;
     }
-    std::cout << velocity.x << " " << velocity.y << " " << deltaTime << std::endl;
-
 
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
