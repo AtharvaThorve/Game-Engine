@@ -1,9 +1,18 @@
 #include "Server.hpp"
 
+Server::Server(): context(1), responder(context, ZMQ_REP) {
+}
 
-Server::Server(const std::string& address)
-    : context(1), responder(context, ZMQ_REP), iteration(0) {
-    responder.bind(address);  // Bind to the specified address
+void Server::bindResponder(const std::string& address, int port){
+    responder.bind(address + ":" + std::to_string(port));
+}
+
+void Server::bindPuller(const std::string& address, int port) {
+    puller.bind(address + ":" + std::to_string(port));
+}
+
+void Server::bindPublisher(const std::string& address, int port) {
+    publisher.bind(address + ":" + std::to_string(port));
 }
 
 void Server::start() {
@@ -15,6 +24,9 @@ void Server::start() {
         // Receive client message (serialized entity data)
         responder.recv(request, zmq::recv_flags::none);
         std::string received(static_cast<char*>(request.data()), request.size());
+        int64_t clientId;
+        std::map<int, std::pair<float, float>> entityPositionMap;
+        parseString(received, clientId, entityPositionMap);
 
         std::cout << "Received data from client: " << received << std::endl;
 

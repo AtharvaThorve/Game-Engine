@@ -4,7 +4,10 @@
 
 // Assuming Server and Client are properly defined classes with start() method
 void runServer() {
-    Server server("tcp://*:5556");
+    Server server;
+    server.bindResponder("tcp://*", 5556);
+    //server.bindPuller("tcp://*", 5557);
+    //server.bindPublisher("tcp://*", 5558);
     server.start();
 }
 

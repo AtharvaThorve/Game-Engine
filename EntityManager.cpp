@@ -18,7 +18,6 @@ void EntityManager::updateEntities(float deltaTime) {
 }
 
 void EntityManager::updateEntities(float deltaTime, PhysicsSystem& physicsSystem) {
-	// Apply gravity to existing entities and then update the entities based on other variables
 	for (auto& entity : entities) {
 		if (entity->isAffectedByGravity) {
 			physicsSystem.applyGravity(*entity, deltaTime);

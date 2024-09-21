@@ -63,7 +63,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
             entity->inputAcceleration.y = accelerationRate;
         }
         else {
-            entity->inputAcceleration.y = 0; // no input, no acceleration
+            entity->inputAcceleration.y = 0;
         }
 
         if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
@@ -73,7 +73,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
             entity->inputAcceleration.x  = accelerationRate;
         }
         else {
-            entity->inputAcceleration.x = 0; // no input, no acceleration
+            entity->inputAcceleration.x = 0;
         }
 
         bool isRShiftPressed = state[SDL_SCANCODE_RSHIFT];
