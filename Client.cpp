@@ -2,8 +2,8 @@
 #include <iostream>
 #include <thread>
 
-Client::Client(int id, const std::string& address)
-    : context(1), requester(context, ZMQ_REQ), client_id(id) {
+Client::Client(int id, const std::string& address, EntityManager& entityManager)
+    : context(1), requester(context, ZMQ_REQ), client_id(id), entityManager(entityManager) {
     requester.connect(address);  // Connect to the specified address
 }
 
@@ -11,8 +11,12 @@ void Client::start() {
     std::cout << "Client " << client_id << " started." << std::endl;
 
     while (true) {
-        // Send client ID to server
-        std::string message = std::to_string(client_id);
+        // Serialize positions of all entities in the EntityManager
+        std::string message = std::to_string(client_id) + " ";
+        for (const auto& entity : entityManager.getEntities()) {
+            message += std::to_string(entity->position.x) + " " + std::to_string(entity->position.y) + " ";
+        }
+
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
         requester.send(request, zmq::send_flags::none);

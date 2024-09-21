@@ -13,6 +13,7 @@ public:
 	void updateEntities(float deltaTime);
 	void updateEntities(float deltaTime, PhysicsSystem& physicsSystem);
 	void drawEntities(void);
+	std::unordered_set<std::shared_ptr<Entity>> getEntities(void);
 
 private:
 	std::unordered_set<std::shared_ptr<Entity>> entities;

@@ -32,3 +32,7 @@ void EntityManager::drawEntities(void) {
 		entity->draw();
 	}
 }
+
+std::unordered_set<std::shared_ptr<Entity>> EntityManager::getEntities(void) {
+	return entities;
+}

@@ -12,5 +12,5 @@ private:
     zmq::socket_t responder;
     int iteration;
     std::unordered_map<int, int> client_iterations; // Tracks iterations for each client
-    void handle_client(int client_id);  // Handles a client's request
+    void handle_client(const std::string& received_data);  // Handles a client's request
 };

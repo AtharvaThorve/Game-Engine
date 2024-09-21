@@ -14,40 +14,26 @@ void Server::start() {
     while (true) {
         zmq::message_t request;
 
-        // Receive client message
+        // Receive client message (serialized entity data)
         responder.recv(request, zmq::recv_flags::none);
         std::string received(static_cast<char*>(request.data()), request.size());
 
-        // Extract client ID from message
-        int client_id = std::stoi(received);
+        std::cout << "Received data from client: " << received << std::endl;
 
-        // Handle client's request
-        handle_client(client_id);
+        // Process the received data (for now, just echo it back)
+        handle_client(received);
 
         // Simulate processing delay
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
-void Server::handle_client(int client_id) {
-    iteration++;
+void Server::handle_client(const std::string& received_data) {
+    // For now, just send back the same data we received from the client
+    zmq::message_t reply_message(received_data.size());
+    memcpy(reply_message.data(), received_data.c_str(), received_data.size());
 
-    // If it's the first message from the client, initialize its iteration count
-    if (client_iterations.find(client_id) == client_iterations.end()) {
-        client_iterations[client_id] = 1;
-    }
-    else {
-        client_iterations[client_id]++;
-    }
-
-    // Prepare response message for the client
-    std::string reply = "Client " + std::to_string(client_id) + ": Iteration " + std::to_string(client_iterations[client_id]);
-
-    zmq::message_t reply_message(reply.size());
-    memcpy(reply_message.data(), reply.c_str(), reply.size());
-
-    // Send the message back to the client
     responder.send(reply_message, zmq::send_flags::none);
 
-    std::cout << "Sent to Client " << client_id << ": " << reply << std::endl;
+    std::cout << "Sent data back to client: " << received_data << std::endl;
 }
