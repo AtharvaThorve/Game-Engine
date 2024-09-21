@@ -1,12 +1,15 @@
 #include "Entity.hpp"
 
+// Initialize the static member variable.
+int64_t Entity::nextID = 0;  // Start the unique ID from 0 or any other value.
+
 Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
     bool isAffectedByGravity, bool isMovable, bool isHittable, ShapeType shapeType,
     const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius,
     Timeline* anchor, int64_t tic)
     : position(position), velocity(velocity), mass(mass), isAffectedByGravity(isAffectedByGravity),
     isMovable(isMovable), isHittable(isHittable), shape(nullptr), color(color), timeline(anchor, tic),
-    lastUpdateTime(timeline.getTime()), lastGlobalTicSize(timeline.getAnchorTic())
+    lastUpdateTime(timeline.getTime()), lastGlobalTicSize(timeline.getAnchorTic()), id(nextID++)  // Assign unique ID
 {
     switch (shapeType) {
     case ShapeType::RECTANGLE:
@@ -22,7 +25,6 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, float mass,
 }
 
 void Entity::updatePosition(float deltaTime) {
-
     int64_t currentGlobalTicSize = timeline.getAnchorTic();
     if (currentGlobalTicSize != lastGlobalTicSize) {
         rescaleLastUpdateTime(lastGlobalTicSize, currentGlobalTicSize);
@@ -79,4 +81,9 @@ void Entity::rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTi
 
         lastUpdateTime = static_cast<int64_t>(lastUpdateTime * scaleFactor);
     }
+}
+
+// Add this getter to retrieve the unique ID.
+int64_t Entity::getID() const {
+    return id;
 }

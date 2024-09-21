@@ -12,6 +12,7 @@ extern App* app;
 
 class Entity {
 public:
+    // Member variables for position, velocity, etc.
     Vector2 position;
     Vector2 velocity;
     Vector2 inputVelocity = { 0, 0 };
@@ -28,18 +29,29 @@ public:
     int64_t lastUpdateTime;
     int64_t lastGlobalTicSize;
 
+    // Static member variable to track the next unique ID
+    static int64_t nextID;
+
+    // Member variable to store this entity's unique ID
+    int64_t id;
+
+    // Constructor
     Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
         bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect,
         const SDL_Point& center, int radius, Timeline* anchor, int64_t tic = 1);
 
+    // Destructor
     ~Entity() = default;
 
+    // Move constructor and move assignment
     Entity(Entity&&) noexcept = default;
     Entity& operator=(Entity&&) noexcept = default;
 
+    // Deleted copy constructor and assignment operator
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
 
+    // Method to update the entity's position
     void updatePosition(float deltaTime);
 
     // Method to draw the entity
@@ -48,5 +60,9 @@ public:
     // Method to check for collisions with another entity
     bool isColliding(const Entity& other) const;
 
+    // Rescale the last update time when the global tic size changes
     void rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTicSize);
+
+    // Getter for the entity's unique ID
+    int64_t getID() const;
 };
