@@ -5,9 +5,9 @@
 // Assuming Server and Client are properly defined classes with start() method
 void runServer() {
     Server server;
-    server.bindResponder("tcp://192.168.1.192", 5556);
-    server.bindPuller("tcp://192.168.1.192", 5557);
-    server.bindPublisher("tcp://192.168.1.192", 5558);
+    server.bindResponder("tcp://*", 5556);
+    server.bindPuller("tcp://*", 5557);
+    server.bindPublisher("tcp://*", 5558);
     server.start();
 }
 
@@ -15,6 +15,7 @@ void runClient(EntityManager& entityManager) {
     Client client(entityManager);
     client.connectRequester("tcp://10.154.55.57", 5556);
     client.connectPusher("tcp://10.154.55.57", 5557);
+    client.connectSubscriber("tcp://", 5558);
     client.connectServer();
     client.start();
 }
