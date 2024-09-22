@@ -13,8 +13,8 @@ void runServer() {
 
 void runClient(EntityManager& entityManager) {
     Client client(entityManager);
-    client.connectRequester("tcp://192.168.1.192", 5556);
-    client.connectPusher("tcp://192.168.1.192", 5557);
+    client.connectRequester("tcp://10.154.55.57", 5556);
+    client.connectPusher("tcp://10.154.55.57", 5557);
     client.connectServer();
     client.start();
 }
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
         //patternEntity1->hasMovementPattern = true;
         //patternEntity1->movementPattern = pattern;
 
-        //entityManager.addEntity(entity);
+        entityManager.addEntity(entity);
         //entityManager.addEntity(entity1);
         entityManager.addEntity(patternEntity);
         //entityManager.addEntity(patternEntity1);
@@ -97,18 +97,19 @@ int main(int argc, char* argv[])
         std::thread clientThread1(runClient, std::ref(entityManager));
 
         int64_t lastUpdateTime = globalTimeline.getTime();
-
+                
         while (1)
         {
-            // Handle input, which might modify the entity's velocity
             doInput(entity, &globalTimeline, 5.0f);
 
-
             int64_t currentTime = globalTimeline.getTime();
-            float deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
+            float globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
             lastUpdateTime = currentTime;
 
-            entityManager.updateEntities(deltaTime, physicsSystem);
+            entityManager.updateEntityDeltaTime();
+            entityManager.applyGravityOnEntities(globalDeltaTime, physicsSystem);
+            entityManager.updateMovementPatternEntities();
+            entityManager.updateEntities();
 
             // Clear the screen with a blue background
             prepareScene(SDL_Color{ 0, 0, 255, 255 });
