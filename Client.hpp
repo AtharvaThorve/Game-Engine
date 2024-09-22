@@ -5,11 +5,15 @@
 
 class Client {
 public:
-    Client(int id, const std::string& address, EntityManager& entityManager);
+    Client(EntityManager& entityManager);
     void start();  // Main client loop
+    void connectRequester(const std::string& address, int port);
+    void connectPusher(const std::string& address, int port);
+    void connectServer();
 private:
     zmq::context_t context;
     zmq::socket_t requester;
-    int client_id;
+    zmq::socket_t pusher;
+    std::string clientID;
     EntityManager& entityManager;
 };

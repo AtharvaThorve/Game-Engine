@@ -1,9 +1,9 @@
 #include "Server.hpp"
 
-Server::Server(): context(1), responder(context, ZMQ_REP) {
-}
+Server::Server(): 
+    context(1), responder(context, ZMQ_REP), puller(context, ZMQ_PULL), publisher(context, ZMQ_PUB) {}
 
-void Server::bindResponder(const std::string& address, int port){
+void Server::bindResponder(const std::string& address, int port) {
     responder.bind(address + ":" + std::to_string(port));
 }
 
@@ -15,26 +15,62 @@ void Server::bindPublisher(const std::string& address, int port) {
     publisher.bind(address + ":" + std::to_string(port));
 }
 
+std::string Server::generateUniqueClientID() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(100, 199);
+
+    std::string clientID;
+    do {
+        clientID = std::to_string(dis(gen));  // Generate random number
+    } while (connectedClientIDs.find(clientID) != connectedClientIDs.end());
+
+    connectedClientIDs.insert(clientID);  // Mark the client ID as used
+    return clientID;
+}
+
 void Server::start() {
     std::cout << "Server started, waiting for clients..." << std::endl;
 
     while (true) {
+        // Req/Rep setup for Hello message and clientId
         zmq::message_t request;
-
-        // Receive client message (serialized entity data)
         responder.recv(request, zmq::recv_flags::none);
         std::string received(static_cast<char*>(request.data()), request.size());
-        int64_t clientId;
-        std::map<int, std::pair<float, float>> entityPositionMap;
-        parseString(received, clientId, entityPositionMap);
+        std::cout << "Received connection request: " << received << std::endl;
 
-        std::cout << "Received data from client: " << received << std::endl;
+        if (received == "Hello") {
+            std::string clientID = generateUniqueClientID();
+            zmq::message_t reply(clientID.size());
+            memcpy(reply.data(), clientID.c_str(), clientID.size());
+            responder.send(reply, zmq::send_flags::none);
+            std::cout << "Assigned client ID: " << clientID << std::endl;
 
-        // Process the received data (for now, just echo it back)
-        handle_client(received);
+            std::thread clientThread(&Server::handle_client_thread, this, clientID);
+            clientThread.detach();
+        }
+    }
+}
 
-        // Simulate processing delay
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+void Server::handle_client_thread(const std::string& clientID) {
+    std::cout << "Client " << clientID << " thread started, waiting for data..." << std::endl;
+
+    while (true) {
+        zmq::message_t positionData;
+
+        puller.recv(positionData, zmq::recv_flags::none);
+        std::string receivedData(static_cast<char*>(positionData.data()), positionData.size());
+        
+        std::unordered_map<int, std::pair<float, float>> entityPositionMap;
+        parseString(receivedData, clientID, entityPositionMap);
+        {
+            std::lock_guard<std::mutex> lock(clientMutex);
+            std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
+
+            clientEntityMap[clientID] = entityPositionMap;
+            printEntityMap();
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -48,9 +84,16 @@ void Server::handle_client(const std::string& received_data) {
     std::cout << "Sent data back to client: " << received_data << std::endl;
 }
 
-void Server::parseString(const std::string& input, int64_t& clientID, std::map<int, std::pair<float, float>>& entityPositionMap) {
+void Server::parseString(const std::string& input, const std::string& clientID, std::unordered_map<int, std::pair<float, float>>& entityPositionMap) {
     std::istringstream stream(input);
-    stream >> clientID; 
+
+    std::string tempClientID;
+    stream >> tempClientID;
+
+    if (tempClientID != clientID) {
+        std::cerr << "Client ID mismatch. Expected: " << clientID << " but got: " << tempClientID << std::endl;
+        return;
+    }
 
     int entityID;
     float x, y;
@@ -59,4 +102,14 @@ void Server::parseString(const std::string& input, int64_t& clientID, std::map<i
         entityPositionMap[entityID] = std::make_pair(x, y);
     }
     std::cout << entityPositionMap.size() << std::endl;
+}
+
+void Server::printEntityMap() {
+    // Debugging function to print out the state of clientEntityMap
+    for (const auto& client : clientEntityMap) {
+        std::cout << "Client " << client.first << " entities:" << std::endl;
+        for (const auto& entity : client.second) {
+            std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
+        }
+    }
 }

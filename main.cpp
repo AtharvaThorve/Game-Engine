@@ -5,14 +5,17 @@
 // Assuming Server and Client are properly defined classes with start() method
 void runServer() {
     Server server;
-    server.bindResponder("tcp://*", 5556);
-    //server.bindPuller("tcp://*", 5557);
-    //server.bindPublisher("tcp://*", 5558);
+    server.bindResponder("tcp://192.168.1.192", 5556);
+    server.bindPuller("tcp://192.168.1.192", 5557);
+    server.bindPublisher("tcp://192.168.1.192", 5558);
     server.start();
 }
 
-void runClient(int client_id, EntityManager& entityManager) {
-    Client client(client_id, "tcp://10.154.55.57:5556", entityManager);
+void runClient(EntityManager& entityManager) {
+    Client client(entityManager);
+    client.connectRequester("tcp://192.168.1.192", 5556);
+    client.connectPusher("tcp://192.168.1.192", 5557);
+    client.connectServer();
     client.start();
 }
 
@@ -31,12 +34,6 @@ int main(int argc, char* argv[])
         runServer();
     }
     else if (mode == "client") {
-        if (argc < 3) {
-            std::cerr << "Usage: " << argv[0] << " client [client_id]" << std::endl;
-            return 1;
-        }
-
-        int client_id = std::stoi(argv[2]);
 
         initSDL();
         // Define scale factors
@@ -77,22 +74,27 @@ int main(int argc, char* argv[])
         //auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
 
         MovementPattern pattern;
-        pattern.addStep(MovementStep({ 50, 50 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
+        pattern.addStep(MovementStep({ 550, 550 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-        pattern.addStep(MovementStep({ -50, -50 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
+        pattern.addStep(MovementStep({ 550, -550 }, 2.0f));
+        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
+        pattern.addStep(MovementStep({ -550 , 550 }, 2.0f));
+        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
+        pattern.addStep(MovementStep({ -550, -550 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
+
         patternEntity->hasMovementPattern = true;
         patternEntity->movementPattern = pattern;
 
         //patternEntity1->hasMovementPattern = true;
         //patternEntity1->movementPattern = pattern;
 
-        entityManager.addEntity(entity);
+        //entityManager.addEntity(entity);
         //entityManager.addEntity(entity1);
-        //entityManager.addEntity(patternEntity);
+        entityManager.addEntity(patternEntity);
         //entityManager.addEntity(patternEntity1);
 
-        std::thread clientThread1(runClient, 1, std::ref(entityManager));
+        std::thread clientThread1(runClient, std::ref(entityManager));
 
         int64_t lastUpdateTime = globalTimeline.getTime();
 
