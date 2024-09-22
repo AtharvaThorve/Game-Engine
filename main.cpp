@@ -74,13 +74,13 @@ int main(int argc, char* argv[])
         //auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
 
         MovementPattern pattern;
-        pattern.addStep(MovementStep({ 550, 550 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
+        pattern.addStep(MovementStep({ 50, 50 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-        pattern.addStep(MovementStep({ 550, -550 }, 2.0f));
+        pattern.addStep(MovementStep({ 50, -50 }, 2.0f));
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
-        pattern.addStep(MovementStep({ -550 , 550 }, 2.0f));
+        pattern.addStep(MovementStep({ -50 , 50 }, 2.0f));
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
-        pattern.addStep(MovementStep({ -550, -550 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
+        pattern.addStep(MovementStep({ -50, -50 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
         pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
 
         patternEntity->hasMovementPattern = true;

@@ -30,6 +30,7 @@ public:
     Timeline timeline;
     int64_t lastUpdateTime;
     int64_t lastGlobalTicSize;
+    float deltaTime;
 
     // Static member variable to track the next unique ID
     static int64_t nextID;
@@ -53,7 +54,7 @@ public:
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
     
-    float getDeltaTime();
+    void updateDeltaTime();
 
     void updatePosition();
 

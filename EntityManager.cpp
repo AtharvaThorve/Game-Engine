@@ -10,8 +10,9 @@ void EntityManager::removeEntity(std::shared_ptr<Entity> entity) {
 
 void EntityManager::updateEntities(float deltaTime) {
 	for (auto& entity : entities) {
+		entity->updateDeltaTime();
 		if (entity->hasMovementPattern) {
-			entity->movementPattern.update(deltaTime, *entity);
+			entity->movementPattern.update(*entity);
 		}
 		entity->updatePosition();
 	}

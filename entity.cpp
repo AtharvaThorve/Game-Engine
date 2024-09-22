@@ -24,23 +24,20 @@ Entity::Entity(const Vector2& position, const Vector2& velocity, const Vector2& 
     }
 }
 
-float Entity::getDeltaTime() {
+void Entity::updateDeltaTime() {
     int64_t currentGlobalTicSize = timeline.getAnchorTic();
     if (currentGlobalTicSize != lastGlobalTicSize) {
         rescaleLastUpdateTime(lastGlobalTicSize, currentGlobalTicSize);
         lastGlobalTicSize = currentGlobalTicSize;
     }
     int64_t currentTime = timeline.getTime();
-    std::cout << lastUpdateTime << " " << currentTime << std::endl;
-    float deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
+    //std::cout << lastUpdateTime << " " << currentTime << std::endl;
+    deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
-
-    return deltaTime;
 }
 
 void Entity::updatePosition() {
 
-    float deltaTime = getDeltaTime();
     //Vector2 finalVelocity = velocity;
     Vector2 finalAcceleration = acceleration;
 
@@ -51,19 +48,23 @@ void Entity::updatePosition() {
     velocity.y += finalAcceleration.y * deltaTime;
 
 
+    if (hasMovementPattern) {
+        // Todo: With this if gravity is turned on any effects from that would be gone, so need to fix it.
+        velocity.x = patternVelocity.x;
+        velocity.y = patternVelocity.y;
+    }
+
     float maxVelocity = 300.0f;
     if (velocity.x > maxVelocity) velocity.x = maxVelocity;
     if (velocity.x < -maxVelocity) velocity.x = -maxVelocity;
     if (velocity.y > maxVelocity) velocity.y = maxVelocity;
     if (velocity.y < -maxVelocity) velocity.y = -maxVelocity;
 
-    if (hasMovementPattern) {
-        velocity.x += patternVelocity.x;
-        velocity.y += patternVelocity.y;
-    }
-
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
+
+    //std::cout << position.x << " " << position.y << std::endl;
+    std::cout << "Entity:" << deltaTime << std::endl;
 
     if (shape->type == ShapeType::RECTANGLE) {
         RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
