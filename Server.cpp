@@ -1,7 +1,11 @@
 #include "Server.hpp"
 
 Server::Server(): 
-    context(1), responder(context, ZMQ_REP), puller(context, ZMQ_PULL), publisher(context, ZMQ_PUB) {}
+    context(1), 
+    responder(context, zmq::socket_type::rep),
+    puller(context, zmq::socket_type::pull), 
+    publisher(context, zmq::socket_type::pub) 
+{}
 
 void Server::bindResponder(const std::string& address, int port) {
     responder.bind(address + ":" + std::to_string(port));

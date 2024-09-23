@@ -2,9 +2,13 @@
 #include <iostream>
 #include <thread>
 
-Client::Client(EntityManager& entityManager)
-    : context(1), requester(context, zmq::socket_type::req), pusher(context, zmq::socket_type::push), subscriber(context, zmq::socket_type::sub), entityManager(entityManager) {
-}
+Client::Client(EntityManager& entityManager): 
+    context(1), 
+    requester(context, zmq::socket_type::req), 
+    pusher(context, zmq::socket_type::push), 
+    subscriber(context, zmq::socket_type::sub), 
+    entityManager(entityManager) 
+{}
 
 void Client::connectRequester(const std::string& address, int port) {
     requester.connect(address + ":" + std::to_string(port));
@@ -47,7 +51,6 @@ void Client::start() {
         zmq::message_t subMsg;
         subscriber.recv(subMsg, zmq::recv_flags::none);
         std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
-        std::cout << "Sub Msg: " + recvMsg << std::endl;
         deserializeClientEntityMap(recvMsg);
         printEntityMap();
 
