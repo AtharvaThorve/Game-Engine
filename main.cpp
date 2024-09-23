@@ -81,14 +81,16 @@ int main(int argc, char* argv[])
         //auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
 
         MovementPattern pattern;
-        pattern.addStep(MovementStep({ 50, 50 }, 2.0f)); // Move diagonally right and down for 2 secs at an acceleration of 50
-        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
-        pattern.addStep(MovementStep({ 50, -50 }, 2.0f));
-        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
-        pattern.addStep(MovementStep({ -50 , 50 }, 2.0f));
-        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true));
-        pattern.addStep(MovementStep({ -50, -50 }, 2.0f)); // Move diagonally left and up for 2 secs at an acceleratopn of 50
-        pattern.addStep(MovementStep({ 0 , 0 }, 1.0f, true)); // Stop for 1 sec
+        pattern.addSteps(
+            MovementStep({ 50, 50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ 50, -50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ -50, 50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ -50, -50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true)
+        );
 
         patternEntity->hasMovementPattern = true;
         patternEntity->movementPattern = pattern;
@@ -96,9 +98,9 @@ int main(int argc, char* argv[])
         //patternEntity1->hasMovementPattern = true;
         //patternEntity1->movementPattern = pattern;
 
-        entityManager.addEntity(entity);
+
+        entityManager.addEntities(entity, patternEntity);
         //entityManager.addEntity(entity1);
-        entityManager.addEntity(patternEntity);
         //entityManager.addEntity(patternEntity1);
 
         std::thread networkThread(runClient, std::ref(entityManager));
@@ -110,7 +112,7 @@ int main(int argc, char* argv[])
                 
         while (1)
         {
-            doInput(entity, &globalTimeline, 50.0f);
+            doInput(entity, &globalTimeline, 550.0f);
 
             int64_t currentTime = globalTimeline.getTime();
             globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
