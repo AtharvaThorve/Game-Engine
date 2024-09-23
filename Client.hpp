@@ -9,8 +9,8 @@ public:
     void start();  // Main client loop
     void connectRequester(const std::string& address, int port);
     void connectPusher(const std::string& address, int port);
-    void connectServer();
     void connectSubscriber(const std::string& address, int port);
+    void connectServer();
     void deserializeClientEntityMap(const std::string& pubMsg);
     void printEntityMap();
 private:

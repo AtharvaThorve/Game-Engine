@@ -13,10 +13,10 @@ void runServer() {
 
 void runClient(EntityManager& entityManager) {
     Client client(entityManager);
-    client.connectRequester("tcp://localhost", 5556);
-    client.connectPusher("tcp://localhost", 5557);
-    client.connectSubscriber("tcp://localhost", 5558);
-    client.connectServer();
+    client.connectRequester("tcp://192.168.1.192", 5556); // Address and port of the server
+    client.connectPusher("tcp://192.168.1.192", 5557); // Address and port of the client
+    client.connectSubscriber("tcp://192.168.1.192", 5558); // Address and port of the server
+    client.connectServer(); // Address and port of the client (needs to be same as bind pusher)
     client.start();
 }
 

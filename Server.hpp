@@ -30,7 +30,6 @@ private:
     std::unordered_map<std::string, std::unordered_map<int, std::pair<float, float>>> clientEntityMap;
     std::string generateUniqueClientID(void);
     std::string generatePubMsg();
-    void handle_client(const std::string& received_data);  // Handles a client's request
     void handle_client_thread(const std::string& clientID);
     void parseString(const std::string& input, const std::string& clientID, std::unordered_map<int, std::pair<float, float>>& entityPositionMap);
     void printEntityMap();
