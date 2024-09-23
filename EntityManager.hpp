@@ -11,7 +11,7 @@ public:
 	void addEntity(std::shared_ptr<Entity> entity);
 	void removeEntity(std::shared_ptr<Entity> entity);
 	void updateEntities();
-	void applyGravityOnEntities(float deltaTime, PhysicsSystem& physicsSystem);
+	void applyGravityOnEntities(PhysicsSystem& physicsSystem);
 	void updateEntityDeltaTime();
 	void drawEntities(void);
 	void updateMovementPatternEntities();

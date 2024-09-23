@@ -20,9 +20,9 @@ void runClient(EntityManager& entityManager) {
     client.start();
 }
 
-void updatePatternEntitiesThread(EntityManager& entityManager) {
+void applyGravityOnEntities(EntityManager& entityManager, PhysicsSystem& physicsSystem) {
     while (1) {
-        entityManager.updateMovementPatternEntities();
+        entityManager.applyGravityOnEntities(physicsSystem);
     }
 }
 
@@ -101,23 +101,24 @@ int main(int argc, char* argv[])
         entityManager.addEntity(patternEntity);
         //entityManager.addEntity(patternEntity1);
 
-        std::thread clientThread1(runClient, std::ref(entityManager));
-
-        //std::thread updateThread(updatePatternEntitiesThread, std::ref(entityManager));
+        std::thread networkThread(runClient, std::ref(entityManager));
 
         int64_t lastUpdateTime = globalTimeline.getTime();
+        float globalDeltaTime = 0;
+
+        std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
                 
         while (1)
         {
             doInput(entity, &globalTimeline, 50.0f);
 
             int64_t currentTime = globalTimeline.getTime();
-            float globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
+            globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
             lastUpdateTime = currentTime;
 
             
             entityManager.updateEntityDeltaTime();
-            entityManager.applyGravityOnEntities(globalDeltaTime, physicsSystem);
+            //entityManager.applyGravityOnEntities(globalDeltaTime, physicsSystem);
             entityManager.updateMovementPatternEntities();
             entityManager.updateEntities();
             
@@ -143,7 +144,8 @@ int main(int argc, char* argv[])
         }
 
         clean_up_sdl();
-        clientThread1.join();
+        networkThread.join();
+        gravityThread.join();
     }
     else {
         std::cerr << "Invalid mode. Use 'server' or 'client'." << std::endl;

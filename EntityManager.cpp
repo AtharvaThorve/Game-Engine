@@ -14,10 +14,10 @@ void EntityManager::updateEntities() {
 	}
 }
 
-void EntityManager::applyGravityOnEntities(float deltaTime, PhysicsSystem& physicsSystem) {
+void EntityManager::applyGravityOnEntities(PhysicsSystem& physicsSystem) {
 	for (auto& entity : entities) {
 		if (entity->isAffectedByGravity) {
-			physicsSystem.applyGravity(*entity, deltaTime);
+			physicsSystem.applyGravity(*entity);
 		}
 	}
 }
