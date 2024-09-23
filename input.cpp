@@ -1,5 +1,4 @@
 #include "input.hpp"
-#include <SDL2/SDL.h>
 
 static bool wasRShiftPressed = false;
 static bool wasEscPressed = false;
@@ -9,9 +8,7 @@ static bool wasMinusPressed = false;
 
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float accelerationRate)
 {
-
     const Uint8* state = SDL_GetKeyboardState(NULL);
-
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -40,14 +37,14 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
     bool game_speed_down = state[SDL_SCANCODE_M];
 
     if (game_speed_up != wasPlusPressed) {
-        if (game_speed_up && globalTimeline->getTic()>1) {
+        if (game_speed_up && globalTimeline->getTic() > 1) {
             globalTimeline->changeTic(globalTimeline->getTic() * 0.5);
         }
         wasPlusPressed = game_speed_up;
     }
 
     if (game_speed_down != wasMinusPressed) {
-        if (game_speed_down && globalTimeline->getTic()<8)
+        if (game_speed_down && globalTimeline->getTic() < 8)
         {
             globalTimeline->changeTic(globalTimeline->getTic() * 2.0);
         }
@@ -67,22 +64,22 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
         }
 
         if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
-            entity->inputAcceleration.x  = -accelerationRate;
+            entity->inputAcceleration.x = -accelerationRate;
         }
         else if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D]) {
-            entity->inputAcceleration.x  = accelerationRate;
+            entity->inputAcceleration.x = accelerationRate;
         }
         else {
             entity->inputAcceleration.x = 0;
         }
+    }
 
-        bool isRShiftPressed = state[SDL_SCANCODE_RSHIFT];
+    bool isRShiftPressed = state[SDL_SCANCODE_RSHIFT];
 
-        if (isRShiftPressed != wasRShiftPressed) {
-            if (!isRShiftPressed) {
-                allowScaling = !allowScaling;
-            }
-            wasRShiftPressed = isRShiftPressed;
+    if (isRShiftPressed != wasRShiftPressed) {
+        if (!isRShiftPressed) {
+            allowScaling = !allowScaling;
         }
+        wasRShiftPressed = isRShiftPressed;
     }
 }

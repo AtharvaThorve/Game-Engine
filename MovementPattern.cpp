@@ -18,7 +18,6 @@ void MovementPattern::update(Entity& entity) {
 
     float deltaTime = entity.deltaTime;
     timeElapsed += deltaTime;
-    std::cout << deltaTime << std::endl;
     MovementStep& step = steps[currentStepIndex];
 
     if (!step.isPause) {

@@ -44,10 +44,10 @@ void Client::start() {
         memcpy(request.data(), message.c_str(), message.size());
         pusher.send(request, zmq::send_flags::none);
 
-        printEntityMap();
         zmq::message_t subMsg;
         subscriber.recv(subMsg, zmq::recv_flags::none);
         std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
+        std::cout << "Sub Msg: " + recvMsg << std::endl;
         deserializeClientEntityMap(recvMsg);
         printEntityMap();
 

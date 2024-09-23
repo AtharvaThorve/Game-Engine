@@ -63,9 +63,6 @@ void Entity::updatePosition() {
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
 
-    //std::cout << position.x << " " << position.y << std::endl;
-    std::cout << "Entity:" << deltaTime << std::endl;
-
     if (shape->type == ShapeType::RECTANGLE) {
         RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
         if (rectShape) {

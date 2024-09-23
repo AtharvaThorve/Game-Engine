@@ -49,7 +49,6 @@ void Server::start() {
             std::thread clientThread(&Server::handle_client_thread, this, clientID);
             clientThread.detach();
         }
-        broadcastMsg();
     }
 }
 
@@ -71,6 +70,7 @@ void Server::handle_client_thread(const std::string& clientID) {
             clientEntityMap[clientID] = entityPositionMap;
             printEntityMap();
         }
+        broadcastMsg();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
@@ -115,9 +115,9 @@ void Server::printEntityMap() {
     }
 }
 
-void Server::broadcastMsg() {
-    
+void Server::broadcastMsg() {    
     std::string pubMsg = generatePubMsg();
+    std::cout << "Pub Msg: " + pubMsg << std::endl;
     zmq::message_t broadcastMsg(pubMsg.size());
     memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
     publisher.send(broadcastMsg, zmq::send_flags::none);
