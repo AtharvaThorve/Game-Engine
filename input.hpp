@@ -5,4 +5,4 @@
 #include "entity.hpp"
 #include "scaling.hpp"
 
-void doInput(std::shared_ptr<Entity> entity, Timeline* globalTimeline, float accelerationRate=5);
+void doInput(std::shared_ptr<Entity> entity, Timeline* globalTimeline, float accelerationRate=5, float decelerationRate = 5);

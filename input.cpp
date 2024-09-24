@@ -6,7 +6,7 @@ static bool wasEscPressed = false;
 static bool wasPlusPressed = false;
 static bool wasMinusPressed = false;
 
-void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float accelerationRate)
+void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float accelerationRate, float decelerationRate)
 {
     const Uint8* state = SDL_GetKeyboardState(NULL);
     SDL_Event event;
@@ -60,7 +60,16 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
             entity->inputAcceleration.y = accelerationRate;
         }
         else {
-            entity->inputAcceleration.y = 0;
+            // Deceleration
+            if (entity->velocity.y > 0) {
+                entity->inputAcceleration.y = -decelerationRate;
+            }
+            else if (entity->velocity.y < 0) {
+                entity->inputAcceleration.y = decelerationRate;
+            }
+            else {
+                entity->inputAcceleration.y = 0;
+            }
         }
 
         if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
@@ -70,7 +79,16 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
             entity->inputAcceleration.x = accelerationRate;
         }
         else {
-            entity->inputAcceleration.x = 0;
+            // Deceleration
+            if (entity->velocity.x > 0) {
+                entity->inputAcceleration.x = -decelerationRate;
+            }
+            else if (entity->velocity.x < 0) {
+                entity->inputAcceleration.x = decelerationRate;
+            }
+            else {
+                entity->inputAcceleration.x = 0;
+            }
         }
     }
 

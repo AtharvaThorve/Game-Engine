@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
         //patternEntity1->movementPattern = pattern;
 
 
-        entityManager.addEntities(entity, patternEntity);
+        entityManager.addEntities(entity, patternEntity, entity1);
         //entityManager.addEntity(entity1);
         //entityManager.addEntity(patternEntity1);
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
                 
         while (1)
         {
-            doInput(entity, &globalTimeline, 550.0f);
+            doInput(entity, &globalTimeline, 50.0f, 50.0f);
 
             int64_t currentTime = globalTimeline.getTime();
             globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
