@@ -23,17 +23,175 @@ void applyGravityOnEntities(EntityManager& entityManager, PhysicsSystem& physics
     }
 }
 
+void doServerEntities(Server& server) {
+    Vector2 initialPosition2{ 300, 300 };
+    Vector2 initialVelocity{ 0, 0 };
+    Vector2 inputInitialVelocity{ 0, 0 };
+    Vector2 initialAcceleration{ 0, 0 };
+    float mass = 1.0f;
+    bool isAffectedByGravity = true;
+    bool isMovable = true;
+    bool isHittable = true;
+    ShapeType shapeType = ShapeType::RECTANGLE;
+    SDL_Color color = { 255, 0, 0, 255 };
+    SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
+    SDL_Point center = { 0, 0 };
+    int radius = 0;
+    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+
+    MovementPattern pattern;
+    pattern.addSteps(
+        MovementStep({ 50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ 50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true)
+    );
+
+    patternEntity->hasMovementPattern = true;
+    patternEntity->movementPattern = pattern;
+
+    EntityManager serverEntityManager;
+    serverEntityManager.addEntities(patternEntity);
+
+    while (true)
+    {
+        serverEntityManager.updateEntityDeltaTime();
+        serverEntityManager.applyGravityOnEntities(physicsSystem);
+        serverEntityManager.updateMovementPatternEntities();
+        serverEntityManager.updateEntities();
+        server.updateClientEntityMap(serverEntityManager);
+    }
+}
+
+void doClientGame() {
+    initSDL();
+    // Define scale factors
+    float scale = 1.0f;
+    float cached_scale = scale;
+
+    Vector2 initialPosition{ 100, 100 };
+    Vector2 initialVelocity{ 0, 0 };
+    Vector2 inputInitialVelocity{ 0, 0 };
+    Vector2 initialAcceleration{ 0, 0 };
+    float mass = 1.0f;
+    bool isAffectedByGravity = true;
+    bool isMovable = true;
+    bool isHittable = true;
+    ShapeType shapeType = ShapeType::RECTANGLE;
+    SDL_Color color = { 255, 0, 0, 255 };
+    SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
+    SDL_Point center = { 0, 0 };
+    int radius = 0;
+
+    Vector2 initialPosition1{ 200, 100 };
+    SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
+
+
+    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+    auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
+
+    Vector2 initialPosition2{ 300, 300 };
+    SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
+    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+
+    //Vector2 initialPosition3{ 600, 100 };
+    //SDL_Rect rect3 = { static_cast<int>(initialPosition3.x), static_cast<int>(initialPosition3.y), 50, 50 };
+    //auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
+
+    MovementPattern pattern;
+    pattern.addSteps(
+        MovementStep({ 50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ 50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true)
+    );
+
+    patternEntity->hasMovementPattern = true;
+    patternEntity->movementPattern = pattern;
+
+    //patternEntity1->hasMovementPattern = true;
+    //patternEntity1->movementPattern = pattern;
+
+    EntityManager entityManager;
+    EntityManager clientEntityManager;
+
+    //entityManager.addEntities(entity1);
+    entityManager.addEntity(entity);
+    //entityManager.addEntity(patternEntity);
+
+    std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
+
+    int64_t lastUpdateTime = globalTimeline.getTime();
+    float globalDeltaTime = 0;
+
+    //std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
+
+    while (true)
+    {
+        doInput(entity, &globalTimeline, 50.0f);
+
+        int64_t currentTime = globalTimeline.getTime();
+        globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
+        lastUpdateTime = currentTime;
+
+
+        entityManager.updateEntityDeltaTime();
+        entityManager.applyGravityOnEntities(physicsSystem);
+        entityManager.updateMovementPatternEntities();
+        entityManager.updateEntities();
+
+        clientEntityManager.updateEntityDeltaTime();
+        clientEntityManager.applyGravityOnEntities(physicsSystem);
+        clientEntityManager.updateMovementPatternEntities();
+        clientEntityManager.updateEntities();
+
+        // Clear the screen with a blue background
+        prepareScene(SDL_Color{ 0, 0, 255, 255 });
+
+        entityManager.drawEntities();
+        clientEntityManager.drawEntities();
+
+        updateScaleFactor(scale);
+        if (allowScaling && cached_scale != scale)
+        {
+            setRenderScale(scale, scale);
+            cached_scale = scale;
+        }
+
+        auto collision = entity->isColliding(*entity1);
+        if (collision) {
+            //break;
+        }
+
+        // Present the updated scene
+        presentScene();
+    }
+
+    networkThread.join();
+    //gravityThread.join();
+    clean_up_sdl();
+}
+
 int main(int argc, char* argv[])
 {
 
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " [server/client] [optional: client_id]" << std::endl;
+    if (argc < 2 || argc > 3) {
+        std::cerr << "Usage: " << argv[0] << " [server/client] [optional: client_id] or [server client/client server]" << std::endl;
         return 1;
     }
 
-    std::string mode = argv[1];
+    std::string mode1 = argv[1];
+    std::string mode2 = (argc == 3) ? argv[2] : "";
 
-    if (mode == "server") {
+    if (mode1 == "server" && mode2.empty()) {
 
         Server server;
         server.bindResponder("tcp://*", 5556);
@@ -43,164 +201,27 @@ int main(int argc, char* argv[])
         std::cout << "Starting server..." << std::endl;
         std::thread serverThread(runServer, std::ref(server));
 
-        Vector2 initialPosition2{ 300, 300 };
-        Vector2 initialVelocity{ 0, 0 };
-        Vector2 inputInitialVelocity{ 0, 0 };
-        Vector2 initialAcceleration{ 0, 0 };
-        float mass = 1.0f;
-        bool isAffectedByGravity = true;
-        bool isMovable = true;
-        bool isHittable = true;
-        ShapeType shapeType = ShapeType::RECTANGLE;
-        SDL_Color color = { 255, 0, 0, 255 };
-        SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
-        SDL_Point center = { 0, 0 };
-        int radius = 0;
-        auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+        doServerEntities(std::ref(server));
 
-        MovementPattern pattern;
-        pattern.addSteps(
-            MovementStep({ 50, 50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ 50, -50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ -50, 50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ -50, -50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true)
-        );
-
-        patternEntity->hasMovementPattern = true;
-        patternEntity->movementPattern = pattern;
-
-        EntityManager serverEntityManager;
-        serverEntityManager.addEntities(patternEntity);
-
-        while (true) 
-        {
-            serverEntityManager.updateEntityDeltaTime();
-            serverEntityManager.applyGravityOnEntities(physicsSystem);
-            serverEntityManager.updateMovementPatternEntities();
-            serverEntityManager.updateEntities();
-            server.updateClientEntityMap(serverEntityManager);
-        }
         serverThread.join();
     }
-    else if (mode == "client") {
+    else if (mode1 == "client" && mode2.empty()) {
+        doClientGame();
+    }
+    else if ((mode1 == "server" && mode2 == "client") || (mode1 == "client" && mode2 == "server")) {
+        Server server;
+        server.bindResponder("tcp://*", 5556);
+        server.bindPuller("tcp://*", 5557);
+        server.bindPublisher("tcp://*", 5558);
 
-        initSDL();
-        // Define scale factors
-        float scale = 1.0f;
-        float cached_scale = scale;
+        std::cout << "Starting server..." << std::endl;
+        std::thread serverThread(runServer, std::ref(server));
 
-        Vector2 initialPosition{ 100, 100 };
-        Vector2 initialVelocity{ 0, 0 };
-        Vector2 inputInitialVelocity{ 0, 0 };
-        Vector2 initialAcceleration{ 0, 0 };
-        float mass = 1.0f;
-        bool isAffectedByGravity = true;
-        bool isMovable = true;
-        bool isHittable = true;
-        ShapeType shapeType = ShapeType::RECTANGLE;
-        SDL_Color color = { 255, 0, 0, 255 };
-        SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
-        SDL_Point center = { 0, 0 };
-        int radius = 0;
-
-        Vector2 initialPosition1{ 200, 100 };
-        SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
-
-
-        auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
-        auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
-
-        Vector2 initialPosition2{ 300, 300 };
-        SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
-        auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
-
-        //Vector2 initialPosition3{ 600, 100 };
-        //SDL_Rect rect3 = { static_cast<int>(initialPosition3.x), static_cast<int>(initialPosition3.y), 50, 50 };
-        //auto patternEntity1 = std::make_shared<Entity>(initialPosition3, initialVelocity, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius);
-
-        MovementPattern pattern;
-        pattern.addSteps(
-            MovementStep({ 50, 50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ 50, -50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ -50, 50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true),
-            MovementStep({ -50, -50 }, 2.0f),
-            MovementStep({ 0, 0 }, 1.0f, true)
-        );
-
-        patternEntity->hasMovementPattern = true;
-        patternEntity->movementPattern = pattern;
-
-        //patternEntity1->hasMovementPattern = true;
-        //patternEntity1->movementPattern = pattern;
-
-        EntityManager entityManager;
-        EntityManager clientEntityManager;
-
-        //entityManager.addEntities(entity1);
-        entityManager.addEntity(entity);
-        //entityManager.addEntity(patternEntity);
-
-        std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
-
-        int64_t lastUpdateTime = globalTimeline.getTime();
-        float globalDeltaTime = 0;
-
-        //std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
-
-        while (true)
-        {
-            doInput(entity, &globalTimeline, 50.0f);
-
-            int64_t currentTime = globalTimeline.getTime();
-            globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
-            lastUpdateTime = currentTime;
-
-
-            entityManager.updateEntityDeltaTime();
-            entityManager.applyGravityOnEntities(physicsSystem);
-            entityManager.updateMovementPatternEntities();
-            entityManager.updateEntities();
-
-            clientEntityManager.updateEntityDeltaTime();
-            clientEntityManager.applyGravityOnEntities(physicsSystem);
-            clientEntityManager.updateMovementPatternEntities();
-            clientEntityManager.updateEntities();
-
-            // Clear the screen with a blue background
-            prepareScene(SDL_Color{ 0, 0, 255, 255 });
-
-            entityManager.drawEntities();
-            clientEntityManager.drawEntities();
-
-            updateScaleFactor(scale);
-            if (allowScaling && cached_scale != scale)
-            {
-                setRenderScale(scale, scale);
-                cached_scale = scale;
-            }
-
-            auto collision = entity->isColliding(*entity1);
-            if (collision) {
-                //break;
-            }
-
-            // Present the updated scene
-            presentScene();
-        }
-
-        networkThread.join();
-        //gravityThread.join();
-        clean_up_sdl();
+        doClientGame();
+        serverThread.join();
     }
     else {
-        std::cerr << "Invalid mode. Use 'server' or 'client'." << std::endl;
+        std::cerr << "Invalid mode. Use 'server', 'client', or both 'server client'." << std::endl;
         return 1;
     }
 
