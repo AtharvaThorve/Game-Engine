@@ -1,6 +1,9 @@
 #include "main.hpp"
-#include <memory>
-#include <iostream>
+
+EntityManager entityManager;
+EntityManager clientEntityManager;
+Timeline globalTimeline(nullptr, 2);
+PhysicsSystem physicsSystem(0.0f, 10.0f);
 
 // Assuming Server and Client are properly defined classes with start() method
 void runServer() {
@@ -12,11 +15,11 @@ void runServer() {
 }
 
 void runClient(EntityManager& entityManager) {
-    Client client(entityManager);
-    client.connectRequester("tcp://192.168.1.192", 5556); // Address and port of the server
-    client.connectPusher("tcp://192.168.1.192", 5557); // Address and port of the client
-    client.connectSubscriber("tcp://192.168.1.192", 5558); // Address and port of the server
-    client.connectServer(); // Address and port of the client (needs to be same as bind pusher)
+    Client client(entityManager, clientEntityManager);
+    client.connectRequester("tcp://192.168.1.192", 5556);
+    client.connectPusher("tcp://192.168.1.192", 5557);
+    client.connectSubscriber("tcp://192.168.1.192", 5558);
+    client.connectServer();
     client.start();
 }
 
@@ -47,14 +50,10 @@ int main(int argc, char* argv[])
         float scale = 1.0f;
         float cached_scale = scale;
 
-        EntityManager entityManager;
-        Timeline globalTimeline(nullptr, 2);
-        PhysicsSystem physicsSystem(0.0f, 10.0f);
-
         Vector2 initialPosition{ 100, 100 };
         Vector2 initialVelocity{ 0, 0 };
         Vector2 inputInitialVelocity{ 0, 0 };
-        Vector2 initialAcceleration{0, 0};
+        Vector2 initialAcceleration{ 0, 0 };
         float mass = 1.0f;
         bool isAffectedByGravity = true;
         bool isMovable = true;
@@ -69,8 +68,8 @@ int main(int argc, char* argv[])
         SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
 
 
-        auto entity = std::make_shared<Entity>(initialPosition, initialVelocity,initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
-        auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity,initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
+        auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+        auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
 
         Vector2 initialPosition2{ 300, 300 };
         SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
@@ -99,35 +98,41 @@ int main(int argc, char* argv[])
         //patternEntity1->movementPattern = pattern;
 
 
-        entityManager.addEntities(entity, patternEntity);
-        //entityManager.addEntity(entity1);
-        //entityManager.addEntity(patternEntity1);
+        //entityManager.addEntities(entity1);
+        entityManager.addEntity(entity1);
+        entityManager.addEntity(patternEntity);
 
         std::thread networkThread(runClient, std::ref(entityManager));
 
         int64_t lastUpdateTime = globalTimeline.getTime();
         float globalDeltaTime = 0;
 
-        std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
-                
+        //std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
+
         while (1)
         {
-            doInput(entity, &globalTimeline, 550.0f);
+            doInput(entity, &globalTimeline, 50.0f);
 
             int64_t currentTime = globalTimeline.getTime();
             globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
             lastUpdateTime = currentTime;
 
-            
+
             entityManager.updateEntityDeltaTime();
-            //entityManager.applyGravityOnEntities(globalDeltaTime, physicsSystem);
+            entityManager.applyGravityOnEntities(physicsSystem);
             entityManager.updateMovementPatternEntities();
             entityManager.updateEntities();
-            
+
+            clientEntityManager.updateEntityDeltaTime();
+            clientEntityManager.applyGravityOnEntities(physicsSystem);
+            clientEntityManager.updateMovementPatternEntities();
+            clientEntityManager.updateEntities();
+
             // Clear the screen with a blue background
             prepareScene(SDL_Color{ 0, 0, 255, 255 });
 
             entityManager.drawEntities();
+            clientEntityManager.drawEntities();
 
             updateScaleFactor(scale);
             if (allowScaling && cached_scale != scale)
@@ -138,16 +143,16 @@ int main(int argc, char* argv[])
 
             auto collision = entity->isColliding(*entity1);
             if (collision) {
-                break;
+                //break;
             }
 
             // Present the updated scene
             presentScene();
         }
 
-        clean_up_sdl();
         networkThread.join();
-        gravityThread.join();
+        //gravityThread.join();
+        clean_up_sdl();
     }
     else {
         std::cerr << "Invalid mode. Use 'server' or 'client'." << std::endl;
