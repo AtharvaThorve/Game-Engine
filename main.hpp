@@ -13,9 +13,15 @@
 #include "EntityManager.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
+#include <iostream>
+#include "Timeline.hpp"
 
 // SDL render and window context
 extern App* app;
+
+//EntityManager entityManager;
+extern Timeline globalTimeline;
+//PhysicsSystem physicsSystem(0.0f, 10.0f);
 
 int main(int argc, char* argv[]);
 

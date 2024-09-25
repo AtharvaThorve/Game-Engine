@@ -2,12 +2,15 @@
 #include <iostream>
 #include <thread>
 
-Client::Client(EntityManager& entityManager): 
-    context(1), 
-    requester(context, zmq::socket_type::req), 
-    pusher(context, zmq::socket_type::push), 
-    subscriber(context, zmq::socket_type::sub), 
-    entityManager(entityManager) 
+std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
+
+Client::Client(EntityManager& entityManager, EntityManager& clientEntityManager) :
+    context(1),
+    requester(context, zmq::socket_type::req),
+    pusher(context, zmq::socket_type::push),
+    subscriber(context, zmq::socket_type::sub),
+    entityManager(entityManager),
+    clientEntityManager(clientEntityManager)
 {}
 
 void Client::connectRequester(const std::string& address, int port) {
@@ -52,7 +55,9 @@ void Client::start() {
         subscriber.recv(subMsg, zmq::recv_flags::none);
         std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
         deserializeClientEntityMap(recvMsg);
-        printEntityMap();
+        // update the entities accoring to the subMsg
+        updateOtherEntities();
+        //printEntityMap();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
@@ -88,6 +93,45 @@ void Client::printEntityMap() {
         std::cout << "Client " << client.first << " entities:" << std::endl;
         for (const auto& entity : client.second) {
             std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
+        }
+    }
+}
+
+void Client::updateOtherEntities() {
+    // remove current clients entities from clientEntityMap
+    clientEntityMap.erase(clientID);
+
+    Vector2 initialPosition{ 100, 100 };
+    Vector2 initialVelocity{ 0, 0 };
+    Vector2 inputInitialVelocity{ 0, 0 };
+    Vector2 initialAcceleration{ 0, 0 };
+    float mass = 1.0f;
+    bool isAffectedByGravity = true;
+    bool isMovable = true;
+    bool isHittable = true;
+    ShapeType shapeType = ShapeType::RECTANGLE;
+    SDL_Color color = { 255, 0, 0, 255 };
+    SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
+    SDL_Point center = { 0, 0 };
+    int radius = 0;
+
+    // TODO: delete the enties from dict if the entity does not exists from client/server side anymore
+
+    for (auto i : clientEntityMap) {
+        std::string clientID = i.first;
+        //auto entityMap = i.second;
+
+        for (auto j : i.second) {
+            int entityID = j.first;
+            Vector2 newPosition{ j.second.first, j.second.second };
+            std::string identifier = clientID + "_" + std::to_string(entityID);
+
+            if (dict.find(identifier) == dict.end()) {
+                auto newEntity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+                dict[identifier] = newEntity;
+                clientEntityManager.addEntities(newEntity);
+            }
+            dict[identifier]->position = newPosition;
         }
     }
 }
