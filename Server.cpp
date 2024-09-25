@@ -81,7 +81,6 @@ void Server::handle_client_thread(const std::string& clientID) {
             std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
 
             clientEntityMap[clientID] = entityPositionMap;
-            printEntityMap();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
@@ -112,6 +111,15 @@ void Server::printEntityMap() {
     }
 }
 
+void Server::updateClientEntityMap(EntityManager& serverEntityManager) {
+    std::unique_lock<std::mutex> lock(clientMutex);
+    std::unordered_map<int, std::pair<float, float>> entityPositionMap;
+    for (const auto& entity : serverEntityManager.getEntities()) {
+        entityPositionMap[entity->getID()] = std::make_pair(entity->position.x, entity->position.y);
+    }
+    clientEntityMap["1"] = entityPositionMap;
+}
+
 void Server::broadcastMsg() {
     std::string pubMsg = generatePubMsg();
     zmq::message_t broadcastMsg(pubMsg.size());
@@ -139,6 +147,8 @@ std::string Server::generatePubMsg() {
         }
         pubMsg << "# ";
     }
+
+    printEntityMap();
 
     return pubMsg.str();
 }

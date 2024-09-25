@@ -1,20 +1,14 @@
 #include "main.hpp"
 
-EntityManager entityManager;
-EntityManager clientEntityManager;
 Timeline globalTimeline(nullptr, 2);
 PhysicsSystem physicsSystem(0.0f, 10.0f);
 
 // Assuming Server and Client are properly defined classes with start() method
-void runServer() {
-    Server server;
-    server.bindResponder("tcp://*", 5556);
-    server.bindPuller("tcp://*", 5557);
-    server.bindPublisher("tcp://*", 5558);
+void runServer(Server& server) {
     server.start();
 }
 
-void runClient(EntityManager& entityManager) {
+void runClient(EntityManager& entityManager, EntityManager& clientEntityManager) {
     Client client(entityManager, clientEntityManager);
     client.connectRequester("tcp://192.168.1.192", 5556);
     client.connectPusher("tcp://192.168.1.192", 5557);
@@ -40,8 +34,57 @@ int main(int argc, char* argv[])
     std::string mode = argv[1];
 
     if (mode == "server") {
+
+        Server server;
+        server.bindResponder("tcp://*", 5556);
+        server.bindPuller("tcp://*", 5557);
+        server.bindPublisher("tcp://*", 5558);
+
         std::cout << "Starting server..." << std::endl;
-        runServer();
+        std::thread serverThread(runServer, std::ref(server));
+
+        Vector2 initialPosition2{ 300, 300 };
+        Vector2 initialVelocity{ 0, 0 };
+        Vector2 inputInitialVelocity{ 0, 0 };
+        Vector2 initialAcceleration{ 0, 0 };
+        float mass = 1.0f;
+        bool isAffectedByGravity = true;
+        bool isMovable = true;
+        bool isHittable = true;
+        ShapeType shapeType = ShapeType::RECTANGLE;
+        SDL_Color color = { 255, 0, 0, 255 };
+        SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
+        SDL_Point center = { 0, 0 };
+        int radius = 0;
+        auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+
+        MovementPattern pattern;
+        pattern.addSteps(
+            MovementStep({ 50, 50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ 50, -50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ -50, 50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true),
+            MovementStep({ -50, -50 }, 2.0f),
+            MovementStep({ 0, 0 }, 1.0f, true)
+        );
+
+        patternEntity->hasMovementPattern = true;
+        patternEntity->movementPattern = pattern;
+
+        EntityManager serverEntityManager;
+        serverEntityManager.addEntities(patternEntity);
+
+        while (true) 
+        {
+            serverEntityManager.updateEntityDeltaTime();
+            serverEntityManager.applyGravityOnEntities(physicsSystem);
+            serverEntityManager.updateMovementPatternEntities();
+            serverEntityManager.updateEntities();
+            server.updateClientEntityMap(serverEntityManager);
+        }
+        serverThread.join();
     }
     else if (mode == "client") {
 
@@ -97,19 +140,21 @@ int main(int argc, char* argv[])
         //patternEntity1->hasMovementPattern = true;
         //patternEntity1->movementPattern = pattern;
 
+        EntityManager entityManager;
+        EntityManager clientEntityManager;
 
         //entityManager.addEntities(entity1);
         entityManager.addEntity(entity);
-        entityManager.addEntity(patternEntity);
+        //entityManager.addEntity(patternEntity);
 
-        std::thread networkThread(runClient, std::ref(entityManager));
+        std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
 
         int64_t lastUpdateTime = globalTimeline.getTime();
         float globalDeltaTime = 0;
 
         //std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
 
-        while (1)
+        while (true)
         {
             doInput(entity, &globalTimeline, 50.0f);
 

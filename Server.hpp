@@ -10,6 +10,7 @@
 #include <random>
 #include <set>
 #include <mutex>
+#include "EntityManager.hpp"
 
 class Server {
 public:
@@ -18,6 +19,7 @@ public:
     void bindResponder(const std::string& address, int port);
     void bindPuller(const std::string& address, int port);
     void bindPublisher(const std::string& address, int port);
+    void updateClientEntityMap(EntityManager& serverEntityManager);
     void broadcastMsg();
 
 private:
