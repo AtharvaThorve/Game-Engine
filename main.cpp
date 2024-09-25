@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 
         //entityManager.addEntities(entity1);
-        entityManager.addEntity(entity1);
+        entityManager.addEntity(entity);
         entityManager.addEntity(patternEntity);
 
         std::thread networkThread(runClient, std::ref(entityManager));

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <thread>
 
+std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
+
 Client::Client(EntityManager& entityManager, EntityManager& clientEntityManager) :
     context(1),
     requester(context, zmq::socket_type::req),
@@ -113,8 +115,6 @@ void Client::updateOtherEntities() {
     SDL_Point center = { 0, 0 };
     int radius = 0;
 
-    std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
-
     // TODO: delete the enties from dict if the entity does not exists from client/server side anymore
 
     for (auto i : clientEntityMap) {
@@ -124,7 +124,7 @@ void Client::updateOtherEntities() {
         for (auto j : i.second) {
             int entityID = j.first;
             Vector2 newPosition{ j.second.first, j.second.second };
-            std::string identifier = clientID + std::to_string(entityID);
+            std::string identifier = clientID + "_" + std::to_string(entityID);
 
             if (dict.find(identifier) == dict.end()) {
                 auto newEntity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
@@ -134,5 +134,4 @@ void Client::updateOtherEntities() {
             dict[identifier]->position = newPosition;
         }
     }
-    printEntityMap();
 }
