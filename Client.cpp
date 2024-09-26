@@ -90,9 +90,9 @@ void Client::deserializeClientEntityMap(const std::string& pubMsg) {
 void Client::printEntityMap() {
     // Debugging function to print out the state of clientEntityMap
     for (const auto& client : clientEntityMap) {
-        std::cout << "Client " << client.first << " entities:" << std::endl;
+        //std::cout << "Client " << client.first << " entities:" << std::endl;
         for (const auto& entity : client.second) {
-            std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
+            //std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
         }
     }
 }

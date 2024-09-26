@@ -34,7 +34,7 @@ std::string Server::generateUniqueClientID() {
 }
 
 void Server::start() {
-    std::cout << "Server started, waiting for clients..." << std::endl;
+    //std::cout << "Server started, waiting for clients..." << std::endl;
 
     while (true) {
         // Req/Rep setup for Hello message and clientId
@@ -47,7 +47,7 @@ void Server::start() {
             zmq::message_t reply(clientID.size());
             memcpy(reply.data(), clientID.c_str(), clientID.size());
             responder.send(reply, zmq::send_flags::none);
-            std::cout << "Assigned client ID: " << clientID << std::endl;
+            //std::cout << "Assigned client ID: " << clientID << std::endl;
 
             std::thread clientThread(&Server::handle_client_thread, this, clientID);
             clientThread.detach();
@@ -58,7 +58,7 @@ void Server::start() {
 }
 
 void Server::handle_client_thread(const std::string& clientID) {
-    std::cout << "Client " << clientID << " thread started, waiting for data..." << std::endl;
+    //std::cout << "Client " << clientID << " thread started, waiting for data..." << std::endl;
 
     while (true) {
         {
@@ -78,7 +78,7 @@ void Server::handle_client_thread(const std::string& clientID) {
 
             std::unordered_map<int, std::pair<float, float>> entityPositionMap;
             parseString(receivedData, clientID, entityPositionMap);
-            std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
+            //std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
 
             clientEntityMap[clientID] = entityPositionMap;
         }
@@ -98,15 +98,15 @@ void Server::parseString(const std::string& input, const std::string& clientID, 
     while (stream >> entityID >> x >> y) {
         entityPositionMap[entityID] = std::make_pair(x, y);
     }
-    std::cout << entityPositionMap.size() << std::endl;
+    //std::cout << entityPositionMap.size() << std::endl;
 }
 
 void Server::printEntityMap() {
     // Debugging function to print out the state of clientEntityMap
     for (const auto& client : clientEntityMap) {
-        std::cout << "Client " << client.first << " entities:" << std::endl;
+        //std::cout << "Client " << client.first << " entities:" << std::endl;
         for (const auto& entity : client.second) {
-            std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
+            //std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
         }
     }
 }
