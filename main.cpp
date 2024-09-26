@@ -17,7 +17,7 @@ void runClient(EntityManager& entityManager, EntityManager& clientEntityManager)
     client.start();
 }
 
-void applyGravityOnEntities(EntityManager& entityManager, PhysicsSystem& physicsSystem) {
+void applyGravityOnEntities(PhysicsSystem& physicsSystem, EntityManager& entityManager) {
     while (1) {
         entityManager.applyGravityOnEntities(physicsSystem);
     }
@@ -57,14 +57,18 @@ void doServerEntities(Server& server) {
     EntityManager serverEntityManager;
     serverEntityManager.addEntities(patternEntity);
 
+    std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem), std::ref(serverEntityManager));
+
     while (true)
     {
         serverEntityManager.updateEntityDeltaTime();
-        serverEntityManager.applyGravityOnEntities(physicsSystem);
+        //serverEntityManager.applyGravityOnEntities(physicsSystem);
         serverEntityManager.updateMovementPatternEntities();
         serverEntityManager.updateEntities();
         server.updateClientEntityMap(serverEntityManager);
     }
+
+    gravityThread.join();
 }
 
 void doClientGame() {
@@ -132,7 +136,8 @@ void doClientGame() {
     int64_t lastUpdateTime = globalTimeline.getTime();
     float globalDeltaTime = 0;
 
-    //std::thread gravityThread(applyGravityOnEntities, std::ref(entityManager), std::ref(physicsSystem));
+    std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem), std::ref(entityManager));
+    std::thread gravityThread2(applyGravityOnEntities, std::ref(physicsSystem), std::ref(clientEntityManager));
 
     while (true)
     {
@@ -144,12 +149,12 @@ void doClientGame() {
 
 
         entityManager.updateEntityDeltaTime();
-        entityManager.applyGravityOnEntities(physicsSystem);
+        //entityManager.applyGravityOnEntities(physicsSystem);
         entityManager.updateMovementPatternEntities();
         entityManager.updateEntities();
 
         clientEntityManager.updateEntityDeltaTime();
-        clientEntityManager.applyGravityOnEntities(physicsSystem);
+        //clientEntityManager.applyGravityOnEntities(physicsSystem);
         clientEntityManager.updateMovementPatternEntities();
         clientEntityManager.updateEntities();
 
@@ -176,7 +181,8 @@ void doClientGame() {
     }
 
     networkThread.join();
-    //gravityThread.join();
+    gravityThread.join();
+    gravityThread2.join();
     clean_up_sdl();
 }
 
