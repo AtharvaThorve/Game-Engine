@@ -128,7 +128,7 @@ void doClientGame() {
     EntityManager clientEntityManager;
 
     //entityManager.addEntities(entity1);
-    entityManager.addEntity(entity);
+    //entityManager.addEntity(entity);
     //entityManager.addEntity(patternEntity);
 
     std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
@@ -137,7 +137,6 @@ void doClientGame() {
     float globalDeltaTime = 0;
 
     std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem), std::ref(entityManager));
-    std::thread gravityThread2(applyGravityOnEntities, std::ref(physicsSystem), std::ref(clientEntityManager));
 
     while (true)
     {
@@ -147,16 +146,9 @@ void doClientGame() {
         globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
         lastUpdateTime = currentTime;
 
-
         entityManager.updateEntityDeltaTime();
-        //entityManager.applyGravityOnEntities(physicsSystem);
         entityManager.updateMovementPatternEntities();
         entityManager.updateEntities();
-
-        clientEntityManager.updateEntityDeltaTime();
-        //clientEntityManager.applyGravityOnEntities(physicsSystem);
-        clientEntityManager.updateMovementPatternEntities();
-        clientEntityManager.updateEntities();
 
         // Clear the screen with a blue background
         prepareScene(SDL_Color{ 0, 0, 255, 255 });
@@ -182,7 +174,6 @@ void doClientGame() {
 
     networkThread.join();
     gravityThread.join();
-    gravityThread2.join();
     clean_up_sdl();
 }
 

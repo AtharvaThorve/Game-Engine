@@ -62,25 +62,11 @@ void Entity::updatePosition() {
 
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
-
-    if (shape->type == ShapeType::RECTANGLE) {
-        RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
-        if (rectShape) {
-            rectShape->rect.x = static_cast<int>(position.x);
-            rectShape->rect.y = static_cast<int>(position.y);
-        }
-    }
-    else if (shape->type == ShapeType::CIRCLE) {
-        CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
-        if (circleShape) {
-            circleShape->center.x = static_cast<int>(position.x);
-            circleShape->center.y = static_cast<int>(position.y);
-        }
-    }
 }
 
 void Entity::draw() {
     if (shape) {
+        updateSDLObject();
         shape->draw(color);
     }
 }
@@ -103,4 +89,21 @@ void Entity::rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTi
 // Add this getter to retrieve the unique ID.
 int64_t Entity::getID() const {
     return id;
+}
+
+void Entity::updateSDLObject() {
+    if (shape->type == ShapeType::RECTANGLE) {
+        RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
+        if (rectShape) {
+            rectShape->rect.x = static_cast<int>(position.x);
+            rectShape->rect.y = static_cast<int>(position.y);
+        }
+    }
+    else if (shape->type == ShapeType::CIRCLE) {
+        CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
+        if (circleShape) {
+            circleShape->center.x = static_cast<int>(position.x);
+            circleShape->center.y = static_cast<int>(position.y);
+        }
+    }
 }

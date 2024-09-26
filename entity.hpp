@@ -69,4 +69,7 @@ public:
 
     // Getter for the entity's unique ID
     int64_t getID() const;
+
+private:
+    void updateSDLObject();
 };
