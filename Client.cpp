@@ -37,6 +37,20 @@ void Client::connectServer() {
     std::string received(static_cast<char*>(reply.data()), reply.size());
     clientID = received;
     std::cout << "Client connected with ID: " << clientID << std::endl;
+    std::thread subMsgThread(&Client::receiveSubMsg, this);
+    subMsgThread.detach();
+}
+
+void Client::receiveSubMsg() {
+    while (true) {
+        zmq::message_t subMsg;
+        subscriber.recv(subMsg, zmq::recv_flags::none);
+        std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
+        deserializeClientEntityMap(recvMsg);
+        // update the entities accoring to the subMsg
+        updateOtherEntities();
+        //printEntityMap();
+    }
 }
 
 void Client::start() {
@@ -50,14 +64,6 @@ void Client::start() {
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
         pusher.send(request, zmq::send_flags::none);
-
-        zmq::message_t subMsg;
-        subscriber.recv(subMsg, zmq::recv_flags::none);
-        std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
-        deserializeClientEntityMap(recvMsg);
-        // update the entities accoring to the subMsg
-        updateOtherEntities();
-        //printEntityMap();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }

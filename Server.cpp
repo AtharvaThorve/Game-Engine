@@ -34,9 +34,16 @@ std::string Server::generateUniqueClientID() {
 }
 
 void Server::start() {
-    //std::cout << "Server started, waiting for clients..." << std::endl;
+    std::cout << "Server started, waiting for clients..." << std::endl;
+
+    bool broadCastMsgThreadStarted = false;
 
     while (true) {
+        if (connectedClientIDs.size() > 0 && !broadCastMsgThreadStarted) {
+            broadCastMsgThreadStarted = true;
+            std::thread broadCastMssgThread(&Server::broadcastMsg, this);
+            broadCastMssgThread.detach();
+        }
         // Req/Rep setup for Hello message and clientId
         zmq::message_t request;
         responder.recv(request, zmq::recv_flags::dontwait);
@@ -52,8 +59,6 @@ void Server::start() {
             std::thread clientThread(&Server::handle_client_thread, this, clientID);
             clientThread.detach();
         }
-        if (connectedClientIDs.size() > 0)
-            broadcastMsg();
     }
 }
 
@@ -121,12 +126,14 @@ void Server::updateClientEntityMap(EntityManager& serverEntityManager) {
 }
 
 void Server::broadcastMsg() {
-    std::string pubMsg = generatePubMsg();
-    zmq::message_t broadcastMsg(pubMsg.size());
-    memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
-    publisher.send(broadcastMsg, zmq::send_flags::none);
+    while (true) {
+        std::string pubMsg = generatePubMsg();
+        zmq::message_t broadcastMsg(pubMsg.size());
+        memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
+        publisher.send(broadcastMsg, zmq::send_flags::none);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
 }
 
 std::string Server::generatePubMsg() {

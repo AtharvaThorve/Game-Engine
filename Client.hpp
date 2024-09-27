@@ -24,4 +24,5 @@ private:
     EntityManager& entityManager;
     EntityManager& clientEntityManager;
     std::unordered_map<std::string, std::unordered_map<int, std::pair<float, float>>> clientEntityMap;
+    void receiveSubMsg();
 };
