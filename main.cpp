@@ -17,6 +17,17 @@ void runClient(EntityManager& entityManager, EntityManager& clientEntityManager)
     client.start();
 }
 
+void runP2PClient(EntityManager& entityManager, EntityManager& clientEntityManager) {
+    Client client(entityManager, clientEntityManager);
+    client.connectRequester("tcp://192.168.1.192", 5555);
+    client.connectSubscriber("tcp://192.168.1.192", 5556);
+    client.bindPeerPublisher("tcp://*", 5557);
+    client.connectPeerSubscriber1("tcp://192.168.1.192", 5558);
+    client.connectPeerSubscriber2("tcp://192.168.1.192", 5559);
+    client.connectServer(true);
+    client.start(true);
+}
+
 void applyGravityOnEntities(PhysicsSystem& physicsSystem, EntityManager& entityManager) {
     while (1) {
         entityManager.applyGravityOnEntities(physicsSystem);
@@ -62,7 +73,6 @@ void doServerEntities(Server& server) {
     while (true)
     {
         serverEntityManager.updateEntityDeltaTime();
-        //serverEntityManager.applyGravityOnEntities(physicsSystem);
         serverEntityManager.updateMovementPatternEntities();
         serverEntityManager.updateEntities();
         server.updateClientEntityMap(serverEntityManager);
@@ -71,7 +81,7 @@ void doServerEntities(Server& server) {
     gravityThread.join();
 }
 
-void doClientGame() {
+void doClientGame(bool isP2P = false) {
     initSDL();
     // Define scale factors
     float scale = 1.0f;
@@ -86,7 +96,7 @@ void doClientGame() {
     bool isMovable = true;
     bool isHittable = true;
     ShapeType shapeType = ShapeType::RECTANGLE;
-    SDL_Color color = { 255, 0, 0, 255 };
+    SDL_Color color = { 0, 255, 0, 255 };
     SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
     SDL_Point center = { 0, 0 };
     int radius = 0;
@@ -95,7 +105,7 @@ void doClientGame() {
     SDL_Rect rect1 = { static_cast<int>(initialPosition1.x), static_cast<int>(initialPosition1.y), 50, 50 };
 
 
-    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
     auto entity1 = std::make_shared<Entity>(initialPosition1, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect1, center, radius, &globalTimeline, 4);
 
     Vector2 initialPosition2{ 300, 300 };
@@ -128,10 +138,17 @@ void doClientGame() {
     EntityManager clientEntityManager;
 
     //entityManager.addEntities(entity1);
-    //entityManager.addEntity(entity);
+    entityManager.addEntity(entity);
     //entityManager.addEntity(patternEntity);
 
-    std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
+    if (!isP2P) {
+        std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
+        networkThread.detach();
+    }
+    else {
+        std::thread networkThread(runP2PClient, std::ref(entityManager), std::ref(clientEntityManager));
+        networkThread.detach();
+    }
 
     int64_t lastUpdateTime = globalTimeline.getTime();
     float globalDeltaTime = 0;
@@ -140,7 +157,7 @@ void doClientGame() {
 
     while (true)
     {
-        doInput(entity, &globalTimeline, 50.0f);
+        doInput(entity, &globalTimeline, 150.0f);
 
         int64_t currentTime = globalTimeline.getTime();
         globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
@@ -172,7 +189,6 @@ void doClientGame() {
         presentScene();
     }
 
-    networkThread.join();
     gravityThread.join();
     clean_up_sdl();
 }
@@ -205,17 +221,22 @@ int main(int argc, char* argv[])
     else if (mode1 == "client" && mode2.empty()) {
         doClientGame();
     }
+    else if ((mode1 == "client" && mode2 == "P2P") || (mode1 == "P2P" && mode2 == "client")) {
+        doClientGame(true);
+    }
     else if ((mode1 == "server" && mode2 == "client") || (mode1 == "client" && mode2 == "server")) {
         Server server;
-        server.bindResponder("tcp://*", 5556);
-        server.bindPuller("tcp://*", 5557);
-        server.bindPublisher("tcp://*", 5558);
+        server.bindResponder("tcp://*", 5555);
+        server.bindPublisher("tcp://*", 5556);
 
         std::cout << "Starting server..." << std::endl;
         std::thread serverThread(runServer, std::ref(server));
 
-        doClientGame();
+        std::thread serverEntities(doServerEntities, std::ref(server));
+
+        doClientGame(true);
         serverThread.join();
+        serverEntities.join();
     }
     else {
         std::cerr << "Invalid mode. Use 'server', 'client', or both 'server client'." << std::endl;

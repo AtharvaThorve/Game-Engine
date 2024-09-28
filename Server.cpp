@@ -54,11 +54,17 @@ void Server::start() {
             zmq::message_t reply(clientID.size());
             memcpy(reply.data(), clientID.c_str(), clientID.size());
             responder.send(reply, zmq::send_flags::none);
-            //std::cout << "Assigned client ID: " << clientID << std::endl;
 
             std::thread clientThread(&Server::handle_client_thread, this, clientID);
             clientThread.detach();
         }
+        else if (received == "Hello_P2P") {
+            std::string clientID = generateUniqueClientID();
+            zmq::message_t reply(clientID.size());
+            memcpy(reply.data(), clientID.c_str(), clientID.size());
+            responder.send(reply, zmq::send_flags::none);
+        }
+
     }
 }
 
@@ -109,9 +115,9 @@ void Server::parseString(const std::string& input, const std::string& clientID, 
 void Server::printEntityMap() {
     // Debugging function to print out the state of clientEntityMap
     for (const auto& client : clientEntityMap) {
-        //std::cout << "Client " << client.first << " entities:" << std::endl;
+        std::cout << "Client " << client.first << " entities:" << std::endl;
         for (const auto& entity : client.second) {
-            //std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
+            std::cout << "  Entity " << entity.first << " -> (" << entity.second.first << ", " << entity.second.second << ")" << std::endl;
         }
     }
 }
@@ -154,8 +160,6 @@ std::string Server::generatePubMsg() {
         }
         pubMsg << "# ";
     }
-
-    printEntityMap();
 
     return pubMsg.str();
 }
