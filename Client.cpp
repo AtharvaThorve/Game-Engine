@@ -68,6 +68,7 @@ void Client::connectServer(bool isP2P) {
 
 void Client::receivePeerMsg() {
     while (true) {
+        bool shouldUpdateEntities = false;
         zmq::message_t peerMsg1, peerMsg2;
 
         // Receive data from both peers, don't block if no message
@@ -80,13 +81,16 @@ void Client::receivePeerMsg() {
         // Check if messages are not empty
         if (!recvMsg1.empty()) {
             deserializeClientEntityMap(recvMsg1);
-            updateOtherEntities();
+            shouldUpdateEntities = true;
         }
 
         if (!recvMsg2.empty()) {
             deserializeClientEntityMap(recvMsg2);
-            updateOtherEntities();
+            shouldUpdateEntities = true;
         }
+
+        if(shouldUpdateEntities)
+            updateOtherEntities();
     }
 }
 

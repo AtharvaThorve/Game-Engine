@@ -19,11 +19,11 @@ void runClient(EntityManager& entityManager, EntityManager& clientEntityManager)
 
 void runP2PClient(EntityManager& entityManager, EntityManager& clientEntityManager) {
     Client client(entityManager, clientEntityManager);
-    client.connectRequester("tcp://192.168.1.192", 5555);
-    client.connectSubscriber("tcp://192.168.1.192", 5556);
-    client.bindPeerPublisher("tcp://*", 5557);
-    client.connectPeerSubscriber1("tcp://192.168.1.192", 5558);
-    client.connectPeerSubscriber2("tcp://192.168.1.192", 5559);
+    client.connectRequester("tcp://192.168.1.192", 5555); // Put the server address and port
+    client.connectSubscriber("tcp://192.168.1.192", 5556); // Put the server address and port
+    client.bindPeerPublisher("tcp://*", 5557); // Bind the client publisher to a port
+    client.connectPeerSubscriber1("tcp://192.168.1.103", 5558); // Put peer 1's address and the port they are bounded on
+    client.connectPeerSubscriber2("tcp://192.168.1.192", 5559); // Put peer 2's address and the port they are bounded on
     client.connectServer(true);
     client.start(true);
 }
