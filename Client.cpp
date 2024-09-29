@@ -170,7 +170,6 @@ void Client::updateOtherEntities() {
 
     Vector2 initialPosition{ 100, 100 };
     Vector2 initialVelocity{ 0, 0 };
-    Vector2 inputInitialVelocity{ 0, 0 };
     Vector2 initialAcceleration{ 0, 0 };
     float mass = 1.0f;
     bool isAffectedByGravity = true;

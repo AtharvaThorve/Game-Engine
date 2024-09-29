@@ -31,7 +31,6 @@ void Entity::updateDeltaTime() {
         lastGlobalTicSize = currentGlobalTicSize;
     }
     int64_t currentTime = timeline.getTime();
-    //std::cout << lastUpdateTime << " " << currentTime << std::endl;
     deltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // Nanoseconds to seconds
     lastUpdateTime = currentTime;
 }
@@ -42,11 +41,10 @@ void Entity::updatePosition() {
     Vector2 finalAcceleration = acceleration;
 
     finalAcceleration.x += inputAcceleration.x;
-    finalAcceleration.y += inputAcceleration.y;    
+    finalAcceleration.y += inputAcceleration.y;
 
     velocity.x += finalAcceleration.x * deltaTime;
     velocity.y += finalAcceleration.y * deltaTime;
-
 
     if (hasMovementPattern) {
         // Todo: With this if gravity is turned on any effects from that would be gone, so need to fix it.
@@ -81,8 +79,10 @@ bool Entity::isColliding(const Entity& other) const {
 void Entity::rescaleLastUpdateTime(int64_t oldGlobalTicSize, int64_t newGlobalTicSize) {
     if (oldGlobalTicSize != newGlobalTicSize) {
         double scaleFactor = static_cast<double>(oldGlobalTicSize) / newGlobalTicSize;
-
+        lastUpdateTime = lastUpdateTime * timeline.getTic() + timeline.getStartTime();
         lastUpdateTime = static_cast<int64_t>(lastUpdateTime * scaleFactor);
+        lastUpdateTime -= timeline.getStartTime();
+        lastUpdateTime /= timeline.getTic();
     }
 }
 
