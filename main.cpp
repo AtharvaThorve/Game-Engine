@@ -144,7 +144,7 @@ void doClientGame(bool isP2P = false) {
 
 
         if (entityManager.checkCollisions(clientEntityManager)) {
-            break;
+            exit(1);
         }
 
         // Present the updated scene
