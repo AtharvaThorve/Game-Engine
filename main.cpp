@@ -103,6 +103,7 @@ void doClientGame(bool isP2P = false) {
     EntityManager entityManager;
     EntityManager clientEntityManager;
     entityManager.addEntity(entity);
+    clientEntityManager.addEntity(entity);
 
     if (!isP2P) {
         std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
@@ -128,6 +129,10 @@ void doClientGame(bool isP2P = false) {
         entityManager.updateEntityDeltaTime();
         entityManager.updateMovementPatternEntities();
         entityManager.updateEntities();
+
+        if (entityManager.checkCollisions(clientEntityManager)) {
+            break;
+        }
 
         // Clear the screen with a blue background
         prepareScene(SDL_Color{ 0, 0, 255, 255 });

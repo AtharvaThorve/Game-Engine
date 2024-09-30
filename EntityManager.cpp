@@ -42,6 +42,18 @@ void EntityManager::updateMovementPatternEntities() {
 	}
 }
 
+bool EntityManager::checkCollisions(EntityManager& otherEntityManager) {
+	for (auto& entity1 : entities) {
+		for (auto& entity2 : otherEntityManager.getEntities()) {
+			if (entity1 != entity2 && entity1->isColliding(*entity2)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 std::unordered_set<std::shared_ptr<Entity>> EntityManager::getEntities(void) {
 	return entities;
 }

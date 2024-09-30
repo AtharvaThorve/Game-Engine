@@ -18,6 +18,7 @@ public:
 	void updateEntityDeltaTime();
 	void drawEntities(void);
 	void updateMovementPatternEntities();
+	bool checkCollisions(EntityManager& otherEntityManager);
 	std::unordered_set<std::shared_ptr<Entity>> getEntities(void);
 
 private:
