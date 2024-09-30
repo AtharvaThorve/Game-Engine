@@ -21,9 +21,9 @@ void runP2PClient(EntityManager& entityManager, EntityManager& clientEntityManag
     Client client(entityManager, clientEntityManager);
     client.connectRequester("tcp://192.168.1.192", 5555); // Put the server address and port
     client.connectSubscriber("tcp://192.168.1.192", 5556); // Put the server address and port
-    client.bindPeerPublisher("tcp://*", 5557); // Bind the client publisher to a port
-    client.connectPeerSubscriber1("tcp://192.168.1.103", 5558); // Put peer 1's address and the port they are bounded on
-    client.connectPeerSubscriber2("tcp://192.168.1.192", 5559); // Put peer 2's address and the port they are bounded on
+    client.bindPeerPublisher("tcp://*", 5558); // Bind the client publisher to a port
+    client.connectPeerSubscriber1("tcp://192.168.1.192", 5557); // Put peer 1's address and the port they are bounded on
+    client.connectPeerSubscriber2("tcp://192.168.1.239", 5559); // Put peer 2's address and the port they are bounded on
     client.connectServer(true);
     client.start(true);
 }
@@ -103,7 +103,6 @@ void doClientGame(bool isP2P = false) {
     EntityManager entityManager;
     EntityManager clientEntityManager;
     entityManager.addEntity(entity);
-    clientEntityManager.addEntity(entity);
 
     if (!isP2P) {
         std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
@@ -130,10 +129,6 @@ void doClientGame(bool isP2P = false) {
         entityManager.updateMovementPatternEntities();
         entityManager.updateEntities();
 
-        if (entityManager.checkCollisions(clientEntityManager)) {
-            break;
-        }
-
         // Clear the screen with a blue background
         prepareScene(SDL_Color{ 0, 0, 255, 255 });
 
@@ -145,6 +140,11 @@ void doClientGame(bool isP2P = false) {
         {
             setRenderScale(scale, scale);
             cached_scale = scale;
+        }
+
+
+        if (entityManager.checkCollisions(clientEntityManager)) {
+            break;
         }
 
         // Present the updated scene
