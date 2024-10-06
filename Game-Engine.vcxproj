@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="cleanup.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="draw.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="Timeline.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.hpp" />
     <ClInclude Include="cleanup.hpp" />
     <ClInclude Include="Client.hpp" />
     <ClInclude Include="defs.hpp" />

@@ -28,9 +28,9 @@ void EntityManager::updateEntityDeltaTime() {
 	}
 }
 
-void EntityManager::drawEntities(void) {
+void EntityManager::drawEntities(float cameraX, float cameraY) {
 	for (auto& entity : entities) {
-		entity->draw();
+		entity->draw(cameraX, cameraY);
 	}
 }
 

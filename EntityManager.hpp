@@ -16,7 +16,7 @@ public:
 	void updateEntities();
 	void applyGravityOnEntities(PhysicsSystem& physicsSystem);
 	void updateEntityDeltaTime();
-	void drawEntities(void);
+	void drawEntities(float cameraX, float cameraY);
 	void updateMovementPatternEntities();
 	bool checkCollisions(EntityManager& otherEntityManager);
 	std::unordered_set<std::shared_ptr<Entity>> getEntities(void);

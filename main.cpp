@@ -86,6 +86,7 @@ void doClientGame(bool isP2P = false) {
     float cached_scale = scale;
 
     Vector2 initialPosition{ 100, 100 };
+    Vector2 initialPosition2{ 1600, 300 };
     Vector2 initialVelocity{ 0, 0 };
     Vector2 initialAcceleration{ 0, 0 };
     float mass = 1.0f;
@@ -95,14 +96,37 @@ void doClientGame(bool isP2P = false) {
     ShapeType shapeType = ShapeType::RECTANGLE;
     SDL_Color color = { 0, 255, 0, 255 };
     SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
+    SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
     SDL_Point center = { 0, 0 };
     int radius = 0;
 
     auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+    auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+
+    MovementPattern pattern;
+    pattern.addSteps(
+        MovementStep({ 50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ 50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, 50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true),
+        MovementStep({ -50, -50 }, 2.0f),
+        MovementStep({ 0, 0 }, 1.0f, true)
+    );
+
+    patternEntity->hasMovementPattern = true;
+    patternEntity->movementPattern = pattern;
 
     EntityManager entityManager;
     EntityManager clientEntityManager;
     entityManager.addEntity(entity);
+    entityManager.addEntity(patternEntity);
+
+    int worldWidth = 5000;
+    int worldHeight = 5000;
+
+    Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if (!isP2P) {
         std::thread networkThread(runClient, std::ref(entityManager), std::ref(clientEntityManager));
@@ -113,27 +137,23 @@ void doClientGame(bool isP2P = false) {
         networkThread.detach();
     }
 
-    //int64_t lastUpdateTime = globalTimeline.getTime();
-
     std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem), std::ref(entityManager));
 
     while (true)
     {
         doInput(entity, &globalTimeline, 150.0f);
 
-        //int64_t currentTime = globalTimeline.getTime();
-        //float globalDeltaTime = (currentTime - lastUpdateTime) / NANOSECONDS_TO_SECONDS; // nanosecond to sec
-        //lastUpdateTime = currentTime;
-
         entityManager.updateEntityDeltaTime();
         entityManager.updateMovementPatternEntities();
         entityManager.updateEntities();
 
+        camera.update(*entity, worldWidth, worldHeight);
+
         // Clear the screen with a blue background
         prepareScene(SDL_Color{ 0, 0, 255, 255 });
 
-        entityManager.drawEntities();
-        clientEntityManager.drawEntities();
+        entityManager.drawEntities(camera.position.x, camera.position.y);
+        clientEntityManager.drawEntities(camera.position.x, camera.position.y);
 
         updateScaleFactor(scale);
         if (allowScaling && cached_scale != scale)

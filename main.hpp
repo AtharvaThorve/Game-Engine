@@ -15,6 +15,7 @@
 #include "Client.hpp"
 #include <iostream>
 #include "Timeline.hpp"
+#include "Camera.hpp"
 
 // SDL render and window context
 extern App* app;

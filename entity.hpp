@@ -59,7 +59,7 @@ public:
     void updatePosition();
 
     // Method to draw the entity
-    void draw();
+    void draw(float cameraX, float cameraY);
 
     // Method to check for collisions with another entity
     bool isColliding(const Entity& other) const;
@@ -71,5 +71,5 @@ public:
     int64_t getID() const;
 
 private:
-    void updateSDLObject();
+    void updateSDLObject(float cameraX, float cameraY);
 };

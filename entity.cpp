@@ -62,9 +62,9 @@ void Entity::updatePosition() {
     position.y += velocity.y * deltaTime;
 }
 
-void Entity::draw() {
+void Entity::draw(float cameraX, float cameraY) {
     if (shape) {
-        updateSDLObject();
+        updateSDLObject(cameraX, cameraY);
         shape->draw(color);
     }
 }
@@ -91,19 +91,19 @@ int64_t Entity::getID() const {
     return id;
 }
 
-void Entity::updateSDLObject() {
+void Entity::updateSDLObject(float cameraX, float cameraY) {
     if (shape->type == ShapeType::RECTANGLE) {
         RectangleShape* rectShape = dynamic_cast<RectangleShape*>(shape.get());
         if (rectShape) {
-            rectShape->rect.x = static_cast<int>(position.x);
-            rectShape->rect.y = static_cast<int>(position.y);
+            rectShape->rect.x = static_cast<int>(position.x - cameraX);
+            rectShape->rect.y = static_cast<int>(position.y - cameraY);
         }
     }
     else if (shape->type == ShapeType::CIRCLE) {
         CircleShape* circleShape = dynamic_cast<CircleShape*>(shape.get());
         if (circleShape) {
-            circleShape->center.x = static_cast<int>(position.x);
-            circleShape->center.y = static_cast<int>(position.y);
+            circleShape->center.x = static_cast<int>(position.x - cameraX);
+            circleShape->center.y = static_cast<int>(position.y - cameraY);
         }
     }
 }
