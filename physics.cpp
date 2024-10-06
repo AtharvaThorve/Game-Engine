@@ -1,11 +1,11 @@
 #include "physics.hpp"
 
-PhysicsSystem::PhysicsSystem(float gravityX, float gravityY) : 
+PhysicsSystem::PhysicsSystem(float gravityX, float gravityY) :
 	gravity{ gravityX, gravityY } {}
 
-void PhysicsSystem::applyGravity(Entity& entity, float deltaTime) {
+void PhysicsSystem::applyGravity(Entity& entity) {
 	if (entity.isAffectedByGravity) {
-		entity.velocity.x += gravity.x * deltaTime;
-		entity.velocity.y += gravity.y * deltaTime;
+		entity.acceleration.x = gravity.x;
+		entity.acceleration.y = gravity.y;
 	}
 }

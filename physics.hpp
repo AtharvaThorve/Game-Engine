@@ -9,5 +9,5 @@ public:
 
 	PhysicsSystem(float gravityX, float gravityY);
 
-	void applyGravity(Entity& entity, float deltaTime);
+	void applyGravity(Entity& entity);
 };
