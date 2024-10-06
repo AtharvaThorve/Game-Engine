@@ -7,13 +7,18 @@
 #include "Entity.hpp"
 #include "cleanup.hpp"
 #include <memory>
+#include <thread>
 #include "SDL2/SDL.h"
 #include "scaling.hpp"
 #include "EntityManager.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
+#include <iostream>
+#include "Timeline.hpp"
 
 // SDL render and window context
 extern App* app;
 
-int main(int argc, char* argv[]);
+extern Timeline globalTimeline;
 
-void setRenderScale(float scaleX, float scaleY);
+int main(int argc, char* argv[]);

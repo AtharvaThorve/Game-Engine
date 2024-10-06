@@ -107,12 +107,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Rushil\source\zeromq-4.3.2</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\vcpkg_installed\x64-windows\x64-windows\lib\manual-link</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);sdl2main.lib</AdditionalDependencies>
+      <AdditionalDependencies>libzmq-mt-4_3_5.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);sdl2main.lib</AdditionalDependencies>
+      <PerUserRedirection>true</PerUserRedirection>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cleanup.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
@@ -142,11 +145,14 @@
     <ClCompile Include="MovementPattern.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="scaling.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="structs.cpp" />
+    <ClCompile Include="Timeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cleanup.hpp" />
+    <ClInclude Include="Client.hpp" />
     <ClInclude Include="defs.hpp" />
     <ClInclude Include="draw.hpp" />
     <ClInclude Include="Entity.hpp" />
@@ -157,8 +163,10 @@
     <ClInclude Include="MovementPattern.hpp" />
     <ClInclude Include="Physics.hpp" />
     <ClInclude Include="scaling.hpp" />
+    <ClInclude Include="Server.hpp" />
     <ClInclude Include="shape.hpp" />
     <ClInclude Include="structs.hpp" />
+    <ClInclude Include="Timeline.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
