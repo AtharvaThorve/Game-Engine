@@ -20,6 +20,10 @@ SRC = main.cpp \
       scaling.cpp \
       entity.cpp \
       input.cpp \
+	  rushil_game1.cpp \
+	  MovementPattern.cpp \
+	  Shape.cpp \
+	  structs.cpp \
 
 # Object files
 OBJ = $(SRC:.cpp=.o)
