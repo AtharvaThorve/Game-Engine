@@ -1,4 +1,4 @@
-#include "Entity.hpp"
+#include "entity.hpp"
 
 Entity::Entity(const Vector2& position, const Vector2& velocity, float mass, bool isAffectedByGravity,
     bool isMovable, bool isHittable, ShapeType shapeType, const SDL_Color& color, const SDL_Rect& rect, const SDL_Point& center, int radius)

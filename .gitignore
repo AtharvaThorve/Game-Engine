@@ -4,3 +4,4 @@
 /Game-Engine/x64/Debug/
 /x64/Debug/
 /vcpkg_installed/
+*.o
