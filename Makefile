@@ -2,13 +2,10 @@
 CXX = g++
 
 # Compiler Flags
-CXXFLAGS = -Wall -std=c++17 -I./include $(shell sdl2-config --cflags) -fPIC
+CXXFLAGS = -Wall -std=c++17 -I./include $(shell sdl2-config --cflags)
 
 # Linker Flags (for SDL2)
 LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread
-
-# SUBSYSTEM = ./src/subsystem
-# UTILS = ./src/utils
 
 # Source files
 SRC = main.cpp \
@@ -20,31 +17,41 @@ SRC = main.cpp \
       scaling.cpp \
       entity.cpp \
       input.cpp \
-	  rushil_game1.cpp \
-	  MovementPattern.cpp \
-	  Shape.cpp \
-	  structs.cpp \
+      MovementPattern.cpp \
+      Shape.cpp \
+      structs.cpp \
+      Client.cpp \
+      Server.cpp \
+      Timeline.cpp
+
+# Object directory
+OBJDIR = obj
 
 # Object files
-OBJ = $(SRC:.cpp=.o)
+OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
 
 # Executable name
 EXEC = main
 
 # Default target
-all: $(EXEC)
+all: clean $(EXEC)
+
+# Ensure obj directory exists
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
 # Linking the executable
 $(EXEC): $(OBJ)
 	$(CXX) $(OBJ) -o $(EXEC) $(LDFLAGS)
 
-# Compiling each .cpp file into .o files
-%.o: %.cpp
+# Compiling each .cpp file into .o files and place them in obj directory
+$(OBJDIR)/%.o: %.cpp | $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean up object files and executable
+# Clean up object files and executable but keep the obj directory
 clean:
-	rm -f $(OBJ) $(EXEC)
+	@if [ -d $(OBJDIR) ]; then rm -f $(OBJDIR)/*.o; fi
+	rm -f $(EXEC)
 
 # Phony targets
 .PHONY: all clean

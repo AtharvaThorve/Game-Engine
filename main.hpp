@@ -8,7 +8,7 @@
 #include "cleanup.hpp"
 #include <memory>
 #include <thread>
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include "scaling.hpp"
 #include "EntityManager.hpp"
 #include "Server.hpp"
