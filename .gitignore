@@ -4,4 +4,9 @@
 /Game-Engine/x64/Debug/
 /x64/Debug/
 /vcpkg_installed/
+
+# Ignore compiled executables
+main
+*.exe
+*.o
 /obj
