@@ -46,7 +46,7 @@ void Server::start() {
         }
         // Req/Rep setup for Hello message and clientId
         zmq::message_t request;
-        responder.recv(request, zmq::recv_flags::dontwait);
+        (void)responder.recv(request, zmq::recv_flags::dontwait);
         std::string received(static_cast<char*>(request.data()), request.size());
 
         if (received == "Hello") {
@@ -76,7 +76,7 @@ void Server::handle_client_thread(const std::string& clientID) {
             std::unique_lock<std::mutex> lock(clientMutex);
             zmq::message_t positionData;
 
-            puller.recv(positionData, zmq::recv_flags::none);
+            (void)puller.recv(positionData, zmq::recv_flags::none);
             std::string receivedData(static_cast<char*>(positionData.data()), positionData.size());
 
             std::istringstream stream(receivedData);

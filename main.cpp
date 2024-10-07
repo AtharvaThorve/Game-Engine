@@ -102,6 +102,7 @@ void doClientGame(bool isP2P = false) {
 
     auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
     auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+    auto entity1 = std::make_shared<Entity>(Vector2{1600, 200}, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
 
     MovementPattern pattern;
     pattern.addSteps(
@@ -121,7 +122,7 @@ void doClientGame(bool isP2P = false) {
     EntityManager entityManager;
     EntityManager clientEntityManager;
     entityManager.addEntity(entity);
-    entityManager.addEntity(patternEntity);
+    entityManager.addEntities(patternEntity, entity1);
 
     int worldWidth = 5000;
     int worldHeight = 5000;

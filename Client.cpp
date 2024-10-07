@@ -52,7 +52,7 @@ void Client::connectServer(bool isP2P) {
     requester.send(request, zmq::send_flags::none);
 
     zmq::message_t reply;
-    requester.recv(reply, zmq::recv_flags::none);
+    (void)requester.recv(reply, zmq::recv_flags::none);
     std::string received(static_cast<char*>(reply.data()), reply.size());
     clientID = received;
     std::cout << "Client connected with ID: " << clientID << std::endl;
@@ -72,8 +72,8 @@ void Client::receivePeerMsg() {
         zmq::message_t peerMsg1, peerMsg2;
 
         // Receive data from both peers, don't block if no message
-        peerSubscriber1.recv(peerMsg1, zmq::recv_flags::dontwait);
-        peerSubscriber2.recv(peerMsg2, zmq::recv_flags::dontwait);
+        (void)peerSubscriber1.recv(peerMsg1, zmq::recv_flags::dontwait);
+        (void)peerSubscriber2.recv(peerMsg2, zmq::recv_flags::dontwait);
 
         std::string recvMsg1(static_cast<char*>(peerMsg1.data()), peerMsg1.size());
         std::string recvMsg2(static_cast<char*>(peerMsg2.data()), peerMsg2.size());
@@ -97,7 +97,7 @@ void Client::receivePeerMsg() {
 void Client::receiveSubMsg() {
     while (true) {
         zmq::message_t subMsg;
-        subscriber.recv(subMsg, zmq::recv_flags::none);
+        (void)subscriber.recv(subMsg, zmq::recv_flags::none);
         std::string recvMsg(static_cast<char*>(subMsg.data()), subMsg.size());
         deserializeClientEntityMap(recvMsg);
         // update the entities accoring to the subMsg

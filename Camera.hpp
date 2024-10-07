@@ -1,5 +1,5 @@
 #pragma once
-#include "Entity.hpp"
+#include "entity.hpp"
 #include "structs.hpp"
 
 class Camera

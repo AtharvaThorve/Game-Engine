@@ -22,7 +22,8 @@ SRC = main.cpp \
       structs.cpp \
       Client.cpp \
       Server.cpp \
-      Timeline.cpp
+      Timeline.cpp \
+      Camera.cpp
 
 # Object directory
 OBJDIR = obj
