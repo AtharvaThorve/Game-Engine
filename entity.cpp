@@ -1,4 +1,4 @@
-#include "Entity.hpp"
+#include "entity.hpp"
 
 // Initialize the static member variable.
 int64_t Entity::nextID = 0;  // Start the unique ID from 0 or any other value.

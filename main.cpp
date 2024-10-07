@@ -10,9 +10,9 @@ void runServer(Server& server) {
 
 void runClient(EntityManager& entityManager, EntityManager& clientEntityManager) {
     Client client(entityManager, clientEntityManager);
-    client.connectRequester("tcp://192.168.1.192", 5556);
-    client.connectPusher("tcp://192.168.1.192", 5557);
-    client.connectSubscriber("tcp://192.168.1.192", 5558);
+    client.connectRequester("tcp://172.30.115.140", 5556);
+    client.connectPusher("tcp://172.30.115.140", 5557);
+    client.connectSubscriber("tcp://172.30.115.140", 5558);
     client.connectServer();
     client.start();
 }

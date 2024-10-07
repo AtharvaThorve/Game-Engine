@@ -1,4 +1,4 @@
-#include "Physics.hpp"
+#include "physics.hpp"
 
 PhysicsSystem::PhysicsSystem(float gravityX, float gravityY) :
 	gravity{ gravityX, gravityY } {}
