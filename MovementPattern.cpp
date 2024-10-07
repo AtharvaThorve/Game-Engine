@@ -1,5 +1,5 @@
 #include "MovementPattern.hpp"
-#include "Entity.hpp"
+#include "entity.hpp"
 #include <iostream>
 
 MovementStep::MovementStep(const Vector2& vel, float dur, bool pause) :
