@@ -23,7 +23,8 @@ SRC = main.cpp \
       Client.cpp \
       Server.cpp \
       Timeline.cpp \
-      Camera.cpp
+      Camera.cpp \
+      collision_utils.cpp
 
 # Object directory
 OBJDIR = obj

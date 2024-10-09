@@ -1,7 +1,7 @@
 #include "main.hpp"
 
 Timeline globalTimeline(nullptr, 2);
-PhysicsSystem physicsSystem(0.0f, 10.0f);
+PhysicsSystem physicsSystem(0.0f, 50.0f);
 
 // Assuming Server and Client are properly defined classes with start() method
 void runServer(Server& server) {
@@ -97,12 +97,14 @@ void doClientGame(bool isP2P = false) {
     SDL_Color color = { 0, 255, 0, 255 };
     SDL_Rect rect = { static_cast<int>(initialPosition.x), static_cast<int>(initialPosition.y), 50, 50 };
     SDL_Rect rect2 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 50, 50 };
+    SDL_Rect rect3 = { static_cast<int>(initialPosition2.x), static_cast<int>(initialPosition2.y), 500, 500 };
     SDL_Point center = { 0, 0 };
     int radius = 0;
 
-    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
+    auto entity = std::make_shared<Entity>(initialPosition, initialVelocity, initialAcceleration, mass, isAffectedByGravity, isMovable, isHittable, shapeType, color, rect, center, radius, &globalTimeline, 2);
     auto patternEntity = std::make_shared<Entity>(initialPosition2, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
     auto entity1 = std::make_shared<Entity>(Vector2{1600, 200}, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect2, center, radius, &globalTimeline, 1);
+    auto platform = std::make_shared<Entity>(Vector2{2000, 200}, initialVelocity, initialAcceleration, mass, !isAffectedByGravity, isMovable, isHittable, shapeType, color, rect3, center, radius, &globalTimeline, 1);
 
     MovementPattern pattern;
     pattern.addSteps(
@@ -122,7 +124,7 @@ void doClientGame(bool isP2P = false) {
     EntityManager entityManager;
     EntityManager clientEntityManager;
     entityManager.addEntity(entity);
-    entityManager.addEntities(patternEntity, entity1);
+    entityManager.addEntities(patternEntity, entity1, platform);
 
     int worldWidth = 5000;
     int worldHeight = 5000;
@@ -163,10 +165,18 @@ void doClientGame(bool isP2P = false) {
             cached_scale = scale;
         }
 
+        // std::string collisionDirection = checkCollisionDirection(entity, platform);
+        // std::cout << collisionDirection << std::endl;
 
-        if (entityManager.checkCollisions(clientEntityManager)) {
-            exit(1);
+        if (collision_utils::isColliding(entity, platform)) {
+            std::string collisionDirection = collision_utils::checkCollisionDirection(entity, platform);
+            std::cout << "Collision direction: " << collisionDirection << std::endl;
+            collision_utils::handlePlatformCollision(entity, platform);
         }
+
+        // if (entityManager.checkCollisions(clientEntityManager)) {
+        //     exit(1);
+        // }
 
         // Present the updated scene
         presentScene();
