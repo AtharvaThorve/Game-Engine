@@ -168,9 +168,9 @@ void doClientGame(bool isP2P = false) {
         // std::string collisionDirection = checkCollisionDirection(entity, platform);
         // std::cout << collisionDirection << std::endl;
 
-        if (collision_utils::isColliding(entity, platform)) {
+        if (entity->isColliding(*platform)) {
             std::string collisionDirection = collision_utils::checkCollisionDirection(entity, platform);
-            std::cout << "Collision direction: " << collisionDirection << std::endl;
+            // std::cout << "Collision direction: " << collisionDirection << std::endl;
             collision_utils::handlePlatformCollision(entity, platform);
         }
 
