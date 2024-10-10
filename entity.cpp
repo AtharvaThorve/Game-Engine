@@ -7,7 +7,7 @@ Entity::Entity(const Vector2 &position, const Vector2 &dimensions, const SDL_Col
     : position(position), shape(nullptr), color(color), timeline(anchor, tic),
       lastUpdateTime(timeline.getTime()), lastGlobalTicSize(timeline.getAnchorTic()), id(nextID++) // Assign unique ID
 {
-    SDL_Rect rect = {position.x, position.y, dimensions.x, dimensions.y};
+    SDL_Rect rect = {static_cast<int>(position.x), static_cast<int>(position.y), static_cast<int>(dimensions.x), static_cast<int>(dimensions.y)};
     shape = std::make_unique<RectangleShape>(rect);
 }
 
