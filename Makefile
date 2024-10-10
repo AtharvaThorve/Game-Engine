@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler Flags
-CXXFLAGS = -Wall -std=c++17 $(shell sdl2-config --cflags)
+CXXFLAGS = -Wall -std=c++17 -O2 $(shell sdl2-config --cflags)
 
 # Linker Flags (for SDL2)
 LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread

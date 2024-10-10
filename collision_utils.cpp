@@ -37,22 +37,36 @@ namespace collision_utils
     void handlePlatformCollision(std::shared_ptr<Entity> entityA, std::shared_ptr<Entity> entityB)
     {
         std::string direction = checkCollisionDirection(entityA, entityB);
+        RectangleShape *rectA = dynamic_cast<RectangleShape *>(entityA->shape.get());
+        RectangleShape *rectB = dynamic_cast<RectangleShape *>(entityB->shape.get());
 
-        if (direction == "up" && entityA->velocity.y < 0)
+        if (direction == "up")
         {
-            entityA->velocity.y = 0;
+            entityA->position.y = entityB->position.y + rectB->rect.h - 1;
+            if(entityA->velocity.y < 0)
+                entityA->velocity.y = 0;
         }
-        else if (direction == "down" && entityA->velocity.y > 0)
+        else if (direction == "down")
         {
-            entityA->velocity.y = 0;
+            entityA->position.y = entityB->position.y - rectA->rect.h + 1;
+            if(!entityA->standingPlatform)
+                entityA->velocity.x = 0;
+            
+            entityA->standingPlatform = entityB;
+            if(entityA->velocity.y > 0)
+                entityA->velocity.y = 0;
         }
-        else if (direction == "left" && entityA->velocity.x < 0)
+        else if (direction == "left")
         {
-            entityA->velocity.x = 0;
+            entityA->position.x = entityB->position.x + rectB->rect.w - 1;
+            if(entityA->velocity.x < 0)
+                entityA->velocity.x = 0;
         }
-        else if (direction == "right" && entityA->velocity.x > 0)
+        else if (direction == "right")
         {
-            entityA->velocity.x = 0;
+            entityA->position.x = entityB->position.x - rectA->rect.w + 1;
+            if(entityA->velocity.x > 0)
+                entityA->velocity.x = 0;
         }
     }
 

@@ -4,25 +4,28 @@
 
 class Entity;
 
-class MovementStep {
+class MovementStep
+{
 public:
-    Vector2 velocity = { 0, 0 };
+    Vector2 velocity = {0, 0};
     float duration;
     bool isPause;
 
-    MovementStep(const Vector2& vel, float dur, bool pause = false);
+    MovementStep(const Vector2 &vel, float dur, bool pause = false);
 };
 
-class MovementPattern {
+class MovementPattern
+{
 private:
     std::vector<MovementStep> steps;
     size_t currentStepIndex;
     float timeElapsed;
-    
+
     void addStepsHelper() {}
 
-    template<typename T, typename... Args>
-    void addStepsHelper(T&& firstStep, Args&&... restSteps) {
+    template <typename T, typename... Args>
+    void addStepsHelper(T &&firstStep, Args &&...restSteps)
+    {
         addStep(std::forward<T>(firstStep));
         addStepsHelper(std::forward<Args>(restSteps)...);
     }
@@ -30,14 +33,13 @@ private:
 public:
     MovementPattern();
 
-    void addStep(const MovementStep& step);
+    void addStep(const MovementStep &step);
 
-    void update(Entity& entity);
+    void update(Entity &entity);
 
-    template<typename... Args>
-    void addSteps(Args&&... args) {
+    template <typename... Args>
+    void addSteps(Args &&...args)
+    {
         addStepsHelper(std::forward<Args>(args)...);
     }
-
-
 };
