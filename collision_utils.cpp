@@ -12,20 +12,26 @@ namespace collision_utils
 
             if (rectA && rectB)
             {
-                // Determine the direction of the collision
-                int deltaX = (rectA->rect.x + rectA->rect.w / 2) - (rectB->rect.x + rectB->rect.w / 2);
-                int deltaY = (rectA->rect.y + rectA->rect.h / 2) - (rectB->rect.y + rectB->rect.h / 2);
+                // Calculate the distances from the edges of rectA to rectB
+                int deltaLeft = (rectB->rect.x + rectB->rect.w) - rectA->rect.x;   // A's left side vs B's right side
+                int deltaRight = (rectA->rect.x + rectA->rect.w) - rectB->rect.x;  // A's right side vs B's left side
+                int deltaTop = (rectB->rect.y + rectB->rect.h) - rectA->rect.y;    // A's top side vs B's bottom side
+                int deltaBottom = (rectA->rect.y + rectA->rect.h) - rectB->rect.y; // A's bottom side vs B's top side
 
-                // Collision direction determination
-                if (std::abs(deltaX) > std::abs(deltaY))
+                // Find the minimum overlap distance to determine collision direction
+                int minDeltaX = std::min(deltaLeft, deltaRight);
+                int minDeltaY = std::min(deltaTop, deltaBottom);
+
+                // Collision direction determination based on the minimum overlap
+                if (minDeltaX < minDeltaY)
                 {
                     // Collision is more horizontal
-                    return (deltaX > 0) ? "left" : "right";
+                    return (deltaLeft < deltaRight) ? "left" : "right";
                 }
                 else
                 {
                     // Collision is more vertical
-                    return (deltaY > 0) ? "up" : "down";
+                    return (deltaTop < deltaBottom) ? "up" : "down";
                 }
             }
         }
@@ -40,32 +46,34 @@ namespace collision_utils
         RectangleShape *rectA = dynamic_cast<RectangleShape *>(entityA->shape.get());
         RectangleShape *rectB = dynamic_cast<RectangleShape *>(entityB->shape.get());
 
+        std::cout << direction << std::endl;
+
         if (direction == "up")
         {
             entityA->position.y = entityB->position.y + rectB->rect.h - 1;
-            if(entityA->velocity.y < 0)
+            if (entityA->velocity.y < 0)
                 entityA->velocity.y = 0;
         }
         else if (direction == "down")
         {
             entityA->position.y = entityB->position.y - rectA->rect.h + 1;
-            if(!entityA->standingPlatform)
+            if (!entityA->standingPlatform)
                 entityA->velocity.x = 0;
-            
+
             entityA->standingPlatform = entityB;
-            if(entityA->velocity.y > 0)
+            if (entityA->velocity.y > 0)
                 entityA->velocity.y = 0;
         }
         else if (direction == "left")
         {
             entityA->position.x = entityB->position.x + rectB->rect.w - 1;
-            if(entityA->velocity.x < 0)
+            if (entityA->velocity.x < 0)
                 entityA->velocity.x = 0;
         }
         else if (direction == "right")
         {
             entityA->position.x = entityB->position.x - rectA->rect.w + 1;
-            if(entityA->velocity.x > 0)
+            if (entityA->velocity.x > 0)
                 entityA->velocity.x = 0;
         }
     }
