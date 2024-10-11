@@ -109,7 +109,7 @@ void Client::receiveSubMsg()
     while (true)
     {
         zmq::message_t subMsg;
-        (void)subscriber.recv(subMsg, zmq::recv_flags::none);
+        (void)subscriber.recv(subMsg, zmq::recv_flags::dontwait);
         std::string recvMsg(static_cast<char *>(subMsg.data()), subMsg.size());
         deserializeClientEntityMap(recvMsg);
         // update the entities accoring to the subMsg
@@ -143,7 +143,7 @@ void Client::start(bool isP2P)
             peerPublisher.send(peerMessage, zmq::send_flags::none);
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
