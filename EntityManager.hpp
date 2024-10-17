@@ -20,9 +20,14 @@ public:
 	void updateMovementPatternEntities();
 	bool checkCollisions(EntityManager& otherEntityManager);
 	std::unordered_set<std::shared_ptr<Entity>> getEntities(void);
+	void addDeathZone(std::shared_ptr<Entity> deathZone);
+	void addSpawnPoint(std::shared_ptr<Entity> spawnPoint);
+	std::vector<std::shared_ptr<Entity>> getSpawnPoints() const;
+	bool checkPlayerDeathAndRespawn(std::shared_ptr<Entity> player);
 
 private:
 	std::unordered_set<std::shared_ptr<Entity>> entities;
+    std::unordered_set<std::shared_ptr<Entity>> deathZones;
 
 	void addEntitiesHelper() {}
 

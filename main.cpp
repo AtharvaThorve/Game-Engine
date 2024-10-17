@@ -89,8 +89,17 @@ void doClientGame(bool isP2P = false)
     Vector2 playerDimensions{50, 50};
     Vector2 platformDimensions{500, 500};
     Vector2 referenceObjectDimensions{50, 100};
+
+    Vector2 deathZonePosition{500, 200};
+    Vector2 deathZoneDimensions{200, 200};
+    SDL_Color deathZoneColor = {255, 0, 0, 255}; // Red for death zone
+
+    Vector2 spawnPointPosition1{100, 300};
+    Vector2 spawnPointPosition2{200, 400};
+
     
     SDL_Color color = {0, 255, 0, 255};
+    auto deathZone = std::make_shared<Entity>(deathZonePosition, deathZoneDimensions, deathZoneColor, &globalTimeline, 2);
 
     auto player = std::make_shared<Entity>(playerPosition, playerDimensions, color, &globalTimeline, 2);
 
@@ -119,6 +128,13 @@ void doClientGame(bool isP2P = false)
     EntityManager clientEntityManager;
     entityManager.addEntity(player);
     entityManager.addEntities(referenceObject, platform);
+    
+    entityManager.addDeathZone(deathZone);
+    auto spawnPoint1 = std::make_shared<Entity>(spawnPointPosition1, Vector2{50, 50}, color, &globalTimeline, 1);
+    auto spawnPoint2 = std::make_shared<Entity>(spawnPointPosition2, Vector2{50, 50}, color, &globalTimeline, 1);
+    entityManager.addSpawnPoint(spawnPoint1);
+    entityManager.addSpawnPoint(spawnPoint2);
+
 
     int worldWidth = 5000;
     int worldHeight = 5000;
@@ -160,6 +176,11 @@ void doClientGame(bool isP2P = false)
             setRenderScale(scale, scale);
             cached_scale = scale;
         }
+
+        if (entityManager.checkPlayerDeathAndRespawn(player)) {
+        std::cout << "Player respawned at the closest spawn point." << std::endl;
+        }
+
 
         // std::string collisionDirection = checkCollisionDirection(entity, platform);
         // std::cout << collisionDirection << std::endl;
