@@ -1,6 +1,9 @@
 #include "Client.hpp"
 #include <iostream>
 #include <thread>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
 
@@ -117,63 +120,140 @@ void Client::receiveSubMsg()
         // printEntityMap();
     }
 }
-
 void Client::start(bool isP2P)
 {
     while (true)
     {
-        // Serialize positions of all entities in the EntityManager
-        std::string message = clientID + " ";
+        // Create a JSON object
+        json j;
+        j["clientID"] = clientID;
+
+        // Add entities to the JSON object
+        j["entities"] = json::array();
         for (const auto &entity : entityManager.getEntities())
         {
-            message += std::to_string(entity->getID()) + " " + std::to_string(entity->position.x) + " " + std::to_string(entity->position.y) + " ";
+            json entityJson;
+            entityJson["entityID"] = entity->getID();
+            entityJson["x"] = entity->position.x;
+            entityJson["y"] = entity->position.y;
+            // Add other entity properties if needed
+            j["entities"].push_back(entityJson);
         }
 
-        // If not in P2P mode, also send to server
+        // Serialize JSON to string
+        std::string message = j.dump();
+        std::cout << "Sending JSON message: " << message << std::endl;
+
+        // Send the message
+        zmq::message_t zmqMessage(message.size());
+        memcpy(zmqMessage.data(), message.c_str(), message.size());
+
         if (!isP2P)
         {
-            zmq::message_t request(message.size());
-            memcpy(request.data(), message.c_str(), message.size());
-            pusher.send(request, zmq::send_flags::none);
+            pusher.send(zmqMessage, zmq::send_flags::none);
         }
         else
         {
-            zmq::message_t peerMessage(message.size());
-            memcpy(peerMessage.data(), message.c_str(), message.size());
-            peerPublisher.send(peerMessage, zmq::send_flags::none);
+            peerPublisher.send(zmqMessage, zmq::send_flags::none);
         }
 
+        // Optionally sleep if needed
         // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
+// void Client::start(bool isP2P)
+// {
+//     while (true)
+//     {
+//         // Serialize positions of all entities in the EntityManager
+//         std::string message = clientID + " ";
+//         for (const auto &entity : entityManager.getEntities())
+//         {
+//             message += std::to_string(entity->getID()) + " " + std::to_string(entity->position.x) + " " + std::to_string(entity->position.y) + " ";
+//         }
+
+//         // If not in P2P mode, also send to server
+//         if (!isP2P)
+//         {
+//             zmq::message_t request(message.size());
+//             memcpy(request.data(), message.c_str(), message.size());
+//             pusher.send(request, zmq::send_flags::none);
+//         }
+//         else
+//         {
+//             zmq::message_t peerMessage(message.size());
+//             memcpy(peerMessage.data(), message.c_str(), message.size());
+//             peerPublisher.send(peerMessage, zmq::send_flags::none);
+//         }
+
+//         // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//     }
+// }
 void Client::deserializeClientEntityMap(const std::string &pubMsg)
 {
-    std::stringstream ss(pubMsg);
-    std::string clientBlock;
-
-    while (std::getline(ss, clientBlock, '#'))
+    try
     {
-        std::stringstream clientStream(clientBlock);
-        std::string clientId;
-        clientStream >> clientId;
+        json j = json::parse(pubMsg);
 
-        std::unordered_map<int, std::pair<float, float>> entityMap;
-        int entityId;
-        float x, y;
+        // Clear existing data
+        clientEntityMap.clear();
 
-        while (clientStream >> entityId >> x >> y)
+        // Check if the JSON is an array of clients
+        if (j.is_array())
         {
-            entityMap[entityId] = {x, y};
-        }
+            for (const auto &clientData : j)
+            {
+                std::string clientId = clientData["clientID"];
+                if (clientId == clientID) continue; // Skip own data
 
-        if (entityMap.size() > 0)
-        {
-            clientEntityMap[clientId] = entityMap;
+                std::unordered_map<int, std::pair<float, float>> entityMap;
+
+                for (const auto &entityJson : clientData["entities"])
+                {
+                    int entityId = entityJson["entityID"];
+                    float x = entityJson["x"];
+                    float y = entityJson["y"];
+                    entityMap[entityId] = {x, y};
+                }
+
+                clientEntityMap[clientId] = entityMap;
+            }
         }
     }
-    return;
+    catch (const json::exception &e)
+    {
+        std::cerr << "JSON parse error: " << e.what() << std::endl;
+    }
 }
+
+// void Client::deserializeClientEntityMap(const std::string &pubMsg)
+// {
+//     std::stringstream ss(pubMsg);
+//     std::string clientBlock;
+
+//     while (std::getline(ss, clientBlock, '#'))
+//     {
+//         std::stringstream clientStream(clientBlock);
+//         std::string clientId;
+//         clientStream >> clientId;
+
+//         std::unordered_map<int, std::pair<float, float>> entityMap;
+//         int entityId;
+//         float x, y;
+
+//         while (clientStream >> entityId >> x >> y)
+//         {
+//             entityMap[entityId] = {x, y};
+//         }
+
+//         if (entityMap.size() > 0)
+//         {
+//             clientEntityMap[clientId] = entityMap;
+//         }
+//     }
+//     return;
+// }
 
 void Client::printEntityMap()
 {
@@ -187,36 +267,83 @@ void Client::printEntityMap()
         }
     }
 }
-
 void Client::updateOtherEntities()
 {
-    // remove current clients entities from clientEntityMap
+    // Remove the current client's entities from clientEntityMap
     clientEntityMap.erase(clientID);
 
-    Vector2 position{100, 100};
-    Vector2 dimensions{50, 50};
-    SDL_Color color = {255, 0, 0, 255};
+    // Prepare to track entities that are still present
+    std::unordered_set<std::string> currentEntityKeys;
 
-    // TODO: delete the entities from dict if the entity does not exists from client/server side anymore
-
-    for (auto i : clientEntityMap)
+    for (const auto &clientPair : clientEntityMap)
     {
-        std::string cID = i.first;
-        // auto entityMap = i.second;
-
-        for (auto j : i.second)
+        const std::string &cID = clientPair.first;
+        for (const auto &entityPair : clientPair.second)
         {
-            int entityID = j.first;
-            Vector2 newPosition{j.second.first, j.second.second};
+            int entityID = entityPair.first;
+            Vector2 newPosition{entityPair.second.first, entityPair.second.second};
             std::string identifier = cID + "_" + std::to_string(entityID);
+            currentEntityKeys.insert(identifier);
 
             if (dict.find(identifier) == dict.end())
             {
-                auto newEntity = std::make_shared<Entity>(position, dimensions, color, &globalTimeline, 2);
+                // Create a new entity if it doesn't exist
+                auto newEntity = std::make_shared<Entity>(newPosition, Vector2{50, 50}, SDL_Color{255, 0, 0, 255}, &globalTimeline, 2);
                 dict[identifier] = newEntity;
-                clientEntityManager.addEntities(newEntity);
+                clientEntityManager.addEntity(newEntity);
             }
-            dict[identifier]->position = newPosition;
+            else
+            {
+                // Update the existing entity's position
+                dict[identifier]->position = newPosition;
+            }
+        }
+    }
+
+    // Remove entities that are no longer present
+    for (auto it = dict.begin(); it != dict.end(); )
+    {
+        if (currentEntityKeys.find(it->first) == currentEntityKeys.end())
+        {
+            clientEntityManager.removeEntity(it->second);
+            it = dict.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }
+
+// void Client::updateOtherEntities()
+// {
+//     // remove current clients entities from clientEntityMap
+//     clientEntityMap.erase(clientID);
+
+//     Vector2 position{100, 100};
+//     Vector2 dimensions{50, 50};
+//     SDL_Color color = {255, 0, 0, 255};
+
+//     // TODO: delete the entities from dict if the entity does not exists from client/server side anymore
+
+//     for (auto i : clientEntityMap)
+//     {
+//         std::string cID = i.first;
+//         // auto entityMap = i.second;
+
+//         for (auto j : i.second)
+//         {
+//             int entityID = j.first;
+//             Vector2 newPosition{j.second.first, j.second.second};
+//             std::string identifier = cID + "_" + std::to_string(entityID);
+
+//             if (dict.find(identifier) == dict.end())
+//             {
+//                 auto newEntity = std::make_shared<Entity>(position, dimensions, color, &globalTimeline, 2);
+//                 dict[identifier] = newEntity;
+//                 clientEntityManager.addEntities(newEntity);
+//             }
+//             dict[identifier]->position = newPosition;
+//         }
+//     }
+// }

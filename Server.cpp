@@ -1,4 +1,7 @@
 #include "Server.hpp"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 Server::Server() : context(1),
                    responder(context, zmq::socket_type::rep),
@@ -77,33 +80,71 @@ void Server::start()
     }
 }
 
+// void Server::handle_client_thread(const std::string &clientID)
+// {
+//     // std::cout << "Client " << clientID << " thread started, waiting for data..." << std::endl;
+
+//     while (true)
+//     {
+//         zmq::message_t positionData;
+//         std::string receivedData;
+//         {
+//             std::unique_lock<std::mutex> lock(clientMutex);
+//             (void)puller.recv(positionData, zmq::recv_flags::dontwait);
+//         }
+//         receivedData = std::string(static_cast<char *>(positionData.data()), positionData.size());
+//         std::istringstream stream(receivedData);
+
+//         std::string tempClientID;
+//         stream >> tempClientID;
+
+//         if (tempClientID != clientID)
+//             continue;
+
+//         std::unordered_map<int, std::pair<float, float>> entityPositionMap;
+//         parseString(receivedData, clientID, entityPositionMap);
+//         // std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
+
+//         clientEntityMap[clientID] = entityPositionMap;
+//         // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//     }
+// }
 void Server::handle_client_thread(const std::string &clientID)
 {
-    // std::cout << "Client " << clientID << " thread started, waiting for data..." << std::endl;
-
     while (true)
     {
         zmq::message_t positionData;
-        std::string receivedData;
+        (void)puller.recv(positionData, zmq::recv_flags::dontwait);
+
+        std::string receivedData(static_cast<char *>(positionData.data()), positionData.size());
+        std::cout << "Received JSON message from client " << clientID << ": " << receivedData << std::endl;
+
+        try
         {
-            std::unique_lock<std::mutex> lock(clientMutex);
-            (void)puller.recv(positionData, zmq::recv_flags::dontwait);
+            json j = json::parse(receivedData);
+
+            std::string tempClientID = j["clientID"];
+            if (tempClientID != clientID) continue;
+
+            std::unordered_map<int, std::pair<float, float>> entityPositionMap;
+
+            for (const auto &entityJson : j["entities"])
+            {
+                int entityID = entityJson["entityID"];
+                float x = entityJson["x"];
+                float y = entityJson["y"];
+                entityPositionMap[entityID] = {x, y};
+            }
+
+            {
+                std::unique_lock<std::mutex> lock(clientMutex);
+                clientEntityMap[clientID] = entityPositionMap;
+            }
         }
-        receivedData = std::string(static_cast<char *>(positionData.data()), positionData.size());
-        std::istringstream stream(receivedData);
-
-        std::string tempClientID;
-        stream >> tempClientID;
-
-        if (tempClientID != clientID)
-            continue;
-
-        std::unordered_map<int, std::pair<float, float>> entityPositionMap;
-        parseString(receivedData, clientID, entityPositionMap);
-        // std::cout << "Received data from client " << clientID << ": " << receivedData << std::endl;
-
-        clientEntityMap[clientID] = entityPositionMap;
-        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        catch (const json::exception &e)
+        {
+            std::cerr << "JSON parse error: " << e.what() << std::endl;
+        }
     }
 }
 
@@ -159,17 +200,18 @@ void Server::broadcastMsg()
         // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
-
 std::string Server::generatePubMsg()
 {
-    std::stringstream pubMsg;
+    json j = json::array();
 
     for (const auto &clientPair : clientEntityMap)
     {
         const std::string &clientId = clientPair.first;
         const auto &entityMap = clientPair.second;
 
-        pubMsg << clientId << " ";
+        json clientData;
+        clientData["clientID"] = clientId;
+        clientData["entities"] = json::array();
 
         for (const auto &entityPair : entityMap)
         {
@@ -177,10 +219,41 @@ std::string Server::generatePubMsg()
             float x = entityPair.second.first;
             float y = entityPair.second.second;
 
-            pubMsg << entityId << " " << x << " " << y << " ";
+            json entityJson;
+            entityJson["entityID"] = entityId;
+            entityJson["x"] = x;
+            entityJson["y"] = y;
+
+            clientData["entities"].push_back(entityJson);
         }
-        pubMsg << "# ";
+
+        j.push_back(clientData);
     }
 
-    return pubMsg.str();
+    return j.dump();
 }
+
+// std::string Server::generatePubMsg()
+// {
+//     std::stringstream pubMsg;
+
+//     for (const auto &clientPair : clientEntityMap)
+//     {
+//         const std::string &clientId = clientPair.first;
+//         const auto &entityMap = clientPair.second;
+
+//         pubMsg << clientId << " ";
+
+//         for (const auto &entityPair : entityMap)
+//         {
+//             int entityId = entityPair.first;
+//             float x = entityPair.second.first;
+//             float y = entityPair.second.second;
+
+//             pubMsg << entityId << " " << x << " " << y << " ";
+//         }
+//         pubMsg << "# ";
+//     }
+
+//     return pubMsg.str();
+// }
