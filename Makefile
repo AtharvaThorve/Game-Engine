@@ -36,7 +36,7 @@ OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
 EXEC = main
 
 # Default target
-all: clean $(EXEC)
+all: $(EXEC)
 
 # Ensure obj directory exists
 $(OBJDIR):
