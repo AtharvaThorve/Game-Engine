@@ -46,8 +46,6 @@ namespace collision_utils
         RectangleShape *rectA = dynamic_cast<RectangleShape *>(entityA->shape.get());
         RectangleShape *rectB = dynamic_cast<RectangleShape *>(entityB->shape.get());
 
-        std::cout << direction << std::endl;
-
         if (direction == "up")
         {
             entityA->position.y = entityB->position.y + rectB->rect.h - 1;

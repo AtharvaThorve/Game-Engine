@@ -95,7 +95,7 @@ void doClientGame(bool isP2P = false)
     SDL_Color deathZoneColor = {255, 0, 0, 255}; // Red for death zone
 
     Vector2 spawnPointPosition1{100, 300};
-    Vector2 spawnPointPosition2{200, 400};
+    Vector2 spawnPointPosition2{200, 50};
 
     
     SDL_Color color = {0, 255, 0, 255};
@@ -179,7 +179,6 @@ void doClientGame(bool isP2P = false)
 
         if (entityManager.checkPlayerDeath(player)) {
             entityManager.respawn(player);
-            std::cout << "Player respawned at the closest spawn point." << std::endl;
         }
 
 
