@@ -55,46 +55,43 @@ bool EntityManager::checkCollisions(EntityManager& otherEntityManager) {
 	}
 	return false;
 }
-std::vector<std::shared_ptr<Entity>> spawnPoints;
-
 void EntityManager::addDeathZone(std::shared_ptr<Entity> deathZone) {
     deathZones.insert(deathZone);
 }
 
 void EntityManager::addSpawnPoint(std::shared_ptr<Entity> spawnPoint) {
-    spawnPoints.push_back(spawnPoint);
+    spawnPoints.insert(spawnPoint);
 }
 
-std::vector<std::shared_ptr<Entity>> EntityManager::getSpawnPoints() const {
-    return spawnPoints;
-}
-bool EntityManager::checkPlayerDeathAndRespawn(std::shared_ptr<Entity> player) {
+bool EntityManager::checkPlayerDeath(std::shared_ptr<Entity> player) {
     for (auto& deathZone : deathZones) {
         if (player->isColliding(*deathZone)) {
-            float playerX = player->position.x;
-            std::shared_ptr<Entity> closestSpawn = nullptr;
-            float minDistance = std::numeric_limits<float>::max();
+            return true; 
+        }
+    }
+    return false; 
+}
 
-            for (auto& spawnPoint : spawnPoints) {
-                if (spawnPoint->position.x < playerX) {
-                    float distance = playerX - spawnPoint->position.x;
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestSpawn = spawnPoint;
-                    }
-                }
-            }
+void EntityManager::respawn(std::shared_ptr<Entity> player) {
+    float playerX = player->position.x;
+    float playerY = player->position.y;
+    std::shared_ptr<Entity> closestSpawn = nullptr;
+    float minDistance = std::numeric_limits<float>::max();
 
-            // If we found a valid spawn point, respawn the player
-            if (closestSpawn) {
-                player->position = closestSpawn->position;
-                player->velocity = {0, 0}; // Reset velocity upon respawn
-                return true; // Player died and was respawned
+    for (auto& spawnPoint : spawnPoints) {
+        if (spawnPoint->position.x < playerX) {
+            float distance = abs(playerX - spawnPoint->position.x) + abs(playerY - spawnPoint->position.y);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestSpawn = spawnPoint;
             }
         }
     }
 
-    return false; // Player did not die
+    if (closestSpawn) {
+        player->position = closestSpawn->position;
+        player->velocity = {0, 0};
+    }
 }
 std::unordered_set<std::shared_ptr<Entity>> EntityManager::getEntities(void) {
 	return entities;

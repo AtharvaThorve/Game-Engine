@@ -177,8 +177,9 @@ void doClientGame(bool isP2P = false)
             cached_scale = scale;
         }
 
-        if (entityManager.checkPlayerDeathAndRespawn(player)) {
-        std::cout << "Player respawned at the closest spawn point." << std::endl;
+        if (entityManager.checkPlayerDeath(player)) {
+            entityManager.respawn(player);
+            std::cout << "Player respawned at the closest spawn point." << std::endl;
         }
 
 
