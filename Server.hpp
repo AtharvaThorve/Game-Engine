@@ -10,6 +10,8 @@
 #include <random>
 #include <set>
 #include <mutex>
+#include <numeric>
+#include <fstream>
 #include "EntityManager.hpp"
 
 class Server {

@@ -149,14 +149,53 @@ void Server::updateClientEntityMap(EntityManager &serverEntityManager)
 
 void Server::broadcastMsg()
 {
+    int iterations = 0;
+    std::vector<long long> broadcastTimes;
+
     while (true)
     {
+        iterations++;
+        auto start = std::chrono::high_resolution_clock::now();
+        
         std::string pubMsg = generatePubMsg();
         zmq::message_t broadcastMsg(pubMsg.size());
         memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
         publisher.send(broadcastMsg, zmq::send_flags::dontwait);
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        if(iterations <= 100000) {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+            broadcastTimes.push_back(duration);
+            if(iterations == 100000) {
+                long long totalTime = std::accumulate(broadcastTimes.begin(), broadcastTimes.end(), 0LL);
+                double avgTime = static_cast<double>(totalTime) / broadcastTimes.size();
+
+                // Calculate variance
+                double variance = 0.0;
+                for (const auto &time : broadcastTimes)
+                {
+                    variance += (time - avgTime) * (time - avgTime);
+                }
+                variance /= broadcastTimes.size();
+
+                // Output results to file
+                std::ofstream outfile("broadcast_benchmark_results.csv", std::ios_base::app); // Append to CSV file
+                if (outfile.is_open())
+                {
+                    // If it's the first time you're writing to the file, include headers
+                    if (outfile.tellp() == 0)
+                    {
+                        outfile << "Total Broadcast Time (microseconds),Average Broadcast Time (microseconds),Variance (microseconds^2)" << std::endl;
+                    }
+
+                    outfile << totalTime << "," << avgTime << "," << variance << std::endl; // Write the data in CSV format
+                    outfile.close();
+                }
+                std::cout << "Benchmark data written to broadcast_benchmark_results.csv" << std::endl;
+            }
+        }
     }
 }
 

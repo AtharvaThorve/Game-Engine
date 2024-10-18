@@ -22,11 +22,11 @@ void runClient(EntityManager &entityManager, EntityManager &clientEntityManager)
 void runP2PClient(EntityManager &entityManager, EntityManager &clientEntityManager)
 {
     Client client(entityManager, clientEntityManager);
-    client.connectRequester("tcp://192.168.1.192", 5555);       // Put the server address and port
-    client.connectSubscriber("tcp://192.168.1.192", 5556);      // Put the server address and port
-    client.bindPeerPublisher("tcp://*", 5558);                  // Bind the client publisher to a port
-    client.connectPeerSubscriber1("tcp://192.168.1.192", 5557); // Put peer 1's address and the port they are bounded on
-    client.connectPeerSubscriber2("tcp://192.168.1.239", 5559); // Put peer 2's address and the port they are bounded on
+    client.connectRequester("tcp://172.30.115.140", 5555);       // Put the server address and port
+    client.connectSubscriber("tcp://172.30.115.140", 5556);      // Put the server address and port
+    client.bindPeerPublisher("tcp://*", 5559);                  // Bind the client publisher to a port
+    client.connectPeerSubscriber1("tcp://172.30.115.140", 5557); // Put peer 1's address and the port they are bounded on
+    client.connectPeerSubscriber2("tcp://172.30.115.140", 5558); // Put peer 2's address and the port they are bounded on
     client.connectServer(true);
     client.start(true);
 }
@@ -41,27 +41,63 @@ void applyGravityOnEntities(PhysicsSystem &physicsSystem, EntityManager &entityM
 
 void doServerEntities(Server &server)
 {
-    Vector2 initialPosition2{300, 300};
-    Vector2 dimensions{50, 50};
-    SDL_Color color = {255, 0, 0, 255};
-    auto patternEntity = std::make_shared<Entity>(initialPosition2, dimensions, color, &globalTimeline, 1);
+    EntityManager serverEntityManager;
+
+    int numStaticEntities = 50;
+    int numMovingEntities = 10;
+
+    for (int i = 0; i < numStaticEntities; ++i)
+    {
+        Vector2 staticPosition{100 + i * 50, 300};  // Adjust the position for each entity
+        Vector2 staticDimensions{50, 100};
+        SDL_Color staticColor = {0, 255, 0, 255};  // Green for static entities
+        auto staticEntity = std::make_shared<Entity>(staticPosition, staticDimensions, staticColor, &globalTimeline, i + 1);
+        serverEntityManager.addEntity(staticEntity);
+    }
 
     MovementPattern pattern;
-    pattern.addSteps(
-        MovementStep({50, 50}, 2.0f),
-        MovementStep({0, 0}, 1.0f, true),
-        MovementStep({50, -50}, 2.0f),
-        MovementStep({0, 0}, 1.0f, true),
-        MovementStep({-50, 50}, 2.0f),
-        MovementStep({0, 0}, 1.0f, true),
-        MovementStep({-50, -50}, 2.0f),
-        MovementStep({0, 0}, 1.0f, true));
+        pattern.addSteps(
+            MovementStep({50, 50}, 2.0f),
+            MovementStep({0, 0}, 1.0f, true),
+            MovementStep({-50, 50}, 2.0f),
+            MovementStep({0, 0}, 1.0f, true),
+            MovementStep({50, -50}, 2.0f),
+            MovementStep({0, 0}, 1.0f, true));
+    
+    for (int i = 0; i < numMovingEntities; ++i)
+    {
+        Vector2 movingPosition{300 + i * 50, 300};
+        Vector2 dimensions{50, 50};
+        SDL_Color movingColor = {255, 0, 0, 255};  // Red for moving entities
+        auto movingEntity = std::make_shared<Entity>(movingPosition, dimensions, movingColor, &globalTimeline, i + 1 + numStaticEntities);
 
-    patternEntity->hasMovementPattern = true;
-    patternEntity->movementPattern = pattern;
+        
+        movingEntity->hasMovementPattern = true;
+        movingEntity->movementPattern = pattern;
 
-    EntityManager serverEntityManager;
-    serverEntityManager.addEntities(patternEntity);
+        serverEntityManager.addEntity(movingEntity);
+    }
+
+    // Vector2 initialPosition2{300, 300};
+    // Vector2 dimensions{50, 50};
+    // SDL_Color color = {255, 0, 0, 255};
+    // auto patternEntity = std::make_shared<Entity>(initialPosition2, dimensions, color, &globalTimeline, 1);
+
+    // MovementPattern pattern;
+    // pattern.addSteps(
+    //     MovementStep({50, 50}, 2.0f),
+    //     MovementStep({0, 0}, 1.0f, true),
+    //     MovementStep({50, -50}, 2.0f),
+    //     MovementStep({0, 0}, 1.0f, true),
+    //     MovementStep({-50, 50}, 2.0f),
+    //     MovementStep({0, 0}, 1.0f, true),
+    //     MovementStep({-50, -50}, 2.0f),
+    //     MovementStep({0, 0}, 1.0f, true));
+
+    // patternEntity->hasMovementPattern = true;
+    // patternEntity->movementPattern = pattern;
+
+    // serverEntityManager.addEntities(patternEntity);
 
     std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem), std::ref(serverEntityManager));
     gravityThread.detach();
@@ -77,7 +113,7 @@ void doServerEntities(Server &server)
 
 void doClientGame(bool isP2P = false)
 {
-    initSDL();
+    // initSDL();
     // Define scale factors
     float scale = 1.0f;
     float cached_scale = scale;
@@ -106,7 +142,7 @@ void doClientGame(bool isP2P = false)
     player->maxVelocity = Vector2{300, 300};
     player->isMovable = true;
     player->isHittable = true;
-    player->isAffectedByGravity = true;
+    // player->isAffectedByGravity = true;
 
     auto referenceObject = std::make_shared<Entity>(referenceObjectPosition, referenceObjectDimensions, color, &globalTimeline, 1);
     auto platform = std::make_shared<Entity>(platformPosition, platformDimensions, color, &globalTimeline, 2);
@@ -126,14 +162,14 @@ void doClientGame(bool isP2P = false)
 
     EntityManager entityManager;
     EntityManager clientEntityManager;
-    entityManager.addEntity(player);
-    entityManager.addEntities(referenceObject, platform);
+    // entityManager.addEntity(player);
+    // entityManager.addEntities(referenceObject, platform);
     
-    entityManager.addDeathZone(deathZone);
+    // entityManager.addDeathZone(deathZone);
     auto spawnPoint1 = std::make_shared<Entity>(spawnPointPosition1, Vector2{50, 50}, color, &globalTimeline, 1);
     auto spawnPoint2 = std::make_shared<Entity>(spawnPointPosition2, Vector2{50, 50}, color, &globalTimeline, 1);
-    entityManager.addSpawnPoint(spawnPoint1);
-    entityManager.addSpawnPoint(spawnPoint2);
+    // entityManager.addSpawnPoint(spawnPoint1);
+    // entityManager.addSpawnPoint(spawnPoint2);
 
 
     int worldWidth = 5000;
@@ -158,49 +194,49 @@ void doClientGame(bool isP2P = false)
     {
         doInput(player, &globalTimeline, 150.0f);
 
-        entityManager.updateEntityDeltaTime();
-        entityManager.updateMovementPatternEntities();
-        entityManager.updateEntities();
+        // entityManager.updateEntityDeltaTime();
+        // entityManager.updateMovementPatternEntities();
+        // entityManager.updateEntities();
 
-        camera.update(*player, worldWidth, worldHeight);
+        // camera.update(*player, worldWidth, worldHeight);
 
-        // Clear the screen with a blue background
-        prepareScene(SDL_Color{0, 0, 255, 255});
+        // // Clear the screen with a blue background
+        // prepareScene(SDL_Color{0, 0, 255, 255});
 
-        entityManager.drawEntities(camera.position.x, camera.position.y);
-        clientEntityManager.drawEntities(camera.position.x, camera.position.y);
+        // entityManager.drawEntities(camera.position.x, camera.position.y);
+        // clientEntityManager.drawEntities(camera.position.x, camera.position.y);
 
-        updateScaleFactor(scale);
-        if (allowScaling && cached_scale != scale)
-        {
-            setRenderScale(scale, scale);
-            cached_scale = scale;
-        }
-
-        if (entityManager.checkPlayerDeath(player)) {
-            entityManager.respawn(player);
-        }
-
-
-        // std::string collisionDirection = checkCollisionDirection(entity, platform);
-        // std::cout << collisionDirection << std::endl;
-
-        if (player->isColliding(*platform))
-        {
-            collision_utils::handlePlatformCollision(player, platform);
-        }
-        else
-        {
-            player->clearPlatformReference();
-        }
-
-        // if (entityManager.checkCollisions(clientEntityManager)) {
-        //     exit(1);
+        // updateScaleFactor(scale);
+        // if (allowScaling && cached_scale != scale)
+        // {
+        //     setRenderScale(scale, scale);
+        //     cached_scale = scale;
         // }
 
-        // Present the updated scene
+        // // if (entityManager.checkPlayerDeath(player)) {
+        // //     entityManager.respawn(player);
+        // // }
 
-        presentScene();
+
+        // // std::string collisionDirection = checkCollisionDirection(entity, platform);
+        // // std::cout << collisionDirection << std::endl;
+
+        // // if (player->isColliding(*platform))
+        // // {
+        // //     collision_utils::handlePlatformCollision(player, platform);
+        // // }
+        // // else
+        // // {
+        // //     player->clearPlatformReference();
+        // // }
+
+        // // if (entityManager.checkCollisions(clientEntityManager)) {
+        // //     exit(1);
+        // // }
+
+        // // Present the updated scene
+
+        // presentScene();
     }
 
     gravityThread.join();

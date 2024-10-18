@@ -1,0 +1,21 @@
+Total Broadcast Time (microseconds),Average Broadcast Time (microseconds),Variance (microseconds^2),Number of Static Entities,Number of Moving Entities,Data Format,Arch,Clients
+12666146,126.661,527598,50,10,String,Client Server,3
+11556091,115.561,452527,50,10,String,Client Server,3
+15237009,152.37,5.1048e+07,50,10,String,Client Server,3
+11452867,114.529,5.34141e+07,50,10,String,Client Server,3
+17160051,171.601,371900,50,10,String,Client Server,3
+24805091,248.051,5.08625e+07,100,10,String,Client Server,3
+25226292,252.263,4.86415e+07,100,10,String,Client Server,3
+23753541,237.535,5.10954e+07,100,10,String,Client Server,3
+21329155,213.292,410118,100,10,String,Client Server,3
+16677082,166.771,5.20567e+07,100,10,String,Client Server,3
+24265056,242.651,5.37908e+07,50,50,String,Client Server,3
+11984526,119.845,5.47239e+07,50,50,String,Client Server,3
+25237223,252.372,943632,50,50,String,Client Server,3
+23493326,234.933,772144,50,50,String,Client Server,3
+16669492,166.695,5.45579e+07,50,50,String,Client Server,3
+17002444,170.024,5.7399e+07,50,10,String,Client Server,5
+19917637,199.176,1.49418e+06,50,10,String,Client Server,5
+22861097,228.611,2.43412e+06,50,10,String,Client Server,5
+20825351,208.254,1.63171e+06,50,10,String,Client Server,5
+19821057,198.211,1.54267e+06,50,10,String,Client Server,5
