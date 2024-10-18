@@ -1,5 +1,9 @@
 Total Broadcast Time (microseconds),Average Broadcast Time (microseconds),Variance (microseconds^2),Number of Static Entities,Number of Moving Entities,Data Format,Arch,Clients
-
+290080,2.9008,136.71,1,1,String,Client Server,1
+313128,3.13128,544.002,1,1,String,Client Server,1
+313509,3.13509,114.087,1,1,String,Client Server,1
+303240,3.0324,240.568,1,1,String,Client Server,1
+305972,3.05972,117.883,1,1,String,Client Server,1
 12666146,126.661,527598,50,10,String,Client Server,3
 11556091,115.561,452527,50,10,String,Client Server,3
 15237009,152.37,5.1048e+07,50,10,String,Client Server,3
