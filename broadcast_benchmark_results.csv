@@ -1,4 +1,5 @@
 Total Broadcast Time (microseconds),Average Broadcast Time (microseconds),Variance (microseconds^2),Number of Static Entities,Number of Moving Entities,Data Format,Arch,Clients
+
 12666146,126.661,527598,50,10,String,Client Server,3
 11556091,115.561,452527,50,10,String,Client Server,3
 15237009,152.37,5.1048e+07,50,10,String,Client Server,3
@@ -19,3 +20,28 @@ Total Broadcast Time (microseconds),Average Broadcast Time (microseconds),Varian
 22861097,228.611,2.43412e+06,50,10,String,Client Server,5
 20825351,208.254,1.63171e+06,50,10,String,Client Server,5
 19821057,198.211,1.54267e+06,50,10,String,Client Server,5
+903677,9.03677,288.321,1,1,JSON,Client Server,1
+867730,8.6773,168.579,1,1,JSON,Client Server,1
+938199,9.38199,757.423,1,1,JSON,Client Server,1
+961888,9.61888,697.591,1,1,JSON,Client Server,1
+915090,9.1509,211.464,1,1,JSON,Client Server,1
+40590739,405.907,3.91288e+07,50,10,JSON,Client Server,3
+27620986,276.21,4.20398e+07,50,10,JSON,Client Server,3
+26671905,266.719,4.79648e+07,50,10,JSON,Client Server,3
+22695000,226.95,476563,50,10,JSON,Client Server,3
+22662190,226.622,4.70678e+07,50,10,JSON,Client Server,3
+20258730,202.587,4.90561e+07,100,10,JSON,Client Server,3
+20996387,209.964,4.48903e+07,100,10,JSON,Client Server,3
+19646993,196.47,4.07907e+07,100,10,JSON,Client Server,3
+22907573,229.076,476112,100,10,JSON,Client Server,3
+20651029,206.51,4.61847e+07,100,10,JSON,Client Server,3
+20108074,201.081,4.41671e+07,50,50,JSON,Client Server,3
+20142209,201.422,4.16608e+07,50,50,JSON,Client Server,3
+20054594,200.546,4.58937e+07,50,50,JSON,Client Server,3
+21756304,217.563,4.3443e+07,50,50,JSON,Client Server,3
+22934430,229.344,4.28761e+07,50,50,JSON,Client Server,3
+26694886,266.949,4.79269e+07,50,10,JSON,Client Server,5
+26781243,267.812,4.85104e+07,50,10,JSON,Client Server,5
+26530113,265.301,4.58023e+07,50,10,JSON,Client Server,5
+24769277,247.693,4.73715e+07,50,10,JSON,Client Server,5
+24439684,244.397,4.98739e+07,50,10,JSON,Client Server,5

@@ -43,8 +43,8 @@ void doServerEntities(Server &server)
 {
     EntityManager serverEntityManager;
 
-    int numStaticEntities = 50;
-    int numMovingEntities = 10;
+    int numStaticEntities = 1;
+    int numMovingEntities = 1;
 
     for (int i = 0; i < numStaticEntities; ++i)
     {
