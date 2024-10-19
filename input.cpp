@@ -62,11 +62,11 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, float acc
 
     if (entity->isMovable)
     {
-        if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
-        {
-            entity->inputAcceleration.y = -accelerationRate;
-        }
-        else if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
+        // if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
+        // {
+        //     entity->inputAcceleration.y = -accelerationRate;
+        // }
+        if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
         {
             entity->inputAcceleration.y = accelerationRate;
         }
