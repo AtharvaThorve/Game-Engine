@@ -208,8 +208,8 @@ void doClientGame(bool isP2P = false) {
 
   // Death zones (lava pits and invisible gap)
   SDL_Color lavaColor = {255, 69, 0, 255}; // Orange-red for lava
-  SDL_Color invisibleColor = {0, 0, 0,
-                              0}; // Fully transparent for invisible death zone
+  SDL_Color invisibleColor = {
+      135, 206, 235, 255};
 
   // Lava on top of a platform
   auto lavaPlatform = std::make_shared<Entity>(
@@ -220,12 +220,11 @@ void doClientGame(bool isP2P = false) {
 
   // Invisible death zone in the gap between ground platforms
   auto invisibleDeathZone =
-      std::make_shared<Entity>(Vector2{1500, 550}, Vector2{100, 200},
+      std::make_shared<Entity>(Vector2{1500, 700}, Vector2{100, 200},
                                invisibleColor, &globalTimeline, 2);
 
   entityManager.addEntities(lavaPlatform);
-  entityManager.addDeathZone(lava1);
-  entityManager.addDeathZone(invisibleDeathZone);
+  entityManager.addDeathZones(lava1, invisibleDeathZone, lavaPlatform);
 
   // Spawn points
   auto spawnPoint1 =

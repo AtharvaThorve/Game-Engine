@@ -21,4 +21,3 @@ void Camera::update(const Entity& entity, int worldWidth, int worldHeight)
 	position.y = entity.position.y + 50 / 2 - height / 2;
 	clampToWorld(worldWidth, worldHeight);
 }
-
