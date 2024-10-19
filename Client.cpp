@@ -3,6 +3,7 @@
 #include <thread>
 
 std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
+std::unordered_set<std::string> activeEntities;
 
 Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
     : context(1), requester(context, zmq::socket_type::req),
@@ -101,7 +102,7 @@ void Client::receiveSubMsg() {
     (void)subscriber.recv(subMsg, zmq::recv_flags::dontwait);
     std::string recvMsg(static_cast<char *>(subMsg.data()), subMsg.size());
     deserializeClientEntityMap(recvMsg);
-    // update the entities accoring to the subMsg
+    // update the entities according to the subMsg
     updateOtherEntities();
     // printEntityMap();
   }
@@ -128,7 +129,7 @@ void Client::start(bool isP2P) {
       peerPublisher.send(peerMessage, zmq::send_flags::none);
     }
 
-    // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
 
@@ -136,10 +137,16 @@ void Client::deserializeClientEntityMap(const std::string &pubMsg) {
   std::stringstream ss(pubMsg);
   std::string clientBlock;
 
+  // Clear the entity map if no data is received for a client
+  std::unordered_set<std::string> receivedClientIDs;
+
   while (std::getline(ss, clientBlock, '#')) {
     std::stringstream clientStream(clientBlock);
     std::string clientId;
     clientStream >> clientId;
+
+    // Store received client IDs
+    receivedClientIDs.insert(clientId);
 
     std::unordered_map<int, std::pair<float, float>> entityMap;
     int entityId;
@@ -150,10 +157,19 @@ void Client::deserializeClientEntityMap(const std::string &pubMsg) {
     }
 
     if (entityMap.size() > 0) {
-      clientEntityMap[clientId] = entityMap;
+      clientEntityMap[clientId] = entityMap; // Update or add new entities
     }
   }
-  return;
+
+  // Remove entities for clients that are no longer sending data
+  for (auto it = clientEntityMap.begin(); it != clientEntityMap.end();) {
+    if (receivedClientIDs.find(it->first) == receivedClientIDs.end()) {
+      // Client is no longer active, remove their entities
+      clientEntityMap.erase(it++); // Erase the client and its entities
+    } else {
+      ++it; // Move to the next client
+    }
+  }
 }
 
 void Client::printEntityMap() {
@@ -171,51 +187,43 @@ void Client::updateOtherEntities() {
   // Remove current client's entities from clientEntityMap
   clientEntityMap.erase(clientID);
 
-  Vector2 position{100, 100};
-  Vector2 dimensions{50, 50};
-  SDL_Color color = {255, 0, 0, 255};
+  // Track which entities are active in this update
+  activeEntities.clear();
 
-  // Set of currently active entities (from server/client)
-  std::unordered_set<std::string> activeEntities;
+  // Iterate over received data and update entities
+  for (const auto &clientData : clientEntityMap) {
+    std::string cID = clientData.first;
 
-  // Update or add new entities
-  for (const auto &i : clientEntityMap) {
-    std::string cID = i.first;
-
-    for (const auto &j : i.second) {
-      int entityID = j.first;
-      Vector2 newPosition{j.second.first, j.second.second};
+    for (const auto &entityData : clientData.second) {
+      int entityID = entityData.first;
+      Vector2 newPosition{entityData.second.first, entityData.second.second};
       std::string identifier = cID + "_" + std::to_string(entityID);
 
       // Mark entity as active
       activeEntities.insert(identifier);
 
-      // Add new entity if it doesn't exist
+      // Add or update entity in the dictionary
       if (dict.find(identifier) == dict.end()) {
+        Vector2 position{100, 100};
+        Vector2 dimensions{50, 50};
+        SDL_Color color = {255, 0, 0, 255};
         auto newEntity = std::make_shared<Entity>(position, dimensions, color,
                                                   &globalTimeline, 2);
         dict[identifier] = newEntity;
         clientEntityManager.addEntities(newEntity);
       }
-
-      // Update position of existing entity
       dict[identifier]->position = newPosition;
     }
   }
 
-  // Iterate over existing entities in dict and remove those not in the
-  // activeEntities set
+  // Now remove entities not in the current active set
   for (auto it = dict.begin(); it != dict.end();) {
-    // If the entity identifier is not in the active set, remove it from the
-    // dict and entity manager
     if (activeEntities.find(it->first) == activeEntities.end()) {
-      // Remove the entity from the entity manager
+      // Entity is no longer active, remove it
       clientEntityManager.removeEntity(it->second);
-
-      // Erase the entity from dict
-      it = dict.erase(it);
+      it = dict.erase(it); // Erase returns the next iterator
     } else {
-      ++it;
+      ++it; // Move to the next entity
     }
   }
 }

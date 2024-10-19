@@ -65,57 +65,63 @@ void Server::start() {
 }
 
 void Server::handle_client_thread(const std::string &clientID) {
-  // Define the timeout duration (e.g., 5 seconds)
   const std::chrono::seconds timeoutDuration(5);
-
-  // Initialize the last received time to the current time
-  auto lastReceivedTime = std::chrono::steady_clock::now();
+  auto lastReceivedTime =
+      std::chrono::system_clock::now(); // Initialize last received time
 
   while (true) {
     zmq::message_t positionData;
     std::string receivedData;
 
-    // Attempt to receive data from the client
+    zmq::recv_result_t result;
     {
       std::unique_lock<std::mutex> lock(clientMutex);
-      zmq::recv_result_t result =
-          puller.recv(positionData, zmq::recv_flags::dontwait);
-
-      if (result) {
-        // Update the last received time when data is received
-        lastReceivedTime = std::chrono::steady_clock::now();
-
-        // Process the received data
-        receivedData = std::string(static_cast<char *>(positionData.data()),
-                                   positionData.size());
-        std::istringstream stream(receivedData);
-
-        std::string tempClientID;
-        stream >> tempClientID;
-
-        if (tempClientID != clientID)
-          continue;
-
-        std::unordered_map<int, std::pair<float, float>> entityPositionMap;
-        parseString(receivedData, clientID, entityPositionMap);
-
-        clientEntityMap[clientID] = entityPositionMap;
-      }
+      result = puller.recv(positionData, zmq::recv_flags::dontwait);
     }
 
-    // Check if the client has not sent data within the timeout period
-    auto currentTime = std::chrono::steady_clock::now();
-    if (std::chrono::duration_cast<std::chrono::seconds>(
-            currentTime - lastReceivedTime) >= timeoutDuration) {
+    // Process received data
+    if (result) {
+      lastReceivedTime =
+          std::chrono::system_clock::now(); // Update time on receiving data
+      receivedData = std::string(static_cast<char *>(positionData.data()),
+                                 positionData.size());
+      std::istringstream stream(receivedData);
+
+      std::string tempClientID;
+      stream >> tempClientID;
+
+      if (tempClientID != clientID)
+        continue;
+
+      std::unordered_map<int, std::pair<float, float>> entityPositionMap;
+      parseString(receivedData, clientID, entityPositionMap);
+      clientEntityMap[clientID] = entityPositionMap;
+
+      // std::cout << "Received data from client: " << clientID
+      //           << std::endl; // Debug info
+    }
+
+    // Check for timeout
+    auto currentTime = std::chrono::system_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(
+        currentTime - lastReceivedTime);
+
+    // std::cout << "Elapsed time since last message: " << elapsedTime.count()
+    //           << " seconds" << std::endl; // Debug info
+
+    if (elapsedTime >= timeoutDuration) {
       if (clientEntityMap.find(clientID) != clientEntityMap.end()) {
         clientEntityMap.erase(clientID);
+        std::cout << "Removed client " << clientID << " from clientEntityMap"
+                  << std::endl; // Debug info
       }
-      std::cout << "Client " << clientID
-                << " has stopped sending data for 5 seconds or more. Marking "
-                   "as disconnected."
-                << std::endl;
-      break;
+      std::cout << "Client " << clientID << " has stopped sending data for "
+                << timeoutDuration.count() << " seconds or more. Marking "
+                << "as disconnected." << std::endl;
+      break; // Exit the loop as client is disconnected
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
 

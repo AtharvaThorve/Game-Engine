@@ -9,9 +9,9 @@ void runServer(Server &server) { server.start(); }
 void runClient(EntityManager &entityManager,
                EntityManager &clientEntityManager) {
   Client client(entityManager, clientEntityManager);
-  client.connectRequester("tcp://172.21.100.173", 5556);
-  client.connectPusher("tcp://172.21.100.173", 5557);
-  client.connectSubscriber("tcp://172.21.100.173", 5558);
+  client.connectRequester("tcp://172.30.115.140", 5556);
+  client.connectPusher("tcp://172.30.115.140", 5557);
+  client.connectSubscriber("tcp://172.30.115.140", 5558);
   client.connectServer();
   client.start();
 }
@@ -96,7 +96,7 @@ void doClientGame(bool isP2P = false) {
   player->maxVelocity = Vector2{300, 300};
   player->isMovable = true;
   player->isHittable = true;
-  player->isAffectedByGravity = true;
+  // player->isAffectedByGravity = true;
 
   auto referenceObject = std::make_shared<Entity>(referenceObjectPosition,
                                                   referenceObjectDimensions,
@@ -118,22 +118,15 @@ void doClientGame(bool isP2P = false) {
   EntityManager entityManager;
   EntityManager clientEntityManager;
   entityManager.addEntity(player);
-  entityManager.addEntities(referenceObject, platform);
+  // entityManager.addEntities(referenceObject, platform);
 
   int worldWidth = 5000;
   int worldHeight = 5000;
 
   Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  if (!isP2P) {
-    std::thread networkThread(runClient, std::ref(entityManager),
+  std::thread networkThread(runClient, std::ref(entityManager),
                               std::ref(clientEntityManager));
-    networkThread.detach();
-  } else {
-    std::thread networkThread(runP2PClient, std::ref(entityManager),
-                              std::ref(clientEntityManager));
-    networkThread.detach();
-  }
 
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
@@ -177,6 +170,7 @@ void doClientGame(bool isP2P = false) {
     presentScene();
   }
 
+  networkThread.join();
   gravityThread.join();
   clean_up_sdl();
 }
