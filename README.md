@@ -1,31 +1,63 @@
-## Game Engine
+# Game Engine
 
-This is a C++ based Visual Studio solution for Game Engine. More information in writeup
+This is a C++ based project designed as a Visual Studio solution for a Game Engine. Detailed setup and usage instructions are provided below.
 
-### Installation
-1. Open the solution in Visual Studio
-2. In the solution explorer (inside Visual Studio) double click on Game-Engine.sln file
-3. Open terminal inside Visual Studio and run the following commands
-    - `vcpkg integrate install`
-    - `vcpkg install`
-4. Build the Project
+## Installation
 
-**Note: Scaling can be toggled by pressing the Right Shift key, by default scaling is not enabled *(Constant Size)***
+1. Open the solution in Visual Studio.
+2. In the Solution Explorer (inside Visual Studio), double-click on the `Game-Engine.sln` file.
+3. Open the terminal inside Visual Studio and run the following commands:
+   * `vcpkg integrate install`
+   * `vcpkg install`
+4. Build the project.
 
-### Timeline
-For the different timeline features view the list below:
-1. Pausing and Unpausing can be toggled using `ESC` key.
-2. Speed up of the game happens with the `p` key.
-3. Slow down of the game happens with the `m` key.
+**Note:** Scaling can be toggled by pressing the `Right Shift` key. By default, scaling is not enabled (constant size).
 
-### Networking setup
-There is no need to install libzmq dll file since it is already present in the x64 folder. But we followed the instructions that were provided [here](https://moodle-courses2425.wolfware.ncsu.edu/mod/page/view.php?id=351117). The version we installed is 4.3.5
-<br><br>
-We support both client-server and P2P architecture.
-1. Client-Server:
-    1. First start the server by passing `server` as the command line argument.
-    2. While starting the client, you need to pass `client` as the command line argument.
-2. P2P:
-    1. First start a listen-server, which is started by either passing `client server` or `server client` as the command line arguments.
-    2. Then for clients user needs to pass `client P2P` or `P2P client` as the command line arguments.
-    3. **Note: While starting P2P client do make sure the clients are binding and connecting to correct IP addresses and ports.**
+## Timeline Controls
+
+The following features are available for controlling the timeline in the game:
+
+1. **Pause/Unpause** can be toggled using the `ESC` key.
+2. **Speed up** the game with the `P` key.
+3. **Slow down** the game with the `M` key.
+
+## Networking Setup
+
+We support both **client-server** and **P2P** architectures. The required `libzmq.dll` file is already included in the `x64` folder, so there's no need to manually install it. We followed instructions provided here and installed version 4.3.5.
+
+### Client-Server Architecture
+1. Start the server by passing `server` as the command-line argument.
+2. Start the client by passing `client` as the command-line argument.
+
+### Peer-to-Peer (P2P) Architecture
+1. Start a listen-server by passing `client server` or `server client` as the command-line arguments.
+2. Start clients by passing `client P2P` or `P2P client` as the command-line arguments.
+
+**Note:** While starting the P2P clients, ensure that the clients are binding and connecting to the correct IP addresses and ports.
+
+## Project Workflow Updates
+
+In this project, we worked primarily with the **server-client** architecture rather than P2P. Additionally, instead of using Visual Studio this time, we switched to **WSL (Windows Subsystem for Linux)** for building and running the project.
+
+### Building with Makefile in WSL
+
+1. To build the project, navigate to the project directory using WSL and use the following commands:
+   * `make clean` - Cleans the existing build files.
+   * `make` - Compiles the project.
+
+### Running the Server and Client
+
+* Start the server using:
+```bash
+./main server
+```
+
+* Start the client using:
+```bash
+./main client
+```
+
+* Start a listen-server using:
+```bash
+./main server client
+```

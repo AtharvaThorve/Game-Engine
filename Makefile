@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler Flags
-CXXFLAGS = -Wall -std=c++17 -I./include $(shell sdl2-config --cflags)
+CXXFLAGS = -Wall -std=c++17 -O2 $(shell sdl2-config --cflags)
 
 # Linker Flags (for SDL2)
 LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread
@@ -22,7 +22,9 @@ SRC = main.cpp \
       structs.cpp \
       Client.cpp \
       Server.cpp \
-      Timeline.cpp
+      Timeline.cpp \
+      Camera.cpp \
+      collision_utils.cpp
 
 # Object directory
 OBJDIR = obj
@@ -34,7 +36,7 @@ OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
 EXEC = main
 
 # Default target
-all: clean $(EXEC)
+all: $(EXEC)
 
 # Ensure obj directory exists
 $(OBJDIR):
