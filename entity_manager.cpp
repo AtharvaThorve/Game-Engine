@@ -1,4 +1,4 @@
-#include "EntityManager.hpp"
+#include "entity_manager.hpp"
 
 void EntityManager::addEntity(std::shared_ptr<Entity> entity) {
 	entities.insert(entity);

@@ -10,7 +10,7 @@
 #include <random>
 #include <set>
 #include <mutex>
-#include "EntityManager.hpp"
+#include "entity_manager.hpp"
 
 class Server {
 public:
