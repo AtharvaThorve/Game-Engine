@@ -1,4 +1,4 @@
-#include "MovementPattern.hpp"
+#include "movement_pattern.hpp"
 #include "entity.hpp"
 
 MovementStep::MovementStep(const Vector2 &vel, float dur, bool pause) : velocity(vel), duration(dur), isPause(pause) {}

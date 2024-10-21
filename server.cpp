@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "server.hpp"
 
 Server::Server()
     : context(1), responder(context, zmq::socket_type::rep),

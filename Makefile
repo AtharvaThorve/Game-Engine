@@ -10,20 +10,20 @@ LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread
 # Source files
 SRC = main.cpp \
       cleanup.cpp \
-      EntityManager.cpp \
+      entity_manager.cpp \
       draw.cpp \
       init.cpp \
       physics.cpp \
       scaling.cpp \
       entity.cpp \
       input.cpp \
-      MovementPattern.cpp \
-      Shape.cpp \
+      movement_pattern.cpp \
+      shape.cpp \
       structs.cpp \
-      Client.cpp \
-      Server.cpp \
-      Timeline.cpp \
-      Camera.cpp \
+      client.cpp \
+      server.cpp \
+      timeline.cpp \
+      camera.cpp \
       collision_utils.cpp
 
 # Object directory

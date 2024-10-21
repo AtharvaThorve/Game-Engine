@@ -1,4 +1,4 @@
-#include "Shape.hpp"
+#include "shape.hpp"
 #include <iostream>
 
 RectangleShape::RectangleShape(const SDL_Rect& rectangle) : rect(rectangle) {
