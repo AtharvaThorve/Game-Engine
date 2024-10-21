@@ -1,9 +1,10 @@
 #pragma once
-#include "entity.hpp"
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+class Entity;
 
 class Event {
 public:

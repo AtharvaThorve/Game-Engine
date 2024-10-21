@@ -96,7 +96,7 @@ void doClientGame(bool isP2P = false) {
   player->maxVelocity = Vector2{300, 300};
   player->isMovable = true;
   player->isHittable = true;
-  // player->isAffectedByGravity = true;
+  player->isAffectedByGravity = true;
 
   auto referenceObject = std::make_shared<Entity>(referenceObjectPosition,
                                                   referenceObjectDimensions,
@@ -118,7 +118,7 @@ void doClientGame(bool isP2P = false) {
   EntityManager entityManager;
   EntityManager clientEntityManager;
   entityManager.addEntity(player);
-  // entityManager.addEntities(referenceObject, platform);
+  entityManager.addEntities(referenceObject, platform);
 
   int worldWidth = 5000;
   int worldHeight = 5000;
@@ -126,7 +126,7 @@ void doClientGame(bool isP2P = false) {
   Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
 
   std::thread networkThread(runClient, std::ref(entityManager),
-                              std::ref(clientEntityManager));
+                            std::ref(clientEntityManager));
 
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
