@@ -2,7 +2,7 @@
 #include <zmq.hpp>
 #include <string>
 #include "main.hpp"
-#include "EntityManager.hpp"
+#include "entity_manager.hpp"
 
 class Client {
 public:
