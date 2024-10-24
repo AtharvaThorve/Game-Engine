@@ -25,7 +25,10 @@ SRC = main.cpp \
       timeline.cpp \
       camera.cpp \
       collision_utils.cpp \
-      event_manager.cpp
+      event_manager.cpp \
+      collision_handler.cpp \
+      death_handler.cpp \
+      respawn_handler.cpp
 
 # Object directory
 OBJDIR = obj

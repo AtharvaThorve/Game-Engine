@@ -2,12 +2,14 @@
 
 void EventManager::register_handler(const std::string &event_type,
                                     EventHandler *event_handler) {
-  handlers[event_type] = event_handler;
+  size_t event_type_hash = std::hash<std::string>{}(event_type);
+  handlers[event_type_hash] = event_handler;
 }
 
 void EventManager::deregister_handler(const std::string &event_type,
                                       EventHandler *event_handler) {
-  handlers.erase(event_type);
+  size_t event_type_hash = std::hash<std::string>{}(event_type);
+  handlers.erase(event_type_hash);
 }
 
 void EventManager::raise_event(const Event &event) {

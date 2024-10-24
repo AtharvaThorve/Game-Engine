@@ -1,6 +1,7 @@
 #pragma once
 #include "event.hpp"
 #include "structs.hpp"
+#include <iostream>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -12,7 +13,7 @@ public:
 
 class EventManager {
 private:
-  std::unordered_map<std::string, EventHandler *> handlers;
+  std::unordered_map<size_t, EventHandler *> handlers;
 
   std::priority_queue<Event, std::vector<Event>, EventCompare> event_queue;
 
