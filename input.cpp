@@ -9,7 +9,7 @@ static bool wasMinusPressed = false;
 static bool wasSpacePressed = false;
 
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             float accelerationRate, float decelerationRate) {
+             EventManager *em, float accelerationRate, float decelerationRate) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -51,26 +51,68 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
 
   if (entity->isMovable) {
     if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) {
-      entity->inputAcceleration.y = -accelerationRate;
+
+      Event move_up_event("input", globalTimeline->getTime() + 10);
+      move_up_event.parameters["player"] = entity;
+      move_up_event.parameters["input_type"] =
+          std::hash<std::string>{}("move_y");
+      move_up_event.parameters["acceleration_rate"] = -accelerationRate;
+      em->raise_event(move_up_event);
+
     } else if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S]) {
-      entity->inputAcceleration.y = accelerationRate;
+
+      Event move_down_event("input", globalTimeline->getTime() + 10);
+      move_down_event.parameters["player"] = entity;
+      move_down_event.parameters["input_type"] =
+          std::hash<std::string>{}("move_y");
+      move_down_event.parameters["acceleration_rate"] = accelerationRate;
+      em->raise_event(move_down_event);
+
     } else {
-      entity->inputAcceleration.y = 0;
+
+      Event stop_up_event("input", globalTimeline->getTime() + 10);
+      stop_up_event.parameters["player"] = entity;
+      stop_up_event.parameters["input_type"] =
+          std::hash<std::string>{}("stop_y");
+      em->raise_event(stop_up_event);
     }
 
     if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A]) {
-      entity->inputAcceleration.x = -accelerationRate;
+
+      Event move_left_event("input", globalTimeline->getTime() + 10);
+      move_left_event.parameters["player"] = entity;
+      move_left_event.parameters["input_type"] =
+          std::hash<std::string>{}("move_x");
+      move_left_event.parameters["acceleration_rate"] = -accelerationRate;
+      em->raise_event(move_left_event);
+
     } else if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D]) {
-      entity->inputAcceleration.x = accelerationRate;
+
+      Event move_right_event("input", globalTimeline->getTime() + 10);
+      move_right_event.parameters["player"] = entity;
+      move_right_event.parameters["input_type"] =
+          std::hash<std::string>{}("move_x");
+      move_right_event.parameters["acceleration_rate"] = accelerationRate;
+      em->raise_event(move_right_event);
+
     } else {
-      entity->inputAcceleration.x = 0;
+
+      Event stop_up_event("input", globalTimeline->getTime() + 10);
+      stop_up_event.parameters["player"] = entity;
+      stop_up_event.parameters["input_type"] =
+          std::hash<std::string>{}("stop_x");
+      em->raise_event(stop_up_event);
     }
 
     bool isSpacePressed = state[SDL_SCANCODE_SPACE];
     if (isSpacePressed && !wasSpacePressed && entity->standingPlatform) {
       // Todo: Update the jumpForce so that user provides it.
-      entity->velocity.y = -150;
-      entity->velocity.x += entity->standingPlatform->velocity.x;
+
+      Event jump_event("input", globalTimeline->getTime() + 10);
+      jump_event.parameters["player"] = entity;
+      jump_event.parameters["input_type"] = std::hash<std::string>{}("jump");
+      jump_event.parameters["jump_force"] = -150.0f;
+      em->raise_event(jump_event);
     }
   }
 

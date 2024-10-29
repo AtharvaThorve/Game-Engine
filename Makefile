@@ -28,7 +28,8 @@ SRC = main.cpp \
       event_manager.cpp \
       collision_handler.cpp \
       death_handler.cpp \
-      respawn_handler.cpp
+      respawn_handler.cpp \
+      input_handler.cpp
 
 # Object directory
 OBJDIR = obj

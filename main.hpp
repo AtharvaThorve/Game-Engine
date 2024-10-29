@@ -11,6 +11,7 @@
 #include "event_manager.hpp"
 #include "init.hpp"
 #include "input.hpp"
+#include "input_handler.hpp"
 #include "physics.hpp"
 #include "respawn_handler.hpp"
 #include "scaling.hpp"

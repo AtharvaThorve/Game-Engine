@@ -155,13 +155,16 @@ void doClientGame(bool isP2P = false) {
 
   event_manager.register_handler("respawn", &respawn_handler);
 
+  event_manager.register_handler(
+      "input", new InputHandler(&event_manager, &globalTimeline));
+
   std::thread networkThread(runClient, std::ref(playerEntityManager),
                             std::ref(clientEntityManager));
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
 
   while (true) {
-    doInput(player, &globalTimeline, 200.0f);
+    doInput(player, &globalTimeline, &event_manager, 200.0f);
 
     entityManager.updateEntityDeltaTime();
     entityManager.updateMovementPatternEntities();
