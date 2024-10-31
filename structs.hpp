@@ -1,5 +1,4 @@
 #pragma once
-#include "event.hpp"
 #include <SDL2/SDL.h>
 #include <string>
 
@@ -14,9 +13,3 @@ typedef struct {
   float x;
   float y;
 } Vector2;
-
-typedef struct {
-  bool operator()(const Event &lhs, const Event &rhs) const {
-    return lhs.timestamp > rhs.timestamp;
-  }
-} EventCompare;

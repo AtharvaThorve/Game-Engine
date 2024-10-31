@@ -86,7 +86,7 @@ void doClientGame(bool isP2P = false) {
 
   auto player = std::make_shared<Entity>(playerPosition, playerDimensions,
                                          playerColor, &globalTimeline, 2);
-  player->maxVelocity = Vector2{200, 600};
+  player->maxVelocity = Vector2{100, 300};
   player->isMovable = true;
   player->isHittable = true;
   player->isAffectedByGravity = true;
@@ -164,7 +164,7 @@ void doClientGame(bool isP2P = false) {
                             std::ref(entityManager));
 
   while (true) {
-    doInput(player, &globalTimeline, &event_manager, 200.0f);
+    doInput(player, &globalTimeline, &event_manager, 50.0f, 200.0f);
 
     entityManager.updateEntityDeltaTime();
     entityManager.updateMovementPatternEntities();

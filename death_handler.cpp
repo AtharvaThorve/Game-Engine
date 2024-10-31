@@ -14,6 +14,7 @@ void DeathHandler::on_event(const Event &event) {
 void DeathHandler::handle_death(std::shared_ptr<Entity> player) {
   // Can do other stuff regarding death here, but currently we only want to
   // spawn the character when it dies
+  player->isMovable = false;
 
   Event spawn_event("respawn", timeline->getTime() + 1000000000);
   spawn_event.parameters["player"] = player;
