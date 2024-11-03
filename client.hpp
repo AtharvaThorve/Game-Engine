@@ -20,6 +20,7 @@ public:
   void deserializeClientEntityMap(const std::string &pubMsg);
   void updateOtherEntities();
   void printEntityMap();
+  void cleanup();
 
 private:
   zmq::context_t context;

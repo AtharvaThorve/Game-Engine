@@ -2,6 +2,7 @@
 
 Timeline globalTimeline(nullptr, 2);
 PhysicsSystem physicsSystem(0.0f, 150.0f);
+std::atomic<bool> terminateThreads(false);
 
 // Assuming Server and Client are properly defined classes with start() method
 void runServer(Server &server) { server.start(); }
@@ -9,11 +10,15 @@ void runServer(Server &server) { server.start(); }
 void runClient(EntityManager &entityManager,
                EntityManager &clientEntityManager) {
   Client client(entityManager, clientEntityManager);
-  client.connectRequester("tcp://172.21.100.173", 5556);
-  client.connectPusher("tcp://172.21.100.173", 5557);
-  client.connectSubscriber("tcp://172.21.100.173", 5558);
+  client.connectRequester("tcp://172.30.115.140", 5556);
+  client.connectPusher("tcp://172.30.115.140", 5557);
+  client.connectSubscriber("tcp://172.30.115.140", 5558);
   client.connectServer();
-  client.start();
+  while (!terminateThreads.load()) {
+    client.start();
+  }
+  std::cout << "Exiting client" << std::endl;
+  client.cleanup();
 }
 
 void runP2PClient(EntityManager &entityManager,
@@ -37,9 +42,10 @@ void runP2PClient(EntityManager &entityManager,
 
 void applyGravityOnEntities(PhysicsSystem &physicsSystem,
                             EntityManager &entityManager) {
-  while (1) {
+  while (!terminateThreads.load()) {
     entityManager.applyGravityOnEntities(physicsSystem);
   }
+  std::cout << "Exiting gravity" << std::endl;
 }
 
 void doServerEntities(Server &server) {
@@ -210,12 +216,18 @@ void doClientGame(bool isP2P = false) {
 
     event_manager.process_events(globalTimeline.getTime());
 
+    if (Client::disconnectRequested.load()) {
+      terminateThreads.store(true);
+      break;
+    }
+
     presentScene();
   }
 
-  networkThread.join();
   gravityThread.join();
+  networkThread.join();
   clean_up_sdl();
+  exit(0);
 }
 
 int main(int argc, char *argv[]) {

@@ -98,7 +98,7 @@ void Client::receivePeerMsg() {
 }
 
 void Client::receiveSubMsg() {
-  while (true) {
+  while (!terminateThreads.load()) {
     zmq::message_t subMsg;
     (void)subscriber.recv(subMsg, zmq::recv_flags::dontwait);
     std::string recvMsg(static_cast<char *>(subMsg.data()), subMsg.size());
@@ -110,33 +110,31 @@ void Client::receiveSubMsg() {
 }
 
 void Client::start(bool isP2P) {
-  while (true) {
-    std::string message = clientID + " ";
+  std::string message = clientID + " ";
 
-    if (disconnectRequested.load()) {
-      message += "disconnect";
-    } else {
-      // Serialize positions of all entities in the EntityManager
-      for (const auto &entity : entityManager.getEntities()) {
-        message += std::to_string(entity->getID()) + " " +
-                   std::to_string(entity->position.x) + " " +
-                   std::to_string(entity->position.y) + " ";
-      }
+  if (disconnectRequested.load()) {
+    message += "disconnect";
+  } else {
+    // Serialize positions of all entities in the EntityManager
+    for (const auto &entity : entityManager.getEntities()) {
+      message += std::to_string(entity->getID()) + " " +
+                 std::to_string(entity->position.x) + " " +
+                 std::to_string(entity->position.y) + " ";
     }
-
-    // If not in P2P mode, also send to server
-    if (!isP2P) {
-      zmq::message_t request(message.size());
-      memcpy(request.data(), message.c_str(), message.size());
-      pusher.send(request, zmq::send_flags::none);
-    } else {
-      zmq::message_t peerMessage(message.size());
-      memcpy(peerMessage.data(), message.c_str(), message.size());
-      peerPublisher.send(peerMessage, zmq::send_flags::none);
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
+
+  // If not in P2P mode, also send to server
+  if (!isP2P) {
+    zmq::message_t request(message.size());
+    memcpy(request.data(), message.c_str(), message.size());
+    pusher.send(request, zmq::send_flags::none);
+  } else {
+    zmq::message_t peerMessage(message.size());
+    memcpy(peerMessage.data(), message.c_str(), message.size());
+    peerPublisher.send(peerMessage, zmq::send_flags::none);
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 void Client::deserializeClientEntityMap(const std::string &pubMsg) {
@@ -232,4 +230,13 @@ void Client::updateOtherEntities() {
       ++it; // Move to the next entity
     }
   }
+}
+
+void Client::cleanup() {
+  requester.close();
+  pusher.close();
+  subscriber.close();
+  peerPublisher.close();
+  peerSubscriber1.close();
+  peerSubscriber2.close();
 }

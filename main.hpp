@@ -20,6 +20,7 @@
 #include "structs.hpp"
 #include "timeline.hpp"
 #include <SDL2/SDL.h>
+#include <atomic>
 #include <iostream>
 #include <memory>
 #include <thread>
@@ -28,5 +29,6 @@
 extern App *app;
 
 extern Timeline globalTimeline;
+extern std::atomic<bool> terminateThreads;
 
 int main(int argc, char *argv[]);
