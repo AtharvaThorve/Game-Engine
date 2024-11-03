@@ -36,4 +36,6 @@ void RespawnHandler::handle_respawn(std::shared_ptr<Entity> player) {
     player->position = closestSpawn->position;
     player->velocity = {0, 0};
   }
+
+  player->isMovable = true;
 }
