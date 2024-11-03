@@ -78,7 +78,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
-      Client::disconnectRequested = true;
+      Client::disconnectRequested.store(true);
       exit(0);
     }
   }

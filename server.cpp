@@ -17,22 +17,37 @@ void Server::bindPublisher(const std::string &address, int port) {
   publisher.bind(address + ":" + std::to_string(port));
 }
 
-namespace {
-// disconnect event creation code
-void raiseClientDisconnectEvent(
-    EventManager *em, Timeline *timeline,
-    std::shared_ptr<std::unordered_map<
-        std::string, std::unordered_map<int, std::pair<float, float>>>>
-        clientEntityMap,
-    std::string clientID,
-    std::shared_ptr<std::set<std::string>> connectedClientIDs) {
+// namespace {
+// // disconnect event creation code
+// void raiseClientDisconnectEvent(
+//     EventManager *em, Timeline *timeline,
+//     std::shared_ptr<std::unordered_map<
+//         std::string, std::unordered_map<int, std::pair<float, float>>>>
+//         clientEntityMap,
+//     std::string clientID,
+//     std::shared_ptr<std::set<std::string>> connectedClientIDs) {
+//   Event disconnectEvent("disconnect", timeline->getTime());
+//   disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
+//   disconnectEvent.parameters["clientID"] = clientID;
+//   disconnectEvent.parameters["connectedClientIDs"] = connectedClientIDs;
+//   em->raise_event(disconnectEvent);
+// }
+// } // namespace
+
+void Server::raiseClientDisconnectEvent(std::string clientID) {
+  std::shared_ptr<std::unordered_map<
+      std::string, std::unordered_map<int, std::pair<float, float>>>>
+      tempMap = std::make_shared<std::unordered_map<
+          std::string, std::unordered_map<int, std::pair<float, float>>>>(
+          clientEntityMap);
+  std::shared_ptr<std::set<std::string>> tempSet =
+      std::make_shared<std::set<std::string>>(connectedClientIDs);
   Event disconnectEvent("disconnect", timeline->getTime());
-  disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
+  disconnectEvent.parameters["clientEntityMap"] = tempMap;
   disconnectEvent.parameters["clientID"] = clientID;
-  disconnectEvent.parameters["connectedClientIDs"] = connectedClientIDs;
+  disconnectEvent.parameters["connectedClientIDs"] = tempSet;
   em->raise_event(disconnectEvent);
 }
-} // namespace
 
 std::string Server::generateUniqueClientID() {
   std::random_device rd;
@@ -123,9 +138,6 @@ void Server::handle_client_thread(const std::string &clientID) {
     auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(
         currentTime - lastReceivedTime);
 
-    // std::cout << "Elapsed time since last message: " << elapsedTime.count()
-    //           << " seconds" << std::endl; // Debug info
-
     if (elapsedTime >= timeoutDuration) {
       std::shared_ptr<std::unordered_map<
           std::string, std::unordered_map<int, std::pair<float, float>>>>
@@ -134,8 +146,8 @@ void Server::handle_client_thread(const std::string &clientID) {
               clientEntityMap);
       std::shared_ptr<std::set<std::string>> tempSet =
           std::make_shared<std::set<std::string>>(connectedClientIDs);
-      raiseClientDisconnectEvent(em, timeline, tempMap, clientID, tempSet);
-      break; // Exit the loop as client is disconnected
+      raiseClientDisconnectEvent(clientID);
+      break;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -166,7 +178,7 @@ void Server::parseString(
             clientEntityMap);
     std::shared_ptr<std::set<std::string>> tempSet =
         std::make_shared<std::set<std::string>>(connectedClientIDs);
-    raiseClientDisconnectEvent(em, timeline, tempMap, clientID, tempSet);
+    raiseClientDisconnectEvent(clientID);
     return;
   } else {
     // If not a disconnect message, proceed with parsing entity data

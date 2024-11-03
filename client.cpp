@@ -113,7 +113,7 @@ void Client::start(bool isP2P) {
   while (true) {
     std::string message = clientID + " ";
 
-    if (disconnectRequested) {
+    if (disconnectRequested.load()) {
       message += "disconnect";
     } else {
       // Serialize positions of all entities in the EntityManager
