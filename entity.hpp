@@ -23,6 +23,7 @@ public:
   bool isAffectedByGravity = false;
   bool isMovable = false;
   bool isHittable = false;
+  bool isDashing = false;
 
   std::unique_ptr<Shape> shape;
   SDL_Color color;

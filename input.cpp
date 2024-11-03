@@ -5,8 +5,6 @@
 static Uint64 dash_start_time = 0;
 static std::optional<size_t> dash_direction_1;
 static std::optional<size_t> dash_direction_2;
-static bool is_dashing = false;
-static float dash_duration = 300000000;
 
 static bool wasEscPressed = false;
 static bool wasPlusPressed = false;
@@ -70,8 +68,7 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             EventManager *em, float accelerationRate, float dash_speed,
-             float decelerationRate) {
+             EventManager *em, float accelerationRate, float dash_speed, float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
 
   SDL_Event event;
@@ -103,9 +100,9 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
 
   if (entity->isMovable) {
     bool l_shift_pressed = state[SDL_SCANCODE_LSHIFT];
-    if (is_dashing &&
+    if (entity->isDashing &&
         globalTimeline->getTime() - dash_start_time >= dash_duration) {
-      is_dashing = false;
+      entity->isDashing = false;
       entity->velocity = {0, 0};
     }
 
@@ -142,7 +139,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
         !l_shift_pressed)
       pressed_directions.clear();
 
-    if (l_shift_pressed && !is_dashing &&
+    if (l_shift_pressed && !entity->isDashing &&
         isValidDirectionCombo(pressed_directions)) {
       dash_direction_1 = *pressed_directions.begin();
       dash_direction_2 =
@@ -150,7 +147,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
               ? std::optional<size_t>(*std::next(pressed_directions.begin()))
               : std::nullopt;
       dash_start_time = globalTimeline->getTime();
-      is_dashing = true;
+      entity->isDashing = true;
       processDashInput(entity, globalTimeline, em, dash_speed);
     }
 

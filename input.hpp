@@ -25,4 +25,4 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 // Function to handle player input
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
              EventManager *em, float accelerationRate = 5,
-             float dash_speed = 50, float decelerationRate = 5);
+             float dash_speed = 50, float dash_duration = 3000000000);

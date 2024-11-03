@@ -48,8 +48,12 @@ void Entity::updatePosition() {
     velocity.x += finalAcceleration.x * deltaTime;
     velocity.y += finalAcceleration.y * deltaTime;
 
-    velocity.x = std::max(std::min(velocity.x, maxVelocity.x), -maxVelocity.x);
-    velocity.y = std::max(std::min(velocity.y, maxVelocity.y), -maxVelocity.y);
+    if (!isDashing) {
+      velocity.x =
+          std::max(std::min(velocity.x, maxVelocity.x), -maxVelocity.x);
+      velocity.y =
+          std::max(std::min(velocity.y, maxVelocity.y), -maxVelocity.y);
+    }
 
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
