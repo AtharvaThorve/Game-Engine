@@ -24,10 +24,12 @@ void raiseClientDisconnectEvent(
     std::shared_ptr<std::unordered_map<
         std::string, std::unordered_map<int, std::pair<float, float>>>>
         clientEntityMap,
-    std::string clientID) {
+    std::string clientID,
+    std::shared_ptr<std::set<std::string>> connectedClientIDs) {
   Event disconnectEvent("disconnect", timeline->getTime());
   disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
   disconnectEvent.parameters["clientID"] = clientID;
+  disconnectEvent.parameters["connectedClientIDs"] = connectedClientIDs;
   em->raise_event(disconnectEvent);
 }
 } // namespace
@@ -76,6 +78,7 @@ void Server::start() {
       memcpy(reply.data(), clientID.c_str(), clientID.size());
       responder.send(reply, zmq::send_flags::dontwait);
     }
+    em->process_events(timeline->getTime());
   }
 }
 
@@ -110,10 +113,9 @@ void Server::handle_client_thread(const std::string &clientID) {
 
       std::unordered_map<int, std::pair<float, float>> entityPositionMap;
       parseString(receivedData, clientID, entityPositionMap);
-      clientEntityMap[clientID] = entityPositionMap;
-
-      // std::cout << "Received data from client: " << clientID
-      //           << std::endl; // Debug info
+      if (connectedClientIDs.find(clientID) != connectedClientIDs.end()) {
+        clientEntityMap[clientID] = entityPositionMap;
+      }
     }
 
     // Check for timeout
@@ -130,7 +132,9 @@ void Server::handle_client_thread(const std::string &clientID) {
           tempMap = std::make_shared<std::unordered_map<
               std::string, std::unordered_map<int, std::pair<float, float>>>>(
               clientEntityMap);
-      raiseClientDisconnectEvent(em, timeline, tempMap, clientID);
+      std::shared_ptr<std::set<std::string>> tempSet =
+          std::make_shared<std::set<std::string>>(connectedClientIDs);
+      raiseClientDisconnectEvent(em, timeline, tempMap, clientID, tempSet);
       break; // Exit the loop as client is disconnected
     }
 
@@ -160,9 +164,10 @@ void Server::parseString(
         tempMap = std::make_shared<std::unordered_map<
             std::string, std::unordered_map<int, std::pair<float, float>>>>(
             clientEntityMap);
-    raiseClientDisconnectEvent(em, timeline, tempMap, clientID);
+    std::shared_ptr<std::set<std::string>> tempSet =
+        std::make_shared<std::set<std::string>>(connectedClientIDs);
+    raiseClientDisconnectEvent(em, timeline, tempMap, clientID, tempSet);
     return;
-
   } else {
     // If not a disconnect message, proceed with parsing entity data
     stream.putback(command[0]); // Put back the first character of the command

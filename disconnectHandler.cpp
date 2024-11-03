@@ -13,6 +13,14 @@ void DisconnectHandler::on_event(const Event &event) {
     std::string clientID =
         std::get<std::string>(event.parameters.at("clientID"));
 
+    std::shared_ptr<std::set<std::string>> connectedClientIDs =
+        std::get<std::shared_ptr<std::set<std::string>>>(
+            event.parameters.at("connectedClientIDs"));
+
+    if (connectedClientIDs->find(clientID) != connectedClientIDs->end()) {
+      connectedClientIDs->erase(clientID);
+    }
+
     if (clientEntityMap->find(clientID) != clientEntityMap->end()) {
       clientEntityMap->erase(clientID);
       std::cout << "Removed client " << clientID << " from clientEntityMap"
