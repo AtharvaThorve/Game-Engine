@@ -17,6 +17,8 @@ void runClient(EntityManager &entityManager,
   while (!terminateThreads.load()) {
     client.start();
   }
+  // Added this one more time so that it sends out the disconnect message properly
+  client.start();
   std::cout << "Exiting client" << std::endl;
   client.cleanup();
 }

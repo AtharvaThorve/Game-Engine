@@ -1,7 +1,7 @@
 #pragma once
 #include "structs.hpp"
 #include <memory>
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -13,7 +13,7 @@ using VariantType = std::variant<
     int, float, size_t, std::string, Vector2, std::shared_ptr<Entity>,
     std::shared_ptr<std::unordered_map<
         std::string, std::unordered_map<int, std::pair<float, float>>>>,
-    std::shared_ptr<std::set<std::string>>>;
+    std::shared_ptr<std::unordered_set<std::string>>>;
 
 class Event {
 public:

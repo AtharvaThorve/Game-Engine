@@ -13,8 +13,8 @@ void DisconnectHandler::on_event(const Event &event) {
     std::string clientID =
         std::get<std::string>(event.parameters.at("clientID"));
 
-    std::shared_ptr<std::set<std::string>> connectedClientIDs =
-        std::get<std::shared_ptr<std::set<std::string>>>(
+    std::shared_ptr<std::unordered_set<std::string>> connectedClientIDs =
+        std::get<std::shared_ptr<std::unordered_set<std::string>>>(
             event.parameters.at("connectedClientIDs"));
 
     if (connectedClientIDs->find(clientID) != connectedClientIDs->end()) {
