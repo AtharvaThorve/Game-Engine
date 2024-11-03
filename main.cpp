@@ -13,14 +13,22 @@ void runClient(EntityManager &entityManager,
   client.connectRequester("tcp://172.30.115.140", 5556);
   client.connectPusher("tcp://172.30.115.140", 5557);
   client.connectSubscriber("tcp://172.30.115.140", 5558);
-  client.connectServer();
-  while (!terminateThreads.load()) {
-    client.start();
+
+  bool connected = false;
+  if (client.connectServer()) {
+    connected = true;
   }
-  // Added this one more time so that it sends out the disconnect message properly
-  client.start();
+
+  while (!terminateThreads.load()) {
+    if (connected)
+      client.start();
+  }
+
+  if (connected)
+    client.start();
   std::cout << "Exiting client" << std::endl;
   client.cleanup();
+  exit(0);
 }
 
 void runP2PClient(EntityManager &entityManager,

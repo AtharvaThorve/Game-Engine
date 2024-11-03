@@ -16,7 +16,7 @@ public:
   void bindPeerPublisher(const std::string &address, int port);
   void connectPeerSubscriber1(const std::string &address, int port);
   void connectPeerSubscriber2(const std::string &address, int port);
-  void connectServer(bool isP2P = false);
+  bool connectServer(bool isP2P = false);
   void deserializeClientEntityMap(const std::string &pubMsg);
   void updateOtherEntities();
   void printEntityMap();

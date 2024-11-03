@@ -48,24 +48,36 @@ void Client::connectPeerSubscriber2(const std::string &address, int port) {
   peerSubscriber2.set(zmq::sockopt::subscribe, "");
 }
 
-void Client::connectServer(bool isP2P) {
+bool Client::connectServer(bool isP2P) {
   std::string helloMessage = isP2P ? "Hello_P2P" : "Hello";
   zmq::message_t request(helloMessage.size());
   memcpy(request.data(), helloMessage.c_str(), helloMessage.size());
   requester.send(request, zmq::send_flags::none);
 
   zmq::message_t reply;
-  (void)requester.recv(reply, zmq::recv_flags::none);
-  std::string received(static_cast<char *>(reply.data()), reply.size());
-  clientID = received;
-  std::cout << "Client connected with ID: " << clientID << std::endl;
 
-  std::thread subMsgThread(&Client::receiveSubMsg, this);
-  subMsgThread.detach();
+  const int timeout = 5000;
+  requester.set(zmq::sockopt::rcvtimeo, timeout);
 
-  if (isP2P) {
-    std::thread peerMsgThread(&Client::receivePeerMsg, this);
-    peerMsgThread.detach();
+  if (requester.recv(reply, zmq::recv_flags::none)) {
+    std::string received(static_cast<char *>(reply.data()), reply.size());
+    clientID = received;
+    std::cout << "Client connected with ID: " << clientID << std::endl;
+
+    std::thread subMsgThread(&Client::receiveSubMsg, this);
+    subMsgThread.detach();
+
+    if (isP2P) {
+      std::thread peerMsgThread(&Client::receivePeerMsg, this);
+      peerMsgThread.detach();
+    }
+    return true;
+  } else {
+    std::cerr << "Failed to receive reply from server. Check if the server is "
+                 "running."
+              << std::endl;
+    
+    return false;
   }
 }
 
