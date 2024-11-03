@@ -5,6 +5,7 @@
 #include "collision_handler.hpp"
 #include "collision_utils.hpp"
 #include "death_handler.hpp"
+#include "disconnectHandler.hpp"
 #include "draw.hpp"
 #include "entity.hpp"
 #include "entity_manager.hpp"

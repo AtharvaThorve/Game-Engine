@@ -9,9 +9,9 @@ void runServer(Server &server) { server.start(); }
 void runClient(EntityManager &entityManager,
                EntityManager &clientEntityManager) {
   Client client(entityManager, clientEntityManager);
-  client.connectRequester("tcp://172.30.115.140", 5556);
-  client.connectPusher("tcp://172.30.115.140", 5557);
-  client.connectSubscriber("tcp://172.30.115.140", 5558);
+  client.connectRequester("tcp://172.21.100.173", 5556);
+  client.connectPusher("tcp://172.21.100.173", 5557);
+  client.connectSubscriber("tcp://172.21.100.173", 5558);
   client.connectServer();
   client.start();
 }
@@ -233,7 +233,11 @@ int main(int argc, char *argv[]) {
 
   if (mode1 == "server" && mode2.empty()) {
 
-    Server server;
+    EventManager em;
+    em.register_handler("disconnect",
+                        new DisconnectHandler(&em, &globalTimeline));
+
+    Server server(&em, &globalTimeline);
     server.bindResponder("tcp://*", 5556);
     server.bindPuller("tcp://*", 5557);
     server.bindPublisher("tcp://*", 5558);
@@ -246,24 +250,26 @@ int main(int argc, char *argv[]) {
     serverThread.join();
   } else if (mode1 == "client" && mode2.empty()) {
     doClientGame();
-  } else if ((mode1 == "client" && mode2 == "P2P") ||
-             (mode1 == "P2P" && mode2 == "client")) {
-    doClientGame(true);
-  } else if ((mode1 == "server" && mode2 == "client") ||
-             (mode1 == "client" && mode2 == "server")) {
-    Server server;
-    server.bindResponder("tcp://*", 5555);
-    server.bindPublisher("tcp://*", 5556);
+  }
+  // else if ((mode1 == "client" && mode2 == "P2P") ||
+  //            (mode1 == "P2P" && mode2 == "client")) {
+  //   doClientGame(true);
+  // } else if ((mode1 == "server" && mode2 == "client") ||
+  //            (mode1 == "client" && mode2 == "server")) {
+  //   Server server;
+  //   server.bindResponder("tcp://*", 5555);
+  //   server.bindPublisher("tcp://*", 5556);
 
-    std::cout << "Starting server..." << std::endl;
-    std::thread serverThread(runServer, std::ref(server));
+  //   std::cout << "Starting server..." << std::endl;
+  //   std::thread serverThread(runServer, std::ref(server));
 
-    std::thread serverEntities(doServerEntities, std::ref(server));
+  //   std::thread serverEntities(doServerEntities, std::ref(server));
 
-    doClientGame(true);
-    serverThread.join();
-    serverEntities.join();
-  } else {
+  //   doClientGame(true);
+  //   serverThread.join();
+  //   serverEntities.join();
+  // }
+  else {
     std::cerr
         << "Invalid mode. Use 'server', 'client', or both 'server client'."
         << std::endl;

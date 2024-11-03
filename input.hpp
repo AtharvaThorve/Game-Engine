@@ -1,5 +1,6 @@
 #pragma once
 
+#include "client.hpp"
 #include "defs.hpp"
 #include "entity.hpp"
 #include "event_manager.hpp"

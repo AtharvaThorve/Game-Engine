@@ -8,15 +8,17 @@
 
 class Entity;
 
+using VariantType = std::variant<
+    int, float, size_t, std::string, Vector2, std::shared_ptr<Entity>,
+    std::shared_ptr<std::unordered_map<
+        std::string, std::unordered_map<int, std::pair<float, float>>>>>;
+
 class Event {
 public:
   // Defines the type of the event
   size_t type;
   // Maps the event type to the parameters it requires.
-  std::unordered_map<std::string,
-                     std::variant<int, float, size_t, std::string, Vector2,
-                                  std::shared_ptr<Entity>>>
-      parameters;
+  std::unordered_map<std::string, VariantType> parameters;
 
   int64_t timestamp;
 

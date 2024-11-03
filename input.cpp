@@ -78,6 +78,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
+      Client::disconnectRequested = true;
       exit(0);
     }
   }
@@ -128,7 +129,8 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
                          globalTimeline);
 
     if ((pressed_directions.size() > 1 &&
-         !isValidDirectionCombo(pressed_directions)) || !l_shift_pressed)
+         !isValidDirectionCombo(pressed_directions)) ||
+        !l_shift_pressed)
       pressed_directions.clear();
 
     // Dash input handling

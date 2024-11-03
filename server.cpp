@@ -1,9 +1,9 @@
 #include "server.hpp"
 
-Server::Server()
+Server::Server(EventManager *em, Timeline *timeline)
     : context(1), responder(context, zmq::socket_type::rep),
       puller(context, zmq::socket_type::pull),
-      publisher(context, zmq::socket_type::pub) {}
+      publisher(context, zmq::socket_type::pub), em(em), timeline(timeline) {}
 
 void Server::bindResponder(const std::string &address, int port) {
   responder.bind(address + ":" + std::to_string(port));
@@ -16,6 +16,21 @@ void Server::bindPuller(const std::string &address, int port) {
 void Server::bindPublisher(const std::string &address, int port) {
   publisher.bind(address + ":" + std::to_string(port));
 }
+
+namespace {
+// disconnect event creation code
+void raiseClientDisconnectEvent(
+    EventManager *em, Timeline *timeline,
+    std::shared_ptr<std::unordered_map<
+        std::string, std::unordered_map<int, std::pair<float, float>>>>
+        clientEntityMap,
+    std::string clientID) {
+  Event disconnectEvent("disconnect", timeline->getTime());
+  disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
+  disconnectEvent.parameters["clientID"] = clientID;
+  em->raise_event(disconnectEvent);
+}
+} // namespace
 
 std::string Server::generateUniqueClientID() {
   std::random_device rd;
@@ -110,14 +125,12 @@ void Server::handle_client_thread(const std::string &clientID) {
     //           << " seconds" << std::endl; // Debug info
 
     if (elapsedTime >= timeoutDuration) {
-      if (clientEntityMap.find(clientID) != clientEntityMap.end()) {
-        clientEntityMap.erase(clientID);
-        std::cout << "Removed client " << clientID << " from clientEntityMap"
-                  << std::endl; // Debug info
-      }
-      std::cout << "Client " << clientID << " has stopped sending data for "
-                << timeoutDuration.count() << " seconds or more. Marking "
-                << "as disconnected." << std::endl;
+      std::shared_ptr<std::unordered_map<
+          std::string, std::unordered_map<int, std::pair<float, float>>>>
+          tempMap = std::make_shared<std::unordered_map<
+              std::string, std::unordered_map<int, std::pair<float, float>>>>(
+              clientEntityMap);
+      raiseClientDisconnectEvent(em, timeline, tempMap, clientID);
       break; // Exit the loop as client is disconnected
     }
 
@@ -132,6 +145,29 @@ void Server::parseString(
 
   std::string tempClientID;
   stream >> tempClientID;
+
+  // Check if the message is a disconnect message
+  std::string command;
+  stream >> command;
+
+  if (command == "disconnect") {
+    // Handle disconnect by removing the client from the connected clients set
+    connectedClientIDs.erase(tempClientID);
+    std::cout << "Client " << tempClientID << " disconnected." << std::endl;
+
+    std::shared_ptr<std::unordered_map<
+        std::string, std::unordered_map<int, std::pair<float, float>>>>
+        tempMap = std::make_shared<std::unordered_map<
+            std::string, std::unordered_map<int, std::pair<float, float>>>>(
+            clientEntityMap);
+    raiseClientDisconnectEvent(em, timeline, tempMap, clientID);
+    return;
+
+  } else {
+    // If not a disconnect message, proceed with parsing entity data
+    stream.putback(command[0]); // Put back the first character of the command
+                                // (likely part of entityID)
+  }
 
   int entityID;
   float x, y;

@@ -4,6 +4,7 @@
 
 std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
 std::unordered_set<std::string> activeEntities;
+std::atomic<bool> Client::disconnectRequested = false;
 
 Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
     : context(1), requester(context, zmq::socket_type::req),
@@ -110,12 +111,17 @@ void Client::receiveSubMsg() {
 
 void Client::start(bool isP2P) {
   while (true) {
-    // Serialize positions of all entities in the EntityManager
     std::string message = clientID + " ";
-    for (const auto &entity : entityManager.getEntities()) {
-      message += std::to_string(entity->getID()) + " " +
-                 std::to_string(entity->position.x) + " " +
-                 std::to_string(entity->position.y) + " ";
+
+    if (disconnectRequested) {
+      message += "disconnect";
+    } else {
+      // Serialize positions of all entities in the EntityManager
+      for (const auto &entity : entityManager.getEntities()) {
+        message += std::to_string(entity->getID()) + " " +
+                   std::to_string(entity->position.x) + " " +
+                   std::to_string(entity->position.y) + " ";
+      }
     }
 
     // If not in P2P mode, also send to server
