@@ -5,9 +5,8 @@
 static Uint64 dash_start_time = 0;
 static std::optional<size_t> dash_direction_1;
 static std::optional<size_t> dash_direction_2;
-static bool was_l_shift_pressed = false;
 static bool is_dashing = false;
-static float dash_duration = 3000000000;
+static float dash_duration = 300000000;
 
 static bool wasEscPressed = false;
 static bool wasPlusPressed = false;
@@ -79,7 +78,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
       Client::disconnectRequested.store(true);
-      exit(0);
+      // exit(0);
     }
   }
 
@@ -110,31 +109,40 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
       entity->velocity = {0, 0};
     }
 
-    // Manage directional input
-    if (state[SDL_SCANCODE_W] &&
-        pressed_directions.insert(std::hash<std::string>{}("up")).second)
+    if (state[SDL_SCANCODE_W]) {
+      pressed_directions.insert(std::hash<std::string>{}("up"));
       raiseMovementEvent(em, "move_y", entity, -accelerationRate,
                          globalTimeline);
-    if (state[SDL_SCANCODE_S] &&
-        pressed_directions.insert(std::hash<std::string>{}("down")).second)
+    } else if (state[SDL_SCANCODE_S]) {
+      pressed_directions.insert(std::hash<std::string>{}("down"));
       raiseMovementEvent(em, "move_y", entity, accelerationRate,
                          globalTimeline);
-    if (state[SDL_SCANCODE_A] &&
-        pressed_directions.insert(std::hash<std::string>{}("left")).second)
+    } else {
+      pressed_directions.erase(std::hash<std::string>{}("up"));
+      pressed_directions.erase(std::hash<std::string>{}("down"));
+      raiseMovementEvent(em, "stop_y", entity, 0, globalTimeline);
+    }
+
+    if (state[SDL_SCANCODE_A]) {
+      pressed_directions.insert(std::hash<std::string>{}("left"));
       raiseMovementEvent(em, "move_x", entity, -accelerationRate,
                          globalTimeline);
-    if (state[SDL_SCANCODE_D] &&
-        pressed_directions.insert(std::hash<std::string>{}("right")).second)
+    } else if (state[SDL_SCANCODE_D]) {
+      pressed_directions.insert(std::hash<std::string>{}("right"));
       raiseMovementEvent(em, "move_x", entity, accelerationRate,
                          globalTimeline);
+    } else {
+      pressed_directions.erase(std::hash<std::string>{}("left"));
+      pressed_directions.erase(std::hash<std::string>{}("right"));
+      raiseMovementEvent(em, "stop_x", entity, 0, globalTimeline);
+    }
 
     if ((pressed_directions.size() > 1 &&
          !isValidDirectionCombo(pressed_directions)) ||
         !l_shift_pressed)
       pressed_directions.clear();
 
-    // Dash input handling
-    if (l_shift_pressed && !was_l_shift_pressed &&
+    if (l_shift_pressed && !is_dashing &&
         isValidDirectionCombo(pressed_directions)) {
       dash_direction_1 = *pressed_directions.begin();
       dash_direction_2 =
@@ -142,10 +150,9 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
               ? std::optional<size_t>(*std::next(pressed_directions.begin()))
               : std::nullopt;
       dash_start_time = globalTimeline->getTime();
+      is_dashing = true;
       processDashInput(entity, globalTimeline, em, dash_speed);
     }
-
-    was_l_shift_pressed = l_shift_pressed;
 
     bool isSpacePressed = state[SDL_SCANCODE_SPACE];
     if (isSpacePressed && !wasSpacePressed && entity->standingPlatform) {
