@@ -2,7 +2,7 @@
 #include <optional>
 #include <unordered_set>
 
-static Uint64 dash_start_time = 0;
+static int64_t dash_start_time = 0;
 static std::optional<size_t> dash_direction_1;
 static std::optional<size_t> dash_direction_2;
 
