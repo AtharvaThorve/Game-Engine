@@ -221,8 +221,8 @@ void Client::updateOtherEntities() {
       // Add or update entity in the dictionary
       if (dict.find(identifier) == dict.end()) {
         Vector2 position{100, 100};
-        Vector2 dimensions{50, 50};
-        SDL_Color color = {255, 0, 0, 255};
+        Vector2 dimensions{40, 40};
+        SDL_Color color = {0, 0, 0, 255};
         auto newEntity = std::make_shared<Entity>(position, dimensions, color,
                                                   &globalTimeline, 2);
         dict[identifier] = newEntity;

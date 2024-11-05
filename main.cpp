@@ -102,7 +102,7 @@ void doClientGame(bool isP2P = false) {
 
   auto player = std::make_shared<Entity>(playerPosition, playerDimensions,
                                          playerColor, &globalTimeline, 2);
-  player->maxVelocity = Vector2{100, 300};
+  player->maxVelocity = Vector2{200, 600};
   player->isMovable = true;
   player->isHittable = true;
   player->isAffectedByGravity = true;
@@ -110,6 +110,8 @@ void doClientGame(bool isP2P = false) {
   EntityManager playerEntityManager;
   playerEntityManager.addEntities(player);
 
+  EntityManager playerEntityManager;
+  playerEntityManager.addEntities(player);
   EntityManager entityManager;
   EntityManager clientEntityManager;
 
@@ -122,9 +124,99 @@ void doClientGame(bool isP2P = false) {
   ground1->isHittable = true;
   ground2->isHittable = true;
 
+  // Variety of platforms
+  std::vector<std::shared_ptr<Entity>> platforms;
+
+  // Static platforms
+  platforms.push_back(std::make_shared<Entity>(
+      Vector2{300, 400}, Vector2{200, 30}, platformColor, &globalTimeline, 2));
+  platforms.push_back(std::make_shared<Entity>(
+      Vector2{600, 300}, Vector2{200, 30}, platformColor, &globalTimeline, 2));
+  platforms.push_back(std::make_shared<Entity>(
+      Vector2{900, 250}, Vector2{200, 30}, platformColor, &globalTimeline, 2));
+  platforms.push_back(std::make_shared<Entity>(
+      Vector2{1300, 350}, Vector2{150, 30}, platformColor, &globalTimeline, 2));
+  platforms.push_back(std::make_shared<Entity>(
+      Vector2{1600, 200}, Vector2{180, 30}, platformColor, &globalTimeline, 2));
+
+  // Moving platforms
+  auto createMovingPlatform = [&](Vector2 pos, Vector2 size, SDL_Color color,
+                                  MovementPattern pattern) {
+    auto platform =
+        std::make_shared<Entity>(pos, size, color, &globalTimeline, 2);
+    platform->maxVelocity = Vector2{100, 100};
+    platform->isHittable = true;
+    platform->hasMovementPattern = true;
+    platform->movementPattern = pattern;
+    return platform;
+  };
+
+  SDL_Color movingPlatformColor = {255, 215, 0, 255}; // Golden color
+
+  // Horizontal moving platform
+  MovementPattern horizontalPattern;
+  horizontalPattern.addSteps(
+      MovementStep({300, 0}, 4.0f), MovementStep({0, 0}, 0.5f, true),
+      MovementStep({-300, 0}, 4.0f), MovementStep({0, 0}, 0.5f, true));
+  platforms.push_back(createMovingPlatform(Vector2{400, 200}, Vector2{100, 20},
+                                           movingPlatformColor,
+                                           horizontalPattern));
+
+  // Vertical moving platform
+  MovementPattern verticalPattern;
+  verticalPattern.addSteps(
+      MovementStep({0, 200}, 3.0f), MovementStep({0, 0}, 0.5f, true),
+      MovementStep({0, -200}, 3.0f), MovementStep({0, 0}, 0.5f, true));
+  platforms.push_back(createMovingPlatform(Vector2{700, 350}, Vector2{100, 20},
+                                           movingPlatformColor,
+                                           verticalPattern));
+
+  // Circular moving platform
+  MovementPattern circularPattern;
+  for (int i = 0; i < 36; ++i) {
+    float angle = i * 10 * M_PI / 180.0f;
+    float x = 100 * cos(angle);
+    float y = 100 * sin(angle);
+    circularPattern.addSteps(MovementStep({x, y}, 0.2f));
+  }
+  platforms.push_back(createMovingPlatform(Vector2{1000, 400}, Vector2{80, 20},
+                                           movingPlatformColor,
+                                           circularPattern));
+
+  // Figure-8 moving platform
+  MovementPattern figure8Pattern;
+  for (int i = 0; i < 60; ++i) {
+    float t = i * 2 * M_PI / 60;
+    float x = 100 * sin(t);
+    float y = 50 * sin(2 * t);
+    figure8Pattern.addSteps(MovementStep({x, y}, 0.1f));
+  }
+  platforms.push_back(createMovingPlatform(Vector2{1400, 300}, Vector2{80, 20},
+                                           movingPlatformColor,
+                                           figure8Pattern));
+
   // Add all platforms to entityManager
   entityManager.addEntities(ground1, ground2);
   entityManager.addEntities(player);
+  for (const auto &platform : platforms) {
+    platform->isHittable = true;
+    entityManager.addEntities(platform);
+  }
+
+  // Collectibles (coins)
+  SDL_Color coinColor = {255, 215, 0, 255}; // Gold color
+  auto coin1 = std::make_shared<Entity>(Vector2{300, 350}, Vector2{20, 20},
+                                        coinColor, &globalTimeline, 1);
+  auto coin2 = std::make_shared<Entity>(Vector2{600, 250}, Vector2{20, 20},
+                                        coinColor, &globalTimeline, 1);
+  auto coin3 = std::make_shared<Entity>(Vector2{900, 200}, Vector2{20, 20},
+                                        coinColor, &globalTimeline, 1);
+  auto coin4 = std::make_shared<Entity>(Vector2{1300, 300}, Vector2{20, 20},
+                                        coinColor, &globalTimeline, 1);
+  auto coin5 = std::make_shared<Entity>(Vector2{1600, 150}, Vector2{20, 20},
+                                        coinColor, &globalTimeline, 1);
+
+  entityManager.addEntities(coin1, coin2, coin3, coin4, coin5);
 
   // Death zones (lava pits and invisible gap)
   SDL_Color lavaColor = {255, 69, 0, 255}; // Orange-red for lava
@@ -132,8 +224,10 @@ void doClientGame(bool isP2P = false) {
 
   // Lava on top of a platform
   auto lavaPlatform = std::make_shared<Entity>(
-      Vector2{1100, 500}, Vector2{200, 30}, lavaColor, &globalTimeline, 2);
+      Vector2{1100, 500}, Vector2{200, 30}, platformColor, &globalTimeline, 2);
   lavaPlatform->isHittable = true;
+  auto lava1 = std::make_shared<Entity>(Vector2{1100, 470}, Vector2{200, 30},
+                                        lavaColor, &globalTimeline, 2);
 
   // Invisible death zone in the gap between ground platforms
   auto invisibleDeathZone =
@@ -141,7 +235,7 @@ void doClientGame(bool isP2P = false) {
                                invisibleColor, &globalTimeline, 2);
 
   entityManager.addEntities(lavaPlatform);
-  entityManager.addDeathZones(invisibleDeathZone, lavaPlatform);
+  entityManager.addDeathZones(lava1, invisibleDeathZone, lavaPlatform);
 
   // Spawn points
   auto spawnPoint1 =
@@ -182,6 +276,9 @@ void doClientGame(bool isP2P = false) {
   while (true) {
     doInput(player, &globalTimeline, &event_manager, 50.0f, 200.0f);
 
+    playerEntityManager.updateEntityDeltaTime();
+    playerEntityManager.updateMovementPatternEntities();
+    playerEntityManager.updateEntities();
     entityManager.updateEntityDeltaTime();
     entityManager.updateMovementPatternEntities();
     entityManager.updateEntities();
@@ -191,6 +288,7 @@ void doClientGame(bool isP2P = false) {
     // Sky blue background
     prepareScene(SDL_Color{135, 206, 235, 255});
 
+    playerEntityManager.drawEntities(camera.position.x, camera.position.y);
     entityManager.drawEntities(camera.position.x, camera.position.y);
     clientEntityManager.drawEntities(camera.position.x, camera.position.y);
 
@@ -205,6 +303,18 @@ void doClientGame(bool isP2P = false) {
       Event death_event("death", globalTimeline.getTime() + 1);
       death_event.parameters["player"] = player;
       event_manager.raise_event(death_event);
+    }
+
+    // Handle collisions
+    for (const auto &platform : platforms) {
+      if (player->isColliding(*platform)) {
+        Event collision_event("collision", globalTimeline.getTime() + 1);
+        collision_event.parameters["entity1"] = player;
+        collision_event.parameters["entity2"] = platform;
+        collision_event.parameters["collision_type"] =
+            std::hash<std::string>{}("platform");
+        event_manager.raise_event(collision_event);
+      }
     }
 
     if (player->isColliding(*ground1)) {
@@ -222,6 +332,15 @@ void doClientGame(bool isP2P = false) {
       collision_event.parameters["collision_type"] =
           std::hash<std::string>{}("platform");
       event_manager.raise_event(collision_event);
+    }
+
+    // Handle coin collisions
+    std::vector<std::shared_ptr<Entity>> coins = {coin1, coin2, coin3, coin4,
+                                                  coin5};
+    for (const auto &coin : coins) {
+      if (player->isColliding(*coin)) {
+        entityManager.removeEntity(coin);
+      }
     }
 
     event_manager.process_events(globalTimeline.getTime());
@@ -272,29 +391,8 @@ int main(int argc, char *argv[]) {
     serverThread.join();
   } else if (mode1 == "client" && mode2.empty()) {
     doClientGame();
-  }
-  // else if ((mode1 == "client" && mode2 == "P2P") ||
-  //            (mode1 == "P2P" && mode2 == "client")) {
-  //   doClientGame(true);
-  // } else if ((mode1 == "server" && mode2 == "client") ||
-  //            (mode1 == "client" && mode2 == "server")) {
-  //   Server server;
-  //   server.bindResponder("tcp://*", 5555);
-  //   server.bindPublisher("tcp://*", 5556);
-
-  //   std::cout << "Starting server..." << std::endl;
-  //   std::thread serverThread(runServer, std::ref(server));
-
-  //   std::thread serverEntities(doServerEntities, std::ref(server));
-
-  //   doClientGame(true);
-  //   serverThread.join();
-  //   serverEntities.join();
-  // }
-  else {
-    std::cerr
-        << "Invalid mode. Use 'server', 'client', or both 'server client'."
-        << std::endl;
+  } else {
+    std::cerr << "Invalid mode. Use 'server', or 'client'." << std::endl;
     return 1;
   }
 

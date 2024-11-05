@@ -46,8 +46,6 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
   RectangleShape *rectA = dynamic_cast<RectangleShape *>(entityA->shape.get());
   RectangleShape *rectB = dynamic_cast<RectangleShape *>(entityB->shape.get());
 
-  // std::cout << direction << std::endl;
-
   if (direction == "up") {
     entityA->position.y = entityB->position.y + rectB->rect.h - 1;
     if (entityA->velocity.y < 0)
