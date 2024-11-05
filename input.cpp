@@ -105,7 +105,6 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
         globalTimeline->getTime() - dash_start_time >= dash_duration) {
       entity->isDashing = false;
       entity->velocity = {0, 0};
-      entity->color = {255, 0, 0, 255};
     }
 
     if (state[SDL_SCANCODE_W]) {
@@ -142,7 +141,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
       pressed_directions.clear();
 
     if (l_shift_pressed && !entity->isDashing &&
-        isValidDirectionCombo(pressed_directions)) {
+        isValidDirectionCombo(pressed_directions) && entity->canDash) {
       dash_direction_1 = *pressed_directions.begin();
       dash_direction_2 =
           (pressed_directions.size() > 1)
@@ -150,6 +149,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
               : std::nullopt;
       dash_start_time = globalTimeline->getTime();
       entity->isDashing = true;
+      entity->canDash = false;
       entity->color = {0, 0, 255, 255};
       processDashInput(entity, globalTimeline, em, dash_speed);
     }

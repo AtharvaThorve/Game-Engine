@@ -48,7 +48,6 @@ void InputHandler::handle_input(std::shared_ptr<Entity> player,
 
   if (input_type == jump) {
     player->velocity.y = jump_force;
-    player->velocity.x += player->standingPlatform->velocity.x;
   }
 
   if (input_type == dash) {

@@ -38,4 +38,7 @@ void RespawnHandler::handle_respawn(std::shared_ptr<Entity> player) {
   }
 
   player->isMovable = true;
+  player->canDash = true;
+  player->clearPlatformReference();
+  player->color = {255, 0, 0, 255};
 }

@@ -60,6 +60,12 @@ void Entity::updatePosition() {
 
     if (standingPlatform) {
       Vector2 platformDelta;
+      
+      standingPlatform->velocity.x =
+          std::max(std::min(standingPlatform->velocity.x, standingPlatform->maxVelocity.x), -standingPlatform->maxVelocity.x);
+      standingPlatform->velocity.y =
+          std::max(std::min(standingPlatform->velocity.y, standingPlatform->maxVelocity.y), -standingPlatform->maxVelocity.y);
+      
       platformDelta.x =
           standingPlatform->velocity.x * standingPlatform->deltaTime;
       platformDelta.y =

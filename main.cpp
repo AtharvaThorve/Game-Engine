@@ -225,7 +225,7 @@ void doClientGame(bool isP2P = false) {
 
   // Lava on top of a platform
   auto lava = std::make_shared<Entity>(Vector2{1100, 500}, Vector2{200, 30},
-                                        lavaColor, &globalTimeline, 2);
+                                       lavaColor, &globalTimeline, 2);
 
   // Invisible death zone in the gap between ground platforms
   auto invisibleDeathZone =
@@ -269,11 +269,8 @@ void doClientGame(bool isP2P = false) {
                             std::ref(entityManager));
 
   while (true) {
-    doInput(player, &globalTimeline, &event_manager, 50.0f, 200.0f);
+    doInput(player, &globalTimeline, &event_manager, 50.0f, 750.0f, 500000000);
 
-    playerEntityManager.updateEntityDeltaTime();
-    playerEntityManager.updateMovementPatternEntities();
-    playerEntityManager.updateEntities();
     entityManager.updateEntityDeltaTime();
     entityManager.updateMovementPatternEntities();
     entityManager.updateEntities();
@@ -295,21 +292,32 @@ void doClientGame(bool isP2P = false) {
 
     // Check death and respawn
     if (entityManager.checkPlayerDeath(player)) {
-      Event death_event("death", globalTimeline.getTime() + 1);
+      Event death_event("death", globalTimeline.getTime());
       death_event.parameters["player"] = player;
       event_manager.raise_event(death_event);
     }
 
     // Handle collisions
+    bool is_on_a_platform = false;
     for (const auto &platform : platforms) {
       if (player->isColliding(*platform)) {
-        Event collision_event("collision", globalTimeline.getTime() + 1);
+        is_on_a_platform = true;
+        Event collision_event("collision", globalTimeline.getTime());
         collision_event.parameters["entity1"] = player;
         collision_event.parameters["entity2"] = platform;
         collision_event.parameters["collision_type"] =
             std::hash<std::string>{}("platform");
         event_manager.raise_event(collision_event);
+        if (collision_utils::checkCollisionDirection(player, platform) ==
+            "down") {
+          player->canDash = true;
+          player->color = playerColor;
+        }
       }
+    }
+
+    if (!is_on_a_platform) {
+      player->clearPlatformReference();
     }
 
     // Handle coin collisions

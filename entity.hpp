@@ -24,6 +24,7 @@ public:
   bool isMovable = false;
   bool isHittable = false;
   bool isDashing = false;
+  bool canDash = true;
 
   std::unique_ptr<Shape> shape;
   SDL_Color color;
