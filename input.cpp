@@ -68,7 +68,8 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             EventManager *em, float accelerationRate, float dash_speed, float dash_duration) {
+             EventManager *em, float accelerationRate, float dash_speed,
+             float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
 
   SDL_Event event;
@@ -104,6 +105,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
         globalTimeline->getTime() - dash_start_time >= dash_duration) {
       entity->isDashing = false;
       entity->velocity = {0, 0};
+      entity->color = {255, 0, 0, 255};
     }
 
     if (state[SDL_SCANCODE_W]) {
@@ -148,6 +150,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
               : std::nullopt;
       dash_start_time = globalTimeline->getTime();
       entity->isDashing = true;
+      entity->color = {0, 0, 255, 255};
       processDashInput(entity, globalTimeline, em, dash_speed);
     }
 

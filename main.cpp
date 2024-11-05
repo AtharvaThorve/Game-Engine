@@ -110,8 +110,6 @@ void doClientGame(bool isP2P = false) {
   EntityManager playerEntityManager;
   playerEntityManager.addEntities(player);
 
-  EntityManager playerEntityManager;
-  playerEntityManager.addEntities(player);
   EntityManager entityManager;
   EntityManager clientEntityManager;
 
@@ -146,6 +144,7 @@ void doClientGame(bool isP2P = false) {
         std::make_shared<Entity>(pos, size, color, &globalTimeline, 2);
     platform->maxVelocity = Vector2{100, 100};
     platform->isHittable = true;
+    platform->isMovable = true;
     platform->hasMovementPattern = true;
     platform->movementPattern = pattern;
     return platform;
@@ -194,6 +193,8 @@ void doClientGame(bool isP2P = false) {
   platforms.push_back(createMovingPlatform(Vector2{1400, 300}, Vector2{80, 20},
                                            movingPlatformColor,
                                            figure8Pattern));
+  platforms.push_back(ground1);
+  platforms.push_back(ground2);
 
   // Add all platforms to entityManager
   entityManager.addEntities(ground1, ground2);
@@ -223,10 +224,7 @@ void doClientGame(bool isP2P = false) {
   SDL_Color invisibleColor = {135, 206, 235, 255};
 
   // Lava on top of a platform
-  auto lavaPlatform = std::make_shared<Entity>(
-      Vector2{1100, 500}, Vector2{200, 30}, platformColor, &globalTimeline, 2);
-  lavaPlatform->isHittable = true;
-  auto lava1 = std::make_shared<Entity>(Vector2{1100, 470}, Vector2{200, 30},
+  auto lava = std::make_shared<Entity>(Vector2{1100, 500}, Vector2{200, 30},
                                         lavaColor, &globalTimeline, 2);
 
   // Invisible death zone in the gap between ground platforms
@@ -234,8 +232,7 @@ void doClientGame(bool isP2P = false) {
       std::make_shared<Entity>(Vector2{1500, 700}, Vector2{100, 200},
                                invisibleColor, &globalTimeline, 2);
 
-  entityManager.addEntities(lavaPlatform);
-  entityManager.addDeathZones(lava1, invisibleDeathZone, lavaPlatform);
+  entityManager.addDeathZones(lava, invisibleDeathZone);
 
   // Spawn points
   auto spawnPoint1 =
@@ -244,8 +241,6 @@ void doClientGame(bool isP2P = false) {
   auto spawnPoint2 =
       std::make_shared<Entity>(Vector2{500, 200}, Vector2{1, 1},
                                SDL_Color{0, 0, 0, 0}, &globalTimeline, 1);
-  entityManager.addSpawnPoint(spawnPoint1);
-  entityManager.addSpawnPoint(spawnPoint2);
 
   int worldWidth = 5000;
   int worldHeight = 2000;
@@ -315,23 +310,6 @@ void doClientGame(bool isP2P = false) {
             std::hash<std::string>{}("platform");
         event_manager.raise_event(collision_event);
       }
-    }
-
-    if (player->isColliding(*ground1)) {
-      Event collision_event("collision", globalTimeline.getTime() + 1);
-      collision_event.parameters["entity1"] = player;
-      collision_event.parameters["entity2"] = ground1;
-      collision_event.parameters["collision_type"] =
-          std::hash<std::string>{}("platform");
-      event_manager.raise_event(collision_event);
-    }
-    if (player->isColliding(*ground2)) {
-      Event collision_event("collision", globalTimeline.getTime() + 1);
-      collision_event.parameters["entity1"] = player;
-      collision_event.parameters["entity2"] = ground2;
-      collision_event.parameters["collision_type"] =
-          std::hash<std::string>{}("platform");
-      event_manager.raise_event(collision_event);
     }
 
     // Handle coin collisions
