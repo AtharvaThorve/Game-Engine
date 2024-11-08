@@ -1,11 +1,10 @@
 #include "input.hpp"
-#include <optional>
-#include <unordered_set>
 
 static int64_t dash_start_time = 0;
 static std::optional<size_t> dash_direction_1;
 static std::optional<size_t> dash_direction_2;
 
+static bool wasLShiftPressed = false;
 static bool wasEscPressed = false;
 static bool wasPlusPressed = false;
 static bool wasMinusPressed = false;
@@ -138,6 +137,13 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
          !isValidDirectionCombo(pressed_directions)) ||
         !l_shift_pressed)
       pressed_directions.clear();
+
+    if(l_shift_pressed != wasLShiftPressed) {
+      if(l_shift_pressed) {
+        allowScaling = !allowScaling;
+      }
+      wasLShiftPressed = l_shift_pressed;
+    }
 
     if (l_shift_pressed && !entity->isDashing &&
         isValidDirectionCombo(pressed_directions)) {
