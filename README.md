@@ -11,7 +11,7 @@ This is a C++ based project designed as a Visual Studio solution for a Game Engi
    * `vcpkg install`
 4. Build the project.
 
-**Note:** Scaling can be toggled by pressing the `Right Shift` key. By default, scaling is not enabled (constant size).
+**Note:** Scaling can be toggled by pressing the `Left Shift` key. By default, scaling is not enabled (constant size).
 
 ## Timeline Controls
 
