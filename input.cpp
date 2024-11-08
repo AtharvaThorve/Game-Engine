@@ -139,8 +139,8 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
         !l_shift_pressed)
       pressed_directions.clear();
 
-    if (l_shift_pressed != wasLShiftPressed) {
-      if (!l_shift_pressed) {
+    if(l_shift_pressed != wasLShiftPressed) {
+      if(l_shift_pressed) {
         allowScaling = !allowScaling;
       }
       wasLShiftPressed = l_shift_pressed;

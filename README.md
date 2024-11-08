@@ -11,7 +11,7 @@ This is a C++ based project designed as a Visual Studio solution for a Game Engi
    * `vcpkg install`
 4. Build the project.
 
-**Note:** Scaling can be toggled by pressing the `Right Shift` key. By default, scaling is not enabled (constant size).
+**Note:** Scaling can be toggled by pressing the `Left Shift` key. By default, scaling is not enabled (constant size).
 
 ## Timeline Controls
 
@@ -57,7 +57,14 @@ In this project, we worked primarily with the **server-client** architecture rat
 ./main client
 ```
 
-* Start a listen-server using:
-```bash
-./main server client
-```
+## Event Management has been added
+So we have `event.hpp` that contains generic event related information. We also have `event_manager.hpp` and `event_manager.cpp`, that takes care of queueing and passing events to respective handlers. Finally, we have handlers for different types of events.
+
+Different events being handled:
+1. Input
+2. Collision
+3. Death
+4. Respawn
+5. Disconnect (Networked)
+
+**Note:** We also have added a new type of movement (dash), which can be performed by pressing LShift and any direction key (WASD). The dash can also be performed in diagonal directions by pressing two directions at the same time.
