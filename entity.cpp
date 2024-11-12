@@ -38,40 +38,6 @@ void Entity::updateDeltaTime() {
   lastUpdateTime = currentTime;
 }
 
-void Entity::updatePosition() {
-  if (isMovable) {
-    Vector2 finalAcceleration = acceleration;
-
-    finalAcceleration.x += inputAcceleration.x;
-    finalAcceleration.y += inputAcceleration.y;
-
-    velocity.x += finalAcceleration.x * deltaTime;
-    velocity.y += finalAcceleration.y * deltaTime;
-
-    if (!isDashing) {
-      velocity.x =
-          std::max(std::min(velocity.x, maxVelocity.x), -maxVelocity.x);
-      velocity.y =
-          std::max(std::min(velocity.y, maxVelocity.y), -maxVelocity.y);
-    }
-
-    position.x += velocity.x * deltaTime;
-    position.y += velocity.y * deltaTime;
-
-    if (standingPlatform) {
-      Vector2 platformDelta;
-      platformDelta.x =
-          standingPlatform->velocity.x * standingPlatform->deltaTime;
-      platformDelta.y =
-          standingPlatform->velocity.y * standingPlatform->deltaTime;
-
-      // Move the entity with the platform
-      position.x += platformDelta.x;
-      position.y += platformDelta.y;
-    }
-  }
-}
-
 void Entity::draw(float cameraX, float cameraY) {
   if (shape) {
     updateSDLObject(cameraX, cameraY);

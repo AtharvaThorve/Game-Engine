@@ -8,9 +8,11 @@ void EntityManager::removeEntity(std::shared_ptr<Entity> entity) {
 	entities.erase(entity);
 }
 
-void EntityManager::updateEntities() {
+void EntityManager::updateEntities(EventManager *em, Timeline *timeline) {
 	for (auto& entity : entities) {
-		entity->updatePosition();
+		Event move_event("move", timeline->getTime());
+		move_event.parameters["entity"] = entity;
+		em->raise_event(move_event);
 	}
 }
 

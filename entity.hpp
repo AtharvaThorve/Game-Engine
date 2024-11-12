@@ -64,8 +64,6 @@ public:
 
   void updateDeltaTime();
 
-  void updatePosition();
-
   // Method to draw the entity
   void draw(float cameraX, float cameraY);
 

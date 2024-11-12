@@ -1,6 +1,8 @@
 #pragma once
 #include "entity.hpp"
 #include "physics.hpp"
+#include "event_manager.hpp"
+#include "timeline.hpp"
 #include <memory>
 #include <unordered_set>
 
@@ -14,7 +16,7 @@ public:
 
   void removeEntity(std::shared_ptr<Entity> entity);
 
-  void updateEntities();
+  void updateEntities(EventManager *em, Timeline *timeline);
 
   void applyGravityOnEntities(PhysicsSystem &physicsSystem);
 

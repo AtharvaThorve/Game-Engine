@@ -82,10 +82,21 @@ void doServerEntities(Server &server) {
                             std::ref(serverEntityManager));
   gravityThread.detach();
 
+  EventManager event_manager;
+
+  event_manager.register_handler(
+      "collision", new CollisionHandler(&event_manager, &globalTimeline));
+
+  ReplayRecorder replay_recorder(&event_manager, &globalTimeline);
+  event_manager.register_wildcard_handler(&replay_recorder);
+
+  event_manager.register_handler(
+      "move", new MovementHandler(&event_manager, &globalTimeline));
+
   while (true) {
     serverEntityManager.updateEntityDeltaTime();
     serverEntityManager.updateMovementPatternEntities();
-    serverEntityManager.updateEntities();
+    serverEntityManager.updateEntities(&event_manager, &globalTimeline);
     server.updateClientEntityMap(serverEntityManager);
   }
 }
@@ -173,9 +184,12 @@ void doClientGame(bool isP2P = false) {
 
   event_manager.register_handler(
       "input", new InputHandler(&event_manager, &globalTimeline));
-    
+
   ReplayRecorder replay_recorder(&event_manager, &globalTimeline);
   event_manager.register_wildcard_handler(&replay_recorder);
+
+  event_manager.register_handler(
+      "move", new MovementHandler(&event_manager, &globalTimeline));
 
   std::thread networkThread(runClient, std::ref(playerEntityManager),
                             std::ref(clientEntityManager));
@@ -184,10 +198,6 @@ void doClientGame(bool isP2P = false) {
 
   while (true) {
     doInput(player, &globalTimeline, &event_manager, 50.0f, 200.0f);
-
-    entityManager.updateEntityDeltaTime();
-    entityManager.updateMovementPatternEntities();
-    entityManager.updateEntities();
 
     camera.update(*player, worldWidth, worldHeight);
 
@@ -226,6 +236,12 @@ void doClientGame(bool isP2P = false) {
           std::hash<std::string>{}("platform");
       event_manager.raise_event(collision_event);
     }
+
+
+    // Need to do this after collision
+    entityManager.updateEntityDeltaTime();
+    entityManager.updateMovementPatternEntities();
+    entityManager.updateEntities(&event_manager, &globalTimeline);
 
     event_manager.process_events(globalTimeline.getTime());
 
