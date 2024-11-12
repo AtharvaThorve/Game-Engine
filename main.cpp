@@ -173,6 +173,9 @@ void doClientGame(bool isP2P = false) {
 
   event_manager.register_handler(
       "input", new InputHandler(&event_manager, &globalTimeline));
+    
+  ReplayRecorder replay_recorder(&event_manager, &globalTimeline);
+  event_manager.register_wildcard_handler(&replay_recorder);
 
   std::thread networkThread(runClient, std::ref(playerEntityManager),
                             std::ref(clientEntityManager));

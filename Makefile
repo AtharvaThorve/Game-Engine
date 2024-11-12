@@ -30,7 +30,8 @@ SRC = main.cpp \
       death_handler.cpp \
       respawn_handler.cpp \
       input_handler.cpp \
-      disconnectHandler.cpp
+      disconnectHandler.cpp \
+      replay_recorder.cpp
 
 # Object directory
 OBJDIR = obj

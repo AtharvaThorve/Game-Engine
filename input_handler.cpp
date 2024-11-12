@@ -52,7 +52,13 @@ void InputHandler::handle_input(std::shared_ptr<Entity> player,
   }
 
   if (input_type == dash) {
+    player->isDashing = true;
     player->velocity.x += dash_vector.x;
     player->velocity.y += dash_vector.y;
+  }
+
+  if (input_type == stop_dash) {
+    player->isDashing = false;
+    player->velocity = {0, 0};
   }
 }

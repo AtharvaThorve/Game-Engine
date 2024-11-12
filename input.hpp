@@ -20,7 +20,7 @@ bool isValidDirectionCombo(const std::unordered_set<size_t> &directions);
 
 // Function to process dash logic with validated directions
 void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
-                      EventManager *em, float dash_speed);
+                      EventManager *em, float dash_speed, float dash_duration);
 
 // Function to handle player input
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,

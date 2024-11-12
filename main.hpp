@@ -14,6 +14,7 @@
 #include "input.hpp"
 #include "input_handler.hpp"
 #include "physics.hpp"
+#include "replay_recorder.hpp"
 #include "respawn_handler.hpp"
 #include "scaling.hpp"
 #include "server.hpp"

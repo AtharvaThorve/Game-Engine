@@ -6,6 +6,10 @@ void EventManager::register_handler(const std::string &event_type,
   handlers[event_type_hash] = event_handler;
 }
 
+void EventManager::register_wildcard_handler(EventHandler *event_handler) {
+  wildcard_handlers.insert(event_handler);
+}
+
 void EventManager::deregister_handler(const std::string &event_type,
                                       EventHandler *event_handler) {
   size_t event_type_hash = std::hash<std::string>{}(event_type);
@@ -25,6 +29,10 @@ void EventManager::process_events(int64_t current_timestamp) {
     auto it = handlers.find(event.type);
     if (it != handlers.end()) {
       it->second->on_event(event);
+    }
+
+    for (auto *handler : wildcard_handlers) {
+      handler->on_event(event);
     }
   }
 }

@@ -19,6 +19,7 @@ private:
   const size_t stop_y = std::hash<std::string>{}("stop_y");
   const size_t jump = std::hash<std::string>{}("jump");
   const size_t dash = std::hash<std::string>{}("dash");
+  const size_t stop_dash = std::hash<std::string>{}("stop_dash");
 
   void handle_input(std::shared_ptr<Entity> player, size_t input_type,
                     float acceleration_rate = 5, float jump_force = -150,
