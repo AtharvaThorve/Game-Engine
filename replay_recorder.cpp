@@ -34,9 +34,11 @@ void ReplayRecorder::record_event(const Event &event) {
 void ReplayRecorder::play_recording() {
   if (!is_recording) {
     replay_start_time = timeline->getTime();
+    em->set_replay_only_mode(true);
     for (auto &event : recorded_events) {
       Event replay_event = event;
       replay_event.timestamp += replay_start_time;
+      replay_event.parameters["is_replay_event"] = true;
       em->raise_event(replay_event);
     }
   } else {

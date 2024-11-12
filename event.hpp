@@ -1,16 +1,16 @@
 #pragma once
 #include "structs.hpp"
 #include <memory>
-#include <unordered_set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
 class Entity;
 
 using VariantType = std::variant<
-    int, float, size_t, std::string, Vector2, std::shared_ptr<Entity>,
+    bool, int, float, size_t, std::string, Vector2, std::shared_ptr<Entity>,
     std::shared_ptr<std::unordered_map<
         std::string, std::unordered_map<int, std::pair<float, float>>>>,
     std::shared_ptr<std::unordered_set<std::string>>>;

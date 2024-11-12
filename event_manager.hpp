@@ -18,6 +18,8 @@ private:
   std::unordered_set<EventHandler*> wildcard_handlers;
 
   std::priority_queue<Event, std::vector<Event>, EventCompare> event_queue;
+  bool replay_only_mode = 0;
+  int64_t replay_events_count = 0;
 
 public:
   void register_handler(const std::string &event_type,
@@ -31,4 +33,6 @@ public:
   void raise_event(const Event &event);
 
   void process_events(int64_t current_timestamp);
+
+  void set_replay_only_mode(bool mode);
 };
