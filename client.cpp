@@ -4,6 +4,7 @@
 
 std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
 std::unordered_set<std::string> activeEntities;
+std::atomic<bool> Client::disconnectRequested = false;
 
 Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
     : context(1), requester(context, zmq::socket_type::req),
@@ -47,24 +48,36 @@ void Client::connectPeerSubscriber2(const std::string &address, int port) {
   peerSubscriber2.set(zmq::sockopt::subscribe, "");
 }
 
-void Client::connectServer(bool isP2P) {
+bool Client::connectServer(bool isP2P) {
   std::string helloMessage = isP2P ? "Hello_P2P" : "Hello";
   zmq::message_t request(helloMessage.size());
   memcpy(request.data(), helloMessage.c_str(), helloMessage.size());
   requester.send(request, zmq::send_flags::none);
 
   zmq::message_t reply;
-  (void)requester.recv(reply, zmq::recv_flags::none);
-  std::string received(static_cast<char *>(reply.data()), reply.size());
-  clientID = received;
-  std::cout << "Client connected with ID: " << clientID << std::endl;
 
-  std::thread subMsgThread(&Client::receiveSubMsg, this);
-  subMsgThread.detach();
+  const int timeout = 5000;
+  requester.set(zmq::sockopt::rcvtimeo, timeout);
 
-  if (isP2P) {
-    std::thread peerMsgThread(&Client::receivePeerMsg, this);
-    peerMsgThread.detach();
+  if (requester.recv(reply, zmq::recv_flags::none)) {
+    std::string received(static_cast<char *>(reply.data()), reply.size());
+    clientID = received;
+    std::cout << "Client connected with ID: " << clientID << std::endl;
+
+    std::thread subMsgThread(&Client::receiveSubMsg, this);
+    subMsgThread.detach();
+
+    if (isP2P) {
+      std::thread peerMsgThread(&Client::receivePeerMsg, this);
+      peerMsgThread.detach();
+    }
+    return true;
+  } else {
+    std::cerr << "Failed to receive reply from server. Check if the server is "
+                 "running."
+              << std::endl;
+    
+    return false;
   }
 }
 
@@ -97,7 +110,7 @@ void Client::receivePeerMsg() {
 }
 
 void Client::receiveSubMsg() {
-  while (true) {
+  while (!terminateThreads.load()) {
     zmq::message_t subMsg;
     (void)subscriber.recv(subMsg, zmq::recv_flags::dontwait);
     std::string recvMsg(static_cast<char *>(subMsg.data()), subMsg.size());
@@ -109,28 +122,31 @@ void Client::receiveSubMsg() {
 }
 
 void Client::start(bool isP2P) {
-  while (true) {
+  std::string message = clientID + " ";
+
+  if (disconnectRequested.load()) {
+    message += "disconnect";
+  } else {
     // Serialize positions of all entities in the EntityManager
-    std::string message = clientID + " ";
     for (const auto &entity : entityManager.getEntities()) {
       message += std::to_string(entity->getID()) + " " +
                  std::to_string(entity->position.x) + " " +
                  std::to_string(entity->position.y) + " ";
     }
-
-    // If not in P2P mode, also send to server
-    if (!isP2P) {
-      zmq::message_t request(message.size());
-      memcpy(request.data(), message.c_str(), message.size());
-      pusher.send(request, zmq::send_flags::none);
-    } else {
-      zmq::message_t peerMessage(message.size());
-      memcpy(peerMessage.data(), message.c_str(), message.size());
-      peerPublisher.send(peerMessage, zmq::send_flags::none);
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
+
+  // If not in P2P mode, also send to server
+  if (!isP2P) {
+    zmq::message_t request(message.size());
+    memcpy(request.data(), message.c_str(), message.size());
+    pusher.send(request, zmq::send_flags::none);
+  } else {
+    zmq::message_t peerMessage(message.size());
+    memcpy(peerMessage.data(), message.c_str(), message.size());
+    peerPublisher.send(peerMessage, zmq::send_flags::none);
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 void Client::deserializeClientEntityMap(const std::string &pubMsg) {
@@ -226,4 +242,13 @@ void Client::updateOtherEntities() {
       ++it; // Move to the next entity
     }
   }
+}
+
+void Client::cleanup() {
+  requester.close();
+  pusher.close();
+  subscriber.close();
+  peerPublisher.close();
+  peerSubscriber1.close();
+  peerSubscriber2.close();
 }

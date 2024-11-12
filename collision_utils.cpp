@@ -49,7 +49,7 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
   // std::cout << direction << std::endl;
 
   if (direction == "up") {
-    entityA->position.y = entityB->position.y + rectB->rect.h - 1;
+    entityA->position.y = entityB->position.y + rectB->rect.h;
     if (entityA->velocity.y < 0)
       entityA->velocity.y = 0;
   } else if (direction == "down") {
@@ -61,11 +61,11 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
     if (entityA->velocity.y > 0)
       entityA->velocity.y = 0;
   } else if (direction == "left") {
-    entityA->position.x = entityB->position.x + rectB->rect.w - 1;
+    entityA->position.x = entityB->position.x + rectB->rect.w;
     if (entityA->velocity.x < 0)
       entityA->velocity.x = 0;
   } else if (direction == "right") {
-    entityA->position.x = entityB->position.x - rectA->rect.w + 1;
+    entityA->position.x = entityB->position.x - rectA->rect.w;
     if (entityA->velocity.x > 0)
       entityA->velocity.x = 0;
   }

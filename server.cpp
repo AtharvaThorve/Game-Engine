@@ -1,9 +1,13 @@
 #include "server.hpp"
 
-Server::Server()
+Server::Server(EventManager *em, Timeline *timeline)
     : context(1), responder(context, zmq::socket_type::rep),
       puller(context, zmq::socket_type::pull),
-      publisher(context, zmq::socket_type::pub) {}
+      publisher(context, zmq::socket_type::pub), em(em), timeline(timeline) {
+  clientEntityMap = std::make_shared<std::unordered_map<
+      std::string, std::unordered_map<int, std::pair<float, float>>>>();
+  connectedClientIDs = std::make_shared<std::unordered_set<std::string>>();
+}
 
 void Server::bindResponder(const std::string &address, int port) {
   responder.bind(address + ":" + std::to_string(port));
@@ -17,6 +21,14 @@ void Server::bindPublisher(const std::string &address, int port) {
   publisher.bind(address + ":" + std::to_string(port));
 }
 
+void Server::raiseClientDisconnectEvent(std::string clientID) {
+  Event disconnectEvent("disconnect", timeline->getTime());
+  disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
+  disconnectEvent.parameters["clientID"] = clientID;
+  disconnectEvent.parameters["connectedClientIDs"] = connectedClientIDs;
+  em->raise_event(disconnectEvent);
+}
+
 std::string Server::generateUniqueClientID() {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -25,9 +37,9 @@ std::string Server::generateUniqueClientID() {
   std::string clientID;
   do {
     clientID = std::to_string(dis(gen)); // Generate random number
-  } while (connectedClientIDs.find(clientID) != connectedClientIDs.end());
+  } while (connectedClientIDs->find(clientID) != connectedClientIDs->end());
 
-  connectedClientIDs.insert(clientID); // Mark the client ID as used
+  connectedClientIDs->insert(clientID); // Mark the client ID as used
   return clientID;
 }
 
@@ -37,7 +49,7 @@ void Server::start() {
   bool broadCastMsgThreadStarted = false;
 
   while (true) {
-    if (connectedClientIDs.size() > 0 && !broadCastMsgThreadStarted) {
+    if (connectedClientIDs->size() > 0 && !broadCastMsgThreadStarted) {
       broadCastMsgThreadStarted = true;
       std::thread broadCastMssgThread(&Server::broadcastMsg, this);
       broadCastMssgThread.detach();
@@ -61,15 +73,16 @@ void Server::start() {
       memcpy(reply.data(), clientID.c_str(), clientID.size());
       responder.send(reply, zmq::send_flags::dontwait);
     }
+    em->process_events(timeline->getTime());
   }
 }
 
 void Server::handle_client_thread(const std::string &clientID) {
   const std::chrono::seconds timeoutDuration(5);
-  auto lastReceivedTime =
-      std::chrono::system_clock::now(); // Initialize last received time
+  auto lastReceivedTime = std::chrono::system_clock::now();
+  bool disconnectMessageReceived = false;
 
-  while (true) {
+  while (connectedClientIDs->find(clientID) != connectedClientIDs->end()) {
     zmq::message_t positionData;
     std::string receivedData;
 
@@ -94,11 +107,14 @@ void Server::handle_client_thread(const std::string &clientID) {
         continue;
 
       std::unordered_map<int, std::pair<float, float>> entityPositionMap;
-      parseString(receivedData, clientID, entityPositionMap);
-      clientEntityMap[clientID] = entityPositionMap;
+      disconnectMessageReceived =
+          parseString(receivedData, clientID, entityPositionMap);
 
-      // std::cout << "Received data from client: " << clientID
-      //           << std::endl; // Debug info
+      if (disconnectMessageReceived)
+        break;
+
+      if (connectedClientIDs->find(clientID) != connectedClientIDs->end())
+        (*clientEntityMap)[clientID] = entityPositionMap;
     }
 
     // Check for timeout
@@ -106,26 +122,25 @@ void Server::handle_client_thread(const std::string &clientID) {
     auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(
         currentTime - lastReceivedTime);
 
-    // std::cout << "Elapsed time since last message: " << elapsedTime.count()
-    //           << " seconds" << std::endl; // Debug info
-
     if (elapsedTime >= timeoutDuration) {
-      if (clientEntityMap.find(clientID) != clientEntityMap.end()) {
-        clientEntityMap.erase(clientID);
-        std::cout << "Removed client " << clientID << " from clientEntityMap"
-                  << std::endl; // Debug info
-      }
-      std::cout << "Client " << clientID << " has stopped sending data for "
-                << timeoutDuration.count() << " seconds or more. Marking "
-                << "as disconnected." << std::endl;
-      break; // Exit the loop as client is disconnected
+      break; // Exit the loop if timeout has been reached
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
+
+  // Check if a disconnect message was received
+  if (disconnectMessageReceived) {
+    std::cout << "Disconnect command received for client: " << clientID
+              << std::endl;
+  } else {
+    std::cout << "Client disconnected due to timeout: " << clientID
+              << std::endl;
+  }
+  raiseClientDisconnectEvent(clientID);
 }
 
-void Server::parseString(
+bool Server::parseString(
     const std::string &input, const std::string &clientID,
     std::unordered_map<int, std::pair<float, float>> &entityPositionMap) {
   std::istringstream stream(input);
@@ -133,18 +148,30 @@ void Server::parseString(
   std::string tempClientID;
   stream >> tempClientID;
 
+  // Check if the message is a disconnect message
+  std::string command;
+  stream >> command;
+
+  if (command == "disconnect" &&
+      connectedClientIDs->find(clientID) != connectedClientIDs->end()) {
+    return true;
+  } else {
+    stream.putback(command[0]);
+  }
+
   int entityID;
   float x, y;
 
   while (stream >> entityID >> x >> y) {
     entityPositionMap[entityID] = std::make_pair(x, y);
   }
-  // std::cout << entityPositionMap.size() << std::endl;
+
+  return false;
 }
 
 void Server::printEntityMap() {
   // Debugging function to print out the state of clientEntityMap
-  for (const auto &client : clientEntityMap) {
+  for (const auto &client : *clientEntityMap) {
     std::cout << "Client " << client.first << " entities:" << std::endl;
     for (const auto &entity : client.second) {
       std::cout << "  Entity " << entity.first << " -> (" << entity.second.first
@@ -159,7 +186,7 @@ void Server::updateClientEntityMap(EntityManager &serverEntityManager) {
     entityPositionMap[entity->getID()] =
         std::make_pair(entity->position.x, entity->position.y);
   }
-  clientEntityMap["1"] = entityPositionMap;
+  (*clientEntityMap)["1"] = entityPositionMap;
 }
 
 void Server::broadcastMsg() {
@@ -169,14 +196,16 @@ void Server::broadcastMsg() {
     memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
     publisher.send(broadcastMsg, zmq::send_flags::dontwait);
 
-    // std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::cout << pubMsg << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
 
 std::string Server::generatePubMsg() {
   std::stringstream pubMsg;
-
-  for (const auto &clientPair : clientEntityMap) {
+  std::unique_lock<std::mutex> lock(clientMutex);
+  for (const auto &clientPair : *clientEntityMap) {
     const std::string &clientId = clientPair.first;
     const auto &entityMap = clientPair.second;
 
