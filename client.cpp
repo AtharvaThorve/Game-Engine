@@ -2,8 +2,6 @@
 #include <iostream>
 #include <thread>
 
-std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
-std::unordered_set<std::string> activeEntities;
 std::atomic<bool> Client::disconnectRequested = false;
 
 Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
@@ -76,7 +74,7 @@ bool Client::connectServer(bool isP2P) {
     std::cerr << "Failed to receive reply from server. Check if the server is "
                  "running."
               << std::endl;
-    
+
     return false;
   }
 }
@@ -118,6 +116,7 @@ void Client::receiveSubMsg() {
     // update the entities according to the subMsg
     updateOtherEntities();
     // printEntityMap();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
 
@@ -217,12 +216,13 @@ void Client::updateOtherEntities() {
 
       // Mark entity as active
       activeEntities.insert(identifier);
+      std::cout << activeEntities.size() << std::endl;
 
       // Add or update entity in the dictionary
       if (dict.find(identifier) == dict.end()) {
         Vector2 position{100, 100};
-        Vector2 dimensions{50, 50};
-        SDL_Color color = {255, 0, 0, 255};
+        Vector2 dimensions{40, 40};
+        SDL_Color color = {0, 0, 0, 255};
         auto newEntity = std::make_shared<Entity>(position, dimensions, color,
                                                   &globalTimeline, 2);
         dict[identifier] = newEntity;
@@ -231,6 +231,8 @@ void Client::updateOtherEntities() {
       dict[identifier]->position = newPosition;
     }
   }
+
+  std::cout << activeEntities.size() << std::endl;
 
   // Now remove entities not in the current active set
   for (auto it = dict.begin(); it != dict.end();) {

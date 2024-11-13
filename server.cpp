@@ -78,7 +78,7 @@ void Server::start() {
 }
 
 void Server::handle_client_thread(const std::string &clientID) {
-  const std::chrono::seconds timeoutDuration(5);
+  const std::chrono::seconds timeoutDuration(10);
   auto lastReceivedTime = std::chrono::system_clock::now();
   bool disconnectMessageReceived = false;
 
@@ -190,7 +190,7 @@ void Server::updateClientEntityMap(EntityManager &serverEntityManager) {
 }
 
 void Server::broadcastMsg() {
-  while (true) {
+  while (connectedClientIDs->size() > 0) {
     std::string pubMsg = generatePubMsg();
     zmq::message_t broadcastMsg(pubMsg.size());
     memcpy(broadcastMsg.data(), pubMsg.data(), pubMsg.size());
