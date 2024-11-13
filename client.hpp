@@ -36,7 +36,8 @@ private:
   std::unordered_map<std::string,
                      std::unordered_map<int, std::pair<float, float>>>
       clientEntityMap;
-  std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
+  std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Entity>>>
+      dict;
   std::unordered_set<std::string> activeEntities;
   void receiveSubMsg();
   void receivePeerMsg();

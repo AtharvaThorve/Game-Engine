@@ -15,14 +15,15 @@ static bool wasRShiftPressed = false;
 static std::unordered_set<size_t> pressed_directions;
 
 // Helper function for raising movement events
-void raiseMovementEvent(EventManager *em, const std::string &input_type,
+void raiseMovementEvent(const std::string &input_type,
                         std::shared_ptr<Entity> entity, float rate,
                         Timeline *timeline) {
   Event event("input", timeline->getTime());
   event.parameters["player"] = entity;
   event.parameters["input_type"] = std::hash<std::string>{}(input_type);
   event.parameters["acceleration_rate"] = rate;
-  em->raise_event(event);
+  EventManager &em = EventManager::getInstance();
+  em.raise_event(event);
 }
 
 // Checks if the current direction combination is valid
@@ -38,7 +39,7 @@ bool isValidDirectionCombo(const std::unordered_set<size_t> &directions) {
 
 // Process dash logic with validated directions
 void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
-                      EventManager *em, float dash_speed, float dash_duration) {
+                      float dash_speed, float dash_duration) {
   float dash_x = 0.0f, dash_y = 0.0f;
   if (dash_direction_1) {
     if (*dash_direction_1 == std::hash<std::string>{}("up"))
@@ -65,19 +66,20 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
   dash_event.parameters["player"] = entity;
   dash_event.parameters["input_type"] = std::hash<std::string>{}("dash");
   dash_event.parameters["dash_vector"] = Vector2{dash_x, dash_y};
-  em->raise_event(dash_event);
+  EventManager &em = EventManager::getInstance();
+  em.raise_event(dash_event);
   Event stop_dash_event("input", timeline->getTime() + dash_duration);
   stop_dash_event.parameters["player"] = entity;
   stop_dash_event.parameters["input_type"] =
       std::hash<std::string>{}("stop_dash");
-  em->raise_event(stop_dash_event);
+  em.raise_event(stop_dash_event);
 }
 
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             EventManager *em, float accelerationRate, float dash_speed,
-             float dash_duration) {
+             float accelerationRate, float dash_speed, float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
+  EventManager &em = EventManager::getInstance();
 
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -115,11 +117,12 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (isRecording) {
       std::cout << "Started Recording" << std::endl;
       Event start_recording_event("start_recording", globalTimeline->getTime());
-      em->raise_event(start_recording_event);
+      
+      em.raise_event(start_recording_event);
     } else {
       std::cout << "Stopped Recording" << std::endl;
       Event stop_recording_event("stop_recording", globalTimeline->getTime());
-      em->raise_event(stop_recording_event);
+      em.raise_event(stop_recording_event);
     }
     wasEnterPressed = false;
   }
@@ -129,7 +132,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (rShiftPressed) {
       std::cout << "Playing Recording" << std::endl;
       Event play_recording_event("play_recording", globalTimeline->getTime());
-      em->raise_event(play_recording_event);
+      em.raise_event(play_recording_event);
     }
     wasRShiftPressed = rShiftPressed;
   }
@@ -139,32 +142,32 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
 
     if (state[SDL_SCANCODE_W]) {
       pressed_directions.insert(std::hash<std::string>{}("up"));
-      raiseMovementEvent(em, "move_y", entity, -accelerationRate,
+      raiseMovementEvent("move_y", entity, -accelerationRate,
                          globalTimeline);
     } else if (state[SDL_SCANCODE_S]) {
       pressed_directions.insert(std::hash<std::string>{}("down"));
-      raiseMovementEvent(em, "move_y", entity, accelerationRate,
+      raiseMovementEvent("move_y", entity, accelerationRate,
                          globalTimeline);
     } else {
       pressed_directions.erase(std::hash<std::string>{}("up"));
       pressed_directions.erase(std::hash<std::string>{}("down"));
       if (entity->inputAcceleration.y != 0)
-        raiseMovementEvent(em, "stop_y", entity, 0, globalTimeline);
+        raiseMovementEvent("stop_y", entity, 0, globalTimeline);
     }
 
     if (state[SDL_SCANCODE_A]) {
       pressed_directions.insert(std::hash<std::string>{}("left"));
-      raiseMovementEvent(em, "move_x", entity, -accelerationRate,
+      raiseMovementEvent("move_x", entity, -accelerationRate,
                          globalTimeline);
     } else if (state[SDL_SCANCODE_D]) {
       pressed_directions.insert(std::hash<std::string>{}("right"));
-      raiseMovementEvent(em, "move_x", entity, accelerationRate,
+      raiseMovementEvent("move_x", entity, accelerationRate,
                          globalTimeline);
     } else {
       pressed_directions.erase(std::hash<std::string>{}("left"));
       pressed_directions.erase(std::hash<std::string>{}("right"));
       if (entity->inputAcceleration.x != 0)
-        raiseMovementEvent(em, "stop_x", entity, 0, globalTimeline);
+        raiseMovementEvent("stop_x", entity, 0, globalTimeline);
     }
 
     if ((pressed_directions.size() > 1 &&
@@ -187,7 +190,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
               ? std::optional<size_t>(*std::next(pressed_directions.begin()))
               : std::nullopt;
       dash_start_time = globalTimeline->getTime();
-      processDashInput(entity, globalTimeline, em, dash_speed, dash_duration);
+      processDashInput(entity, globalTimeline, dash_speed, dash_duration);
     }
 
     bool isSpacePressed = state[SDL_SCANCODE_SPACE];
@@ -198,7 +201,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
       jump_event.parameters["player"] = entity;
       jump_event.parameters["input_type"] = std::hash<std::string>{}("jump");
       jump_event.parameters["jump_force"] = -150.0f;
-      em->raise_event(jump_event);
+      em.raise_event(jump_event);
     }
     wasSpacePressed = isSpacePressed;
   }

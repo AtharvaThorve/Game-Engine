@@ -11,7 +11,10 @@ Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
       peerPublisher(context, zmq::socket_type::pub),
       peerSubscriber1(context, zmq::socket_type::sub),
       peerSubscriber2(context, zmq::socket_type::sub),
-      entityManager(entityManager), clientEntityManager(clientEntityManager) {}
+      entityManager(entityManager), clientEntityManager(clientEntityManager) {
+  dict = std::make_shared<
+      std::unordered_map<std::string, std::shared_ptr<Entity>>>();
+}
 
 void Client::connectRequester(const std::string &address, int port) {
   requester.connect(address + ":" + std::to_string(port));
@@ -115,7 +118,6 @@ void Client::receiveSubMsg() {
     deserializeClientEntityMap(recvMsg);
     // update the entities according to the subMsg
     updateOtherEntities();
-    // printEntityMap();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
@@ -216,30 +218,37 @@ void Client::updateOtherEntities() {
 
       // Mark entity as active
       activeEntities.insert(identifier);
-      std::cout << activeEntities.size() << std::endl;
 
       // Add or update entity in the dictionary
-      if (dict.find(identifier) == dict.end()) {
+      if (dict->find(identifier) == dict->end()) {
         Vector2 position{100, 100};
         Vector2 dimensions{40, 40};
         SDL_Color color = {0, 0, 0, 255};
         auto newEntity = std::make_shared<Entity>(position, dimensions, color,
                                                   &globalTimeline, 2);
-        dict[identifier] = newEntity;
+        (*dict)[identifier] = newEntity;
         clientEntityManager.addEntities(newEntity);
       }
-      dict[identifier]->position = newPosition;
+      if ((*dict)[identifier]->position.x != newPosition.x ||
+          (*dict)[identifier]->position.y != newPosition.y) {
+
+        // (*dict)[identifier]->position = newPosition;
+        Event update_position_event("update_position",
+        globalTimeline.getTime()); update_position_event.parameters["dict"] =
+        dict; update_position_event.parameters["identifier"] = identifier;
+        update_position_event.parameters["newPosition"] = newPosition;
+        EventManager &em = EventManager::getInstance();
+        em.raise_event(update_position_event);
+      }
     }
   }
 
-  std::cout << activeEntities.size() << std::endl;
-
   // Now remove entities not in the current active set
-  for (auto it = dict.begin(); it != dict.end();) {
+  for (auto it = dict->begin(); it != dict->end();) {
     if (activeEntities.find(it->first) == activeEntities.end()) {
       // Entity is no longer active, remove it
       clientEntityManager.removeEntity(it->second);
-      it = dict.erase(it); // Erase returns the next iterator
+      it = dict->erase(it); // Erase returns the next iterator
     } else {
       ++it; // Move to the next entity
     }

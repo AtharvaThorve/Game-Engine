@@ -1,7 +1,6 @@
 #include "input_handler.hpp"
 
-InputHandler::InputHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+InputHandler::InputHandler(Timeline *timeline) : timeline(timeline) {}
 
 void InputHandler::on_event(const Event &event) {
   if (event.type == input_event_hash) {

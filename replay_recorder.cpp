@@ -1,7 +1,6 @@
 #include "replay_recorder.hpp"
 
-ReplayRecorder::ReplayRecorder(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+ReplayRecorder::ReplayRecorder(Timeline *timeline) : timeline(timeline) {}
 
 void ReplayRecorder::on_event(const Event &event) {
   if (event.type == start_recording_hash) {
@@ -34,12 +33,13 @@ void ReplayRecorder::record_event(const Event &event) {
 void ReplayRecorder::play_recording() {
   if (!is_recording) {
     replay_start_time = timeline->getTime();
-    em->set_replay_only_mode(true);
+    EventManager &em = EventManager::getInstance();
+    em.set_replay_only_mode(true);
     for (auto &event : recorded_events) {
       Event replay_event = event;
       replay_event.timestamp += replay_start_time;
       replay_event.parameters["is_replay_event"] = true;
-      em->raise_event(replay_event);
+      em.raise_event(replay_event);
     }
   } else {
     std::cerr << "Recording is still running, stop it before replaying it"

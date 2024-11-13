@@ -17,7 +17,7 @@
 
 class Server {
 public:
-  Server(EventManager *em, Timeline *timeline);
+  Server(Timeline *timeline);
   void start(); // Main server loop
   void bindResponder(const std::string &address, int port);
   void bindPuller(const std::string &address, int port);
@@ -31,7 +31,6 @@ private:
   zmq::socket_t responder;
   zmq::socket_t puller;
   zmq::socket_t publisher;
-  EventManager *em;
   Timeline *timeline;
   std::shared_ptr<std::unordered_set<std::string>> connectedClientIDs;
   std::shared_ptr<std::unordered_map<std::string, std::unordered_map<int, std::pair<float, float>>>> clientEntityMap;

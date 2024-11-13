@@ -6,11 +6,10 @@
 
 class CollisionHandler : public EventHandler {
 public:
-  CollisionHandler(EventManager *em, Timeline *timeline);
+  CollisionHandler(Timeline *timeline);
   void on_event(const Event &event) override;
 
 private:
-  EventManager *em;
   Timeline *timeline;
   const size_t collision_event_hash = std::hash<std::string>{}("collision");
   const size_t platform_collision_hash = std::hash<std::string>{}("platform");

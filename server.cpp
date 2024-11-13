@@ -1,9 +1,9 @@
 #include "server.hpp"
 
-Server::Server(EventManager *em, Timeline *timeline)
+Server::Server(Timeline *timeline)
     : context(1), responder(context, zmq::socket_type::rep),
       puller(context, zmq::socket_type::pull),
-      publisher(context, zmq::socket_type::pub), em(em), timeline(timeline) {
+      publisher(context, zmq::socket_type::pub), timeline(timeline) {
   clientEntityMap = std::make_shared<std::unordered_map<
       std::string, std::unordered_map<int, std::pair<float, float>>>>();
   connectedClientIDs = std::make_shared<std::unordered_set<std::string>>();
@@ -26,7 +26,8 @@ void Server::raiseClientDisconnectEvent(std::string clientID) {
   disconnectEvent.parameters["clientEntityMap"] = clientEntityMap;
   disconnectEvent.parameters["clientID"] = clientID;
   disconnectEvent.parameters["connectedClientIDs"] = connectedClientIDs;
-  em->raise_event(disconnectEvent);
+  EventManager &em = EventManager::getInstance();
+  em.raise_event(disconnectEvent);
 }
 
 std::string Server::generateUniqueClientID() {
@@ -73,7 +74,8 @@ void Server::start() {
       memcpy(reply.data(), clientID.c_str(), clientID.size());
       responder.send(reply, zmq::send_flags::dontwait);
     }
-    em->process_events(timeline->getTime());
+    EventManager &em = EventManager::getInstance();
+    em.process_events(timeline->getTime());
   }
 }
 
@@ -122,9 +124,9 @@ void Server::handle_client_thread(const std::string &clientID) {
     auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(
         currentTime - lastReceivedTime);
 
-    if (elapsedTime >= timeoutDuration) {
-      break; // Exit the loop if timeout has been reached
-    }
+    // if (elapsedTime >= timeoutDuration) {
+    //   break; // Exit the loop if timeout has been reached
+    // }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }

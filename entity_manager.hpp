@@ -16,7 +16,7 @@ public:
 
   void removeEntity(std::shared_ptr<Entity> entity);
 
-  void updateEntities(EventManager *em, Timeline *timeline);
+  void updateEntities(Timeline *timeline);
 
   void applyGravityOnEntities(PhysicsSystem &physicsSystem);
 

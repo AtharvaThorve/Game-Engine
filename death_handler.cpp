@@ -1,7 +1,6 @@
 #include "death_handler.hpp"
 
-DeathHandler::DeathHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+DeathHandler::DeathHandler(Timeline *timeline) : timeline(timeline) {}
 
 void DeathHandler::on_event(const Event &event) {
   if (event.type == death_event_hash) {
@@ -18,5 +17,6 @@ void DeathHandler::handle_death(std::shared_ptr<Entity> player) {
 
   Event spawn_event("respawn", timeline->getTime() + 1000000000);
   spawn_event.parameters["player"] = player;
-  em->raise_event(spawn_event);
+  EventManager &em = EventManager::getInstance();
+  em.raise_event(spawn_event);
 }

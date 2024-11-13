@@ -2,6 +2,7 @@
 #include "event.hpp"
 #include "structs.hpp"
 #include <iostream>
+#include <mutex>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -14,17 +15,29 @@ public:
 
 class EventManager {
 private:
+  EventManager() {}
+  
   std::unordered_map<size_t, EventHandler *> handlers;
-  std::unordered_set<EventHandler*> wildcard_handlers;
+  std::unordered_set<EventHandler *> wildcard_handlers;
 
   std::priority_queue<Event, std::vector<Event>, EventCompare> event_queue;
   bool replay_only_mode = 0;
   int64_t replay_events_count = 0;
 
+  std::mutex event_mutex;
+
 public:
+  static EventManager &getInstance() {
+    static EventManager instance;
+    return instance;
+  }
+
+  EventManager(const EventManager &) = delete;
+  EventManager &operator=(const EventManager &) = delete;
+
   void register_handler(const std::string &event_type,
                         EventHandler *event_handler);
-  
+
   void register_wildcard_handler(EventHandler *event_handler);
 
   void deregister_handler(const std::string &event_type,

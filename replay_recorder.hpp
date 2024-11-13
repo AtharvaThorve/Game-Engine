@@ -5,11 +5,10 @@
 
 class ReplayRecorder : public EventHandler {
 public:
-  ReplayRecorder(EventManager *em, Timeline *timeline);
+  ReplayRecorder(Timeline *timeline);
   void on_event(const Event &event) override;
 
 private:
-  EventManager *em;
   Timeline *timeline;
 
   bool is_recording = false;

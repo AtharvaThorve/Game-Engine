@@ -1,7 +1,6 @@
 #include "respawn_handler.hpp"
 
-RespawnHandler::RespawnHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+RespawnHandler::RespawnHandler(Timeline *timeline) : timeline(timeline) {}
 
 void RespawnHandler::add_spawn_point(std::shared_ptr<Entity> spawnPoint) {
   spawn_points.insert(spawnPoint);

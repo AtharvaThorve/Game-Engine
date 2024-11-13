@@ -17,6 +17,7 @@ void EventManager::deregister_handler(const std::string &event_type,
 }
 
 void EventManager::raise_event(const Event &event) {
+  std::unique_lock<std::mutex> lock(event_mutex);
   event_queue.emplace(event);
   if (replay_only_mode &&
       event.parameters.find("is_replay_event") != event.parameters.end()) {
@@ -35,7 +36,10 @@ void EventManager::process_events(int64_t current_timestamp) {
   while (!event_queue.empty() &&
          event_queue.top().timestamp <= current_timestamp) {
     Event event = event_queue.top();
-    event_queue.pop();
+    {
+      std::unique_lock<std::mutex> lock(event_mutex);
+      event_queue.pop();
+    }
 
     if (replay_only_mode &&
         event.parameters.find("is_replay_event") == event.parameters.end())

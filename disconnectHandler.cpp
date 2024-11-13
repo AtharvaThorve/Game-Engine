@@ -1,7 +1,6 @@
 #include "disconnectHandler.hpp"
 
-DisconnectHandler::DisconnectHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+DisconnectHandler::DisconnectHandler(Timeline *timeline) : timeline(timeline) {}
 
 void DisconnectHandler::on_event(const Event &event) {
   if (event.type == disconnect_event_hash) {

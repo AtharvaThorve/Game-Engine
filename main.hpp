@@ -15,6 +15,7 @@
 #include "input_handler.hpp"
 #include "movement_handler.hpp"
 #include "physics.hpp"
+#include "position_handler.hpp"
 #include "replay_recorder.hpp"
 #include "respawn_handler.hpp"
 #include "scaling.hpp"

@@ -1,7 +1,6 @@
 #include "collision_handler.hpp"
 
-CollisionHandler::CollisionHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+CollisionHandler::CollisionHandler(Timeline *timeline) : timeline(timeline) {}
 
 void CollisionHandler::on_event(const Event &event) {
   if (event.type == collision_event_hash) {
@@ -24,6 +23,7 @@ void CollisionHandler::handle_collision(std::shared_ptr<Entity> entity1,
   } else if (collision_type == death_zone_collision_hash) {
     Event death_event("death", timeline->getTime() + 1);
     death_event.parameters["player"] = entity1;
-    em->raise_event(death_event);
+    EventManager &em = EventManager::getInstance();
+    em.raise_event(death_event);
   }
 }

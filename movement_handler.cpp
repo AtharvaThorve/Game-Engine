@@ -1,7 +1,6 @@
 #include "movement_handler.hpp"
 
-MovementHandler::MovementHandler(EventManager *em, Timeline *timeline)
-    : em(em), timeline(timeline) {}
+MovementHandler::MovementHandler(Timeline *timeline) : timeline(timeline) {}
 
 void MovementHandler::on_event(const Event &event) {
   if (event.type == move_event_hash) {
