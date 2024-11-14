@@ -8,13 +8,15 @@
 #include <vector>
 
 class Entity;
+class EntityManager;
 
 using VariantType = std::variant<
     bool, int, float, size_t, std::string, Vector2, std::shared_ptr<Entity>,
     std::shared_ptr<std::unordered_map<
         std::string, std::unordered_map<int, std::pair<float, float>>>>,
     std::shared_ptr<std::unordered_set<std::string>>,
-    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Entity>>>>;
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Entity>>>,
+    std::vector<std::shared_ptr<EntityManager>>>;
 
 class Event {
 public:

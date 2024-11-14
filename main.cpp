@@ -84,14 +84,10 @@ void doServerEntities(Server &server) {
 
   EventManager &event_manager = EventManager::getInstance();
 
-  event_manager.register_handler(
-      "collision", new CollisionHandler(&globalTimeline));
+  event_manager.register_handler("collision",
+                                 new CollisionHandler(&globalTimeline));
 
-  ReplayRecorder replay_recorder(&globalTimeline);
-  event_manager.register_wildcard_handler(&replay_recorder);
-
-  event_manager.register_handler(
-      "move", new MovementHandler(&globalTimeline));
+  event_manager.register_handler("move", new MovementHandler(&globalTimeline));
 
   while (true) {
     serverEntityManager.updateEntityDeltaTime();
@@ -161,8 +157,6 @@ void doClientGame(bool isP2P = false) {
   auto spawnPoint2 =
       std::make_shared<Entity>(Vector2{500, 200}, Vector2{1, 1},
                                SDL_Color{0, 0, 0, 0}, &globalTimeline, 1);
-  entityManager.addSpawnPoint(spawnPoint1);
-  entityManager.addSpawnPoint(spawnPoint2);
 
   int worldWidth = 5000;
   int worldHeight = 2000;
@@ -171,28 +165,29 @@ void doClientGame(bool isP2P = false) {
 
   EventManager &event_manager = EventManager::getInstance();
 
-  event_manager.register_handler(
-      "collision", new CollisionHandler(&globalTimeline));
+  std::vector<std::shared_ptr<EntityManager>> entityManagers = {
+      std::make_shared<EntityManager>(entityManager),
+      std::make_shared<EntityManager>(clientEntityManager)};
 
-  event_manager.register_handler(
-      "death", new DeathHandler(&globalTimeline));
+  event_manager.register_handler("collision",
+                                 new CollisionHandler(&globalTimeline));
+
+  event_manager.register_handler("death", new DeathHandler(&globalTimeline));
 
   RespawnHandler respawn_handler(&globalTimeline);
   respawn_handler.add_spawn_points(spawnPoint1, spawnPoint2);
 
   event_manager.register_handler("respawn", &respawn_handler);
 
-  event_manager.register_handler(
-      "input", new InputHandler(&globalTimeline));
+  event_manager.register_handler("input", new InputHandler(&globalTimeline));
 
-  ReplayRecorder replay_recorder(&globalTimeline);
+  ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
   event_manager.register_wildcard_handler(&replay_recorder);
 
-  event_manager.register_handler(
-      "move", new MovementHandler(&globalTimeline));
+  event_manager.register_handler("move", new MovementHandler(&globalTimeline));
 
-  event_manager.register_handler(
-      "update_position", new PositionHandler(&globalTimeline));
+  event_manager.register_handler("update_position",
+                                 new PositionHandler(&globalTimeline));
 
   std::thread networkThread(runClient, std::ref(playerEntityManager),
                             std::ref(clientEntityManager));
@@ -277,8 +272,7 @@ int main(int argc, char *argv[]) {
   if (mode1 == "server" && mode2.empty()) {
 
     EventManager &em = EventManager::getInstance();
-    em.register_handler("disconnect",
-                        new DisconnectHandler(&globalTimeline));
+    em.register_handler("disconnect", new DisconnectHandler(&globalTimeline));
 
     Server server(&globalTimeline);
     server.bindResponder("tcp://*", 5556);

@@ -142,12 +142,10 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
 
     if (state[SDL_SCANCODE_W]) {
       pressed_directions.insert(std::hash<std::string>{}("up"));
-      raiseMovementEvent("move_y", entity, -accelerationRate,
-                         globalTimeline);
+      raiseMovementEvent("move_y", entity, -accelerationRate, globalTimeline);
     } else if (state[SDL_SCANCODE_S]) {
       pressed_directions.insert(std::hash<std::string>{}("down"));
-      raiseMovementEvent("move_y", entity, accelerationRate,
-                         globalTimeline);
+      raiseMovementEvent("move_y", entity, accelerationRate, globalTimeline);
     } else {
       pressed_directions.erase(std::hash<std::string>{}("up"));
       pressed_directions.erase(std::hash<std::string>{}("down"));
@@ -157,12 +155,10 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
 
     if (state[SDL_SCANCODE_A]) {
       pressed_directions.insert(std::hash<std::string>{}("left"));
-      raiseMovementEvent("move_x", entity, -accelerationRate,
-                         globalTimeline);
+      raiseMovementEvent("move_x", entity, -accelerationRate, globalTimeline);
     } else if (state[SDL_SCANCODE_D]) {
       pressed_directions.insert(std::hash<std::string>{}("right"));
-      raiseMovementEvent("move_x", entity, accelerationRate,
-                         globalTimeline);
+      raiseMovementEvent("move_x", entity, accelerationRate, globalTimeline);
     } else {
       pressed_directions.erase(std::hash<std::string>{}("left"));
       pressed_directions.erase(std::hash<std::string>{}("right"));

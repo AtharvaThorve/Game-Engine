@@ -1,6 +1,9 @@
 #include "replay_recorder.hpp"
 
-ReplayRecorder::ReplayRecorder(Timeline *timeline) : timeline(timeline) {}
+ReplayRecorder::ReplayRecorder(
+    Timeline *timeline,
+    std::vector<std::shared_ptr<EntityManager>> &entityManagers)
+    : timeline(timeline), entityManagers(entityManagers) {}
 
 void ReplayRecorder::on_event(const Event &event) {
   if (event.type == start_recording_hash) {
@@ -18,6 +21,15 @@ void ReplayRecorder::start_recording() {
   is_recording = true;
   recording_start_time = timeline->getTime();
   recorded_events.clear();
+  initial_positions.clear();
+
+  for (const auto &manager : entityManagers) {
+    for (const auto &entity : manager->getEntities()) {
+      if (entity) {
+        initial_positions[entity] = entity->position;
+      }
+    }
+  }
 }
 
 void ReplayRecorder::stop_recording() { is_recording = false; }
@@ -34,7 +46,14 @@ void ReplayRecorder::play_recording() {
   if (!is_recording) {
     replay_start_time = timeline->getTime();
     EventManager &em = EventManager::getInstance();
+
+    for (const auto &pair : initial_positions) {
+      auto entity = pair.first;
+      entity->position = pair.second;
+    }
+
     em.set_replay_only_mode(true);
+
     for (auto &event : recorded_events) {
       Event replay_event = event;
       replay_event.timestamp += replay_start_time;

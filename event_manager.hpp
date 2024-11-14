@@ -10,6 +10,7 @@
 
 class EventHandler {
 public:
+  virtual ~EventHandler() = default;
   virtual void on_event(const Event &event) = 0;
 };
 
