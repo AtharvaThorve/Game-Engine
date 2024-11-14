@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 extern App *app;
 
@@ -80,6 +81,11 @@ public:
   // Clearing platform's reference
   void clearPlatformReference();
 
+  Vector2 getPosition();
+  void setPosition(const Vector2 &ps);
+
 private:
   void updateSDLObject(float cameraX, float cameraY);
+
+  std::mutex positionMutex;
 };

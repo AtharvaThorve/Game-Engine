@@ -62,7 +62,7 @@ void ReplayRecorder::play_recording() {
     // started
     for (const auto &pair : initial_positions) {
       auto entity = pair.first;
-      entity->position = pair.second;
+      entity->setPosition(pair.second);
       entity->velocity = {0, 0};
       entity->inputAcceleration = {0, 0};
     }
@@ -84,7 +84,7 @@ void ReplayRecorder::play_recording() {
 void ReplayRecorder::replay_complete() {
   for (const auto &pair : final_positions) {
     auto entity = pair.first;
-    entity->position = pair.second;
+    entity->setPosition(pair.second);
     entity->velocity = {0, 0};
     entity->inputAcceleration = {0, 0};
   }

@@ -130,9 +130,10 @@ void Client::start(bool isP2P) {
   } else {
     // Serialize positions of all entities in the EntityManager
     for (const auto &entity : entityManager.getEntities()) {
+      Vector2 position = entity->getPosition();
       message += std::to_string(entity->getID()) + " " +
-                 std::to_string(entity->position.x) + " " +
-                 std::to_string(entity->position.y) + " ";
+                 std::to_string(position.x) + " " +
+                 std::to_string(position.y) + " ";
     }
   }
 

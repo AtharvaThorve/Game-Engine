@@ -85,3 +85,13 @@ void Entity::updateSDLObject(float cameraX, float cameraY) {
 }
 
 void Entity::clearPlatformReference() { standingPlatform = nullptr; }
+
+Vector2 Entity::getPosition() {
+  std::unique_lock<std::mutex> lock(positionMutex);
+  return position;
+}
+
+void Entity::setPosition(const Vector2& ps) {
+  std::unique_lock<std::mutex> lock(positionMutex);
+  position = ps;
+}

@@ -29,8 +29,11 @@ void MovementHandler::handle_movement(std::shared_ptr<Entity> entity) {
                    -entity->maxVelocity.y);
     }
 
-    entity->position.x += entity->velocity.x * entity->deltaTime;
-    entity->position.y += entity->velocity.y * entity->deltaTime;
+    Vector2 position = entity->getPosition();
+    position.x += entity->velocity.x * entity->deltaTime;
+    position.y += entity->velocity.y * entity->deltaTime;
+
+    entity->setPosition(position);
 
     if (entity->standingPlatform) {
       Vector2 platformDelta;
@@ -39,9 +42,12 @@ void MovementHandler::handle_movement(std::shared_ptr<Entity> entity) {
       platformDelta.y = entity->standingPlatform->velocity.y *
                         entity->standingPlatform->deltaTime;
 
+      Vector2 position = entity->getPosition();
       // Move the entity with the platform
-      entity->position.x += platformDelta.x;
-      entity->position.y += platformDelta.y;
+      position.x += platformDelta.x;
+      position.y += platformDelta.y;
+
+      entity->setPosition(position);
     }
   }
 }
