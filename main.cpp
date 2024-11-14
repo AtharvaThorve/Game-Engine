@@ -181,13 +181,13 @@ void doClientGame(bool isP2P = false) {
 
   event_manager.register_handler("input", new InputHandler(&globalTimeline));
 
-  ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
-  event_manager.register_wildcard_handler(&replay_recorder);
-
   event_manager.register_handler("move", new MovementHandler(&globalTimeline));
 
   event_manager.register_handler("update_position",
                                  new PositionHandler(&globalTimeline));
+
+  ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
+  event_manager.register_wildcard_handler(&replay_recorder);
 
   std::thread networkThread(runClient, std::ref(playerEntityManager),
                             std::ref(clientEntityManager));
@@ -213,13 +213,13 @@ void doClientGame(bool isP2P = false) {
 
     // Check death and respawn
     if (entityManager.checkPlayerDeath(player)) {
-      Event death_event("death", globalTimeline.getTime() + 1);
+      Event death_event("death", globalTimeline.getTime());
       death_event.parameters["player"] = player;
       event_manager.raise_event(death_event);
     }
 
     if (player->isColliding(*ground1)) {
-      Event collision_event("collision", globalTimeline.getTime() + 1);
+      Event collision_event("collision", globalTimeline.getTime());
       collision_event.parameters["entity1"] = player;
       collision_event.parameters["entity2"] = ground1;
       collision_event.parameters["collision_type"] =
@@ -227,7 +227,7 @@ void doClientGame(bool isP2P = false) {
       event_manager.raise_event(collision_event);
     }
     if (player->isColliding(*ground2)) {
-      Event collision_event("collision", globalTimeline.getTime() + 1);
+      Event collision_event("collision", globalTimeline.getTime());
       collision_event.parameters["entity1"] = player;
       collision_event.parameters["entity2"] = ground2;
       collision_event.parameters["collision_type"] =

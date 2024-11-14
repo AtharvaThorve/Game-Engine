@@ -60,6 +60,10 @@ void EventManager::process_events(int64_t current_timestamp) {
 
       if (replay_events_count == 0) {
         replay_only_mode = false;
+        
+        Event replay_complete("replay_complete", current_timestamp);
+        raise_event(replay_complete);
+
         std::cout << "Replay Complete" << std::endl;
       }
     }

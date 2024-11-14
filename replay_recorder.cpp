@@ -12,6 +12,8 @@ void ReplayRecorder::on_event(const Event &event) {
     stop_recording();
   } else if (event.type == play_recording_hash) {
     play_recording();
+  } else if (event.type == replay_complete_hash) {
+    replay_complete();
   } else {
     record_event(event);
   }
@@ -47,9 +49,22 @@ void ReplayRecorder::play_recording() {
     replay_start_time = timeline->getTime();
     EventManager &em = EventManager::getInstance();
 
+    final_positions.clear();
+    for (const auto &manager : entityManagers) {
+      for (const auto &entity : manager->getEntities()) {
+        if (entity) {
+          final_positions[entity] = entity->position;
+        }
+      }
+    }
+
+    // Snap entities to the initial_positions they were at when recording
+    // started
     for (const auto &pair : initial_positions) {
       auto entity = pair.first;
       entity->position = pair.second;
+      entity->velocity = {0, 0};
+      entity->inputAcceleration = {0, 0};
     }
 
     em.set_replay_only_mode(true);
@@ -63,5 +78,14 @@ void ReplayRecorder::play_recording() {
   } else {
     std::cerr << "Recording is still running, stop it before replaying it"
               << std::endl;
+  }
+}
+
+void ReplayRecorder::replay_complete() {
+  for (const auto &pair : final_positions) {
+    auto entity = pair.first;
+    entity->position = pair.second;
+    entity->velocity = {0, 0};
+    entity->inputAcceleration = {0, 0};
   }
 }

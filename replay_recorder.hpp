@@ -20,6 +20,7 @@ private:
 
   std::vector<Event> recorded_events;
   std::unordered_map<std::shared_ptr<Entity>, Vector2> initial_positions;
+  std::unordered_map<std::shared_ptr<Entity>, Vector2> final_positions;
 
   const size_t start_recording_hash =
       std::hash<std::string>{}("start_recording");
@@ -30,5 +31,6 @@ private:
   void start_recording();
   void stop_recording();
   void play_recording();
+  void replay_complete();
   void record_event(const Event &event);
 };
