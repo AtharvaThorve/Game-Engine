@@ -49,4 +49,5 @@ public:
   void process_events(int64_t current_timestamp);
 
   void set_replay_only_mode(bool mode);
+  bool get_replay_only_mode();
 };

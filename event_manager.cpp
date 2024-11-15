@@ -32,6 +32,10 @@ void EventManager::set_replay_only_mode(bool mode) {
   }
 }
 
+bool EventManager::get_replay_only_mode() {
+  return replay_only_mode;
+}
+
 void EventManager::process_events(int64_t current_timestamp) {
   while (!event_queue.empty() &&
          event_queue.top().timestamp <= current_timestamp) {

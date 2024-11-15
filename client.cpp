@@ -130,10 +130,12 @@ void Client::start(bool isP2P) {
   } else {
     // Serialize positions of all entities in the EntityManager
     for (const auto &entity : entityManager.getEntities()) {
-      Vector2 position = entity->getPosition();
+      Vector2 position = EventManager::getInstance().get_replay_only_mode()
+          ? Vector2{10000, 10000}:
+              entity->getPosition();
       message += std::to_string(entity->getID()) + " " +
-                 std::to_string(position.x) + " " +
-                 std::to_string(position.y) + " ";
+                 std::to_string(position.x) + " " + std::to_string(position.y) +
+                 " ";
     }
   }
 
@@ -148,7 +150,7 @@ void Client::start(bool isP2P) {
     peerPublisher.send(peerMessage, zmq::send_flags::none);
   }
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(45));
 }
 
 void Client::deserializeClientEntityMap(const std::string &pubMsg) {
@@ -235,8 +237,9 @@ void Client::updateOtherEntities() {
 
         // (*dict)[identifier]->position = newPosition;
         Event update_position_event("update_position",
-        globalTimeline.getTime()); update_position_event.parameters["dict"] =
-        dict; update_position_event.parameters["identifier"] = identifier;
+                                    globalTimeline.getTime());
+        update_position_event.parameters["dict"] = dict;
+        update_position_event.parameters["identifier"] = identifier;
         update_position_event.parameters["newPosition"] = newPosition;
         EventManager &em = EventManager::getInstance();
         em.raise_event(update_position_event);
