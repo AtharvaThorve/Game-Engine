@@ -19,14 +19,17 @@
 #include "replay_recorder.hpp"
 #include "respawn_handler.hpp"
 #include "scaling.hpp"
+#include "script_manager.hpp"
 #include "server.hpp"
 #include "structs.hpp"
 #include "timeline.hpp"
 #include <SDL2/SDL.h>
 #include <atomic>
 #include <iostream>
+#include <libplatform/libplatform.h>
 #include <memory>
 #include <thread>
+#include <v8.h>
 
 // SDL render and window context
 extern App *app;
