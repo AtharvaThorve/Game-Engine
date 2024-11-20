@@ -105,14 +105,8 @@ void usage() {
             << "\n"
             << "Commands:\n"
             << "\th: run hello_world.js\n"
-            << "\tc: run create_object.js\n"
-            << "\tm: run modify_position.js\n"
-            << "\tr: reload scripts from files\n"
-            << "\tl: list all game objects\n"
-            << "\ta: create new object and assign random position\n"
-            << "\to: run random_object.js\n"
-            << "\t?: to print this message\n"
-            << "\tq: quit" << std::endl;
+            << "\tk: To kill the player\n"
+            << std::endl;
 }
 
 void doClientGame() {

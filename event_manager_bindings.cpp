@@ -1,17 +1,12 @@
 #include "event_manager_bindings.hpp"
 
+extern Timeline globalTimeline;
+
 void process_events(const v8::FunctionCallbackInfo<v8::Value> &args) {
   v8::Isolate *isolate = args.GetIsolate();
   v8::HandleScope handle_scope(isolate);
 
-  if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(v8::Exception::TypeError(
-        v8::String::NewFromUtf8(isolate, "Expected a number")));
-    return;
-  }
-
-  int64_t timestamp =
-      args[0]->IntegerValue(isolate->GetCurrentContext()).FromJust();
+  int64_t timestamp = globalTimeline.getTime();
   EventManager::getInstance().process_events(timestamp);
 }
 
@@ -27,7 +22,9 @@ void raise_event(const v8::FunctionCallbackInfo<v8::Value> &args) {
 
   v8::String::Utf8Value event_type(isolate, args[0]);
 
-  Event event(*event_type);
+  int64_t timestamp = globalTimeline.getTime() + 1;
+
+  Event event(*event_type, timestamp);
 
   if (args.Length() > 1 && args[1]->IsObject()) {
     v8::Local<v8::Object> js_params =
@@ -79,8 +76,14 @@ void raise_event(const v8::FunctionCallbackInfo<v8::Value> &args) {
           v8::Local<v8::External> entity_ptr =
               v8::Local<v8::External>::Cast(obj->GetInternalField(0));
           if (!entity_ptr.IsEmpty()) {
-            std::shared_ptr<Entity> entity_shared_ptr =
-                *static_cast<std::shared_ptr<Entity> *>(entity_ptr->Value());
+            Entity *raw_entity_ptr = static_cast<Entity *>(entity_ptr->Value());
+
+            std::shared_ptr<Entity> entity_shared_ptr(raw_entity_ptr,
+                                                      [](Entity *) {
+                                                        // No-op deleter: do
+                                                        // nothing
+                                                      });
+
             event.parameters[key_str] = entity_shared_ptr;
           } else {
             std::cerr << "Failed to retrieve Entity pointer for key: "
@@ -91,13 +94,11 @@ void raise_event(const v8::FunctionCallbackInfo<v8::Value> &args) {
                     << std::endl;
         }
       } else {
-        // Unhandled type: log or ignore
         std::cerr << "Unhandled parameter type for key: " << key_str
                   << std::endl;
       }
     }
   }
-
   EventManager::getInstance().raise_event(event);
 }
 

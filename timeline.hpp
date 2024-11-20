@@ -25,4 +25,6 @@ public:
     int64_t getTic();
     int64_t getAnchorTic();
     int64_t getStartTime();
+
+    ~Timeline() = default;
 };

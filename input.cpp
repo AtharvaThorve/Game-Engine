@@ -12,6 +12,7 @@ static bool wasSpacePressed = false;
 static bool wasEnterPressed = false;
 static bool isRecording = false;
 static bool wasRShiftPressed = false;
+static bool wasKPressed = false;
 static std::unordered_set<size_t> pressed_directions;
 
 // Helper function for raising movement events
@@ -144,8 +145,10 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     sm->runOne("hello_world", false, "default");
   }
   bool k = state[SDL_SCANCODE_K];
-  if(k) {
-    sm->runOne("player", false, "default");
+  if(k != wasKPressed) {
+    if(k)
+      sm->runOne("player", false, "default");
+    wasKPressed = k;
   }
 
   // Handle player movement
