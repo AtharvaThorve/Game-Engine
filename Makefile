@@ -36,7 +36,8 @@ SRC = main.cpp \
       position_handler.cpp \
       v8helpers.cpp \
       script_manager.cpp \
-
+      event_manager_bindings.cpp \
+      entity_bindings.cpp \
 # Object directory
 OBJDIR = obj
 

@@ -77,7 +77,8 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             float accelerationRate, float dash_speed, float dash_duration) {
+             ScriptManager *sm, float accelerationRate, float dash_speed,
+             float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
   EventManager &em = EventManager::getInstance();
 
@@ -117,7 +118,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (isRecording) {
       std::cout << "Started Recording" << std::endl;
       Event start_recording_event("start_recording", globalTimeline->getTime());
-      
+
       em.raise_event(start_recording_event);
     } else {
       std::cout << "Stopped Recording" << std::endl;
@@ -137,6 +138,17 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     wasRShiftPressed = rShiftPressed;
   }
 
+  // Handle script inputs
+  bool h = state[SDL_SCANCODE_H];
+  if(h) {
+    sm->runOne("hello_world", false, "default");
+  }
+  bool k = state[SDL_SCANCODE_K];
+  if(k) {
+    sm->runOne("player", false, "default");
+  }
+
+  // Handle player movement
   if (entity->isMovable) {
     bool l_shift_pressed = state[SDL_SCANCODE_LSHIFT];
 

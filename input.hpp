@@ -5,6 +5,7 @@
 #include "entity.hpp"
 #include "event_manager.hpp"
 #include "scaling.hpp"
+#include "script_manager.hpp"
 #include "structs.hpp"
 #include <SDL2/SDL.h>
 #include <optional>
@@ -24,5 +25,5 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 
 // Function to handle player input
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
-             float accelerationRate = 5, float dash_speed = 50,
-             float dash_duration = 3000000000);
+             ScriptManager *sm, float accelerationRate = 5,
+             float dash_speed = 50, float dash_duration = 3000000000);

@@ -97,6 +97,24 @@ void doServerEntities(Server &server) {
   }
 }
 
+void usage() {
+  // Usage
+  std::cout << "\n"
+            << "JavaScript <--> C++ Integration Example\n"
+            << "---------------------------------------\n"
+            << "\n"
+            << "Commands:\n"
+            << "\th: run hello_world.js\n"
+            << "\tc: run create_object.js\n"
+            << "\tm: run modify_position.js\n"
+            << "\tr: reload scripts from files\n"
+            << "\tl: list all game objects\n"
+            << "\ta: create new object and assign random position\n"
+            << "\to: run random_object.js\n"
+            << "\t?: to print this message\n"
+            << "\tq: quit" << std::endl;
+}
+
 void doClientGame() {
   std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
@@ -113,11 +131,22 @@ void doClientGame() {
     v8::HandleScope handle_scope(isolate);
     v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
 
+    global->Set(isolate, "print",
+                v8::FunctionTemplate::New(isolate, v8helpers::Print));
+    global->Set(
+        isolate, "gethandle",
+        v8::FunctionTemplate::New(isolate, ScriptManager::getHandleFromScript));
+    bind_event_manager(isolate, global);
+
     v8::Local<v8::Context> context = v8::Context::New(isolate, nullptr, global);
     v8::Context::Scope context_scope(context);
 
     ScriptManager *sm = new ScriptManager(isolate, context);
-    
+
+    sm->addScript("hello_world", "scripts/hello_world.js");
+    sm->addScript("player", "scripts/player.js");
+
+    usage();
 
     initSDL();
     float scale = 1.0f;
@@ -134,6 +163,8 @@ void doClientGame() {
     player->isMovable = true;
     player->isHittable = true;
     player->isAffectedByGravity = true;
+
+    expose_entity_to_v8(player, isolate, context);
 
     EntityManager playerEntityManager;
     playerEntityManager.addEntities(player);
@@ -219,7 +250,7 @@ void doClientGame() {
                               std::ref(entityManager));
 
     while (true) {
-      doInput(player, &globalTimeline, 50.0f, 200.0f);
+      doInput(player, &globalTimeline, sm, 50.0f, 200.0f);
 
       camera.update(*player, worldWidth, worldHeight);
 

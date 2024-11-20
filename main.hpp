@@ -8,8 +8,10 @@
 #include "disconnectHandler.hpp"
 #include "draw.hpp"
 #include "entity.hpp"
+#include "entity_bindings.hpp"
 #include "entity_manager.hpp"
 #include "event_manager.hpp"
+#include "event_manager_bindings.hpp"
 #include "init.hpp"
 #include "input.hpp"
 #include "input_handler.hpp"
@@ -23,6 +25,7 @@
 #include "server.hpp"
 #include "structs.hpp"
 #include "timeline.hpp"
+#include "v8helpers.hpp"
 #include <SDL2/SDL.h>
 #include <atomic>
 #include <iostream>
