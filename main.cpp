@@ -169,8 +169,11 @@ void doClientGame(bool isP2P = false) {
       std::make_shared<EntityManager>(entityManager),
       std::make_shared<EntityManager>(clientEntityManager)};
 
-  event_manager.register_handler("collision",
-                                 new CollisionHandler(&globalTimeline));
+  CollisionHandler collision_handler(&globalTimeline);
+  collision_handler.register_collision_handler("platform", collision_utils::handlePlatformCollision);
+  collision_handler.register_collision_handler("death_zone", collision_utils::handleDeathZoneCollision);
+
+  event_manager.register_handler("collision", &collision_handler);
 
   event_manager.register_handler("death", new DeathHandler(&globalTimeline));
 
@@ -222,16 +225,14 @@ void doClientGame(bool isP2P = false) {
       Event collision_event("collision", globalTimeline.getTime());
       collision_event.parameters["entity1"] = player;
       collision_event.parameters["entity2"] = ground1;
-      collision_event.parameters["collision_type"] =
-          std::hash<std::string>{}("platform");
+      collision_event.parameters["collision_type"] = "platform";
       event_manager.raise_event(collision_event);
     }
     if (player->isColliding(*ground2)) {
       Event collision_event("collision", globalTimeline.getTime());
       collision_event.parameters["entity1"] = player;
       collision_event.parameters["entity2"] = ground2;
-      collision_event.parameters["collision_type"] =
-          std::hash<std::string>{}("platform");
+      collision_event.parameters["collision_type"] = "platform";
       event_manager.raise_event(collision_event);
     }
 
