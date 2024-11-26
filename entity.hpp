@@ -14,6 +14,7 @@ extern App *app;
 class Entity {
 public:
   Vector2 position = {0, 0};
+  Vector2 dimensions = {0, 0};
 
   Vector2 velocity = {0, 0};
   Vector2 maxVelocity = {50, 50};

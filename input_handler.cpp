@@ -37,6 +37,7 @@ void InputHandler::handle_input(std::shared_ptr<Entity> player,
     player->inputAcceleration.x = acceleration_rate;
   } else if (input_type == stop_x) {
     player->inputAcceleration.x = 0;
+    player->velocity.x = 0;
   }
 
   if (input_type == move_y) {

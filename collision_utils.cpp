@@ -79,4 +79,33 @@ void handleDeathZoneCollision(std::shared_ptr<Entity> entityA,
   em.raise_event(death_event);
 }
 
+void handleBallPaddleCollision(std::shared_ptr<Entity> ball,
+                               std::shared_ptr<Entity> paddle) {
+  ball->velocity.y = -std::abs(ball->velocity.y);
+  float deltaX = ball->position.x - paddle->position.x;
+  ball->velocity.x += deltaX * 5 * (ball->velocity.x >= 0 ? 1 : -1);
+}
+
+void handleBallBrickCollision(std::shared_ptr<Entity> ball,
+                              std::shared_ptr<Entity> brick) {
+  std::string dir = checkCollisionDirection(ball, brick);
+  if (dir == "up" || dir == "down")
+    ball->velocity.y = -ball->velocity.y;
+  else if (dir == "left" || dir == "right")
+    ball->velocity.x = -ball->velocity.x;
+    
+  brick->isHittable = false;
+}
+
+void handleBallWallCollision(std::shared_ptr<Entity> ball, int screenWidth,
+                             int screenHeight) {
+  if (ball->position.x <= 0 ||
+      ball->position.x + ball->dimensions.x >= screenWidth) {
+    ball->velocity.x = -ball->velocity.x;
+  }
+  if (ball->position.y <= 0) {
+    ball->velocity.y = -ball->velocity.y;
+  }
+}
+
 } // namespace collision_utils

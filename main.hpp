@@ -27,6 +27,9 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
 
 // SDL render and window context
 extern App *app;
