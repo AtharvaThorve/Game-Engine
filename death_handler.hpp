@@ -1,6 +1,7 @@
 #pragma once
 #include "entity.hpp"
 #include "event_manager.hpp"
+#include "main.hpp"
 #include "timeline.hpp"
 
 class DeathHandler : public EventHandler {

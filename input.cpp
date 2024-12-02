@@ -12,6 +12,7 @@ static bool wasSpacePressed = false;
 static bool wasEnterPressed = false;
 static bool isRecording = false;
 static bool wasRShiftPressed = false;
+static bool wasJPressed = false;
 static std::unordered_set<size_t> pressed_directions;
 
 // Helper function for raising movement events
@@ -77,6 +78,8 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
+             EntityManager &entityManager,
+             std::list<std::shared_ptr<Entity>> &playerBullets,
              float accelerationRate, float dash_speed, float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
   EventManager &em = EventManager::getInstance();
@@ -85,7 +88,6 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
       Client::disconnectRequested.store(true);
-      // exit(0);
     }
   }
 
@@ -117,7 +119,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (isRecording) {
       std::cout << "Started Recording" << std::endl;
       Event start_recording_event("start_recording", globalTimeline->getTime());
-      
+
       em.raise_event(start_recording_event);
     } else {
       std::cout << "Stopped Recording" << std::endl;
@@ -164,6 +166,24 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
       pressed_directions.erase(std::hash<std::string>{}("right"));
       if (entity->inputAcceleration.x != 0)
         raiseMovementEvent("stop_x", entity, 0, globalTimeline);
+    }
+
+    bool isJPressed = state[SDL_SCANCODE_J];
+    if (isJPressed && !wasJPressed) {
+      auto bullet = std::make_shared<Entity>(
+          Vector2{entity->position.x + (entity->dimensions.x / 2),
+                  entity->position.y + entity->dimensions.y},
+          Vector2{10, 20}, SDL_Color{0, 0, 0, 255}, globalTimeline, 1);
+      bullet->position = entity->position;
+      bullet->velocity = Vector2{0, -150};
+      bullet->isMovable = true;
+      entityManager.addEntity(bullet);
+      playerBullets.push_back(bullet);
+      wasJPressed = true;
+    }
+
+    if (!isJPressed) {
+      wasJPressed = false;
     }
 
     if ((pressed_directions.size() > 1 &&

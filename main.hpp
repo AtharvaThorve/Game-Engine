@@ -25,6 +25,7 @@
 #include <SDL2/SDL.h>
 #include <atomic>
 #include <iostream>
+#include <list>
 #include <memory>
 #include <thread>
 

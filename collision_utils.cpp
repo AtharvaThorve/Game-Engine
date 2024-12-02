@@ -79,4 +79,28 @@ void handleDeathZoneCollision(std::shared_ptr<Entity> entityA,
   em.raise_event(death_event);
 }
 
+void handlePlayerBulletAlienCollision(std::shared_ptr<Entity> bullet,
+                                      std::shared_ptr<Entity> alien) {
+  alien->isHittable = false;
+  bullet->isHittable = false;
+}
+
+void handleAlienBulletPlayerCollision(std::shared_ptr<Entity> bullet,
+                                      std::shared_ptr<Entity> player) {
+  bullet->isHittable = false;
+  Event death_event("death", globalTimeline.getTime() + 1);
+  death_event.parameters["player"] = player;
+  EventManager &em = EventManager::getInstance();
+  em.raise_event(death_event);
+}
+
+void handlePlayerWallCollision(std::shared_ptr<Entity> player, int worldWidth) {
+  Vector2 playerPos = player->getPosition();
+  if (playerPos.x < 0) {
+    playerPos.x = 0;
+  } else if (playerPos.x + player->dimensions.x >= worldWidth) {
+    playerPos.x = worldWidth - player->dimensions.x;
+  }
+}
+
 } // namespace collision_utils

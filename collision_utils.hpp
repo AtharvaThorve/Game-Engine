@@ -13,4 +13,8 @@ namespace collision_utils {
     std::string checkCollisionDirection(std::shared_ptr<Entity> entityA, std::shared_ptr<Entity> entityB);
     void handlePlatformCollision(std::shared_ptr<Entity> entityA, std::shared_ptr<Entity> entityB);
     void handleDeathZoneCollision(std::shared_ptr<Entity> entityA, std::shared_ptr<Entity> entityB);
+    void handlePlayerBulletAlienCollision(std::shared_ptr<Entity> bullet, std::shared_ptr<Entity> alien);
+    void handleAlienBulletPlayerCollision(std::shared_ptr<Entity> bullet, std::shared_ptr<Entity> player);
+    void handleBulletWallCollision(std::shared_ptr<Entity> bullet, int worldHeight);
+    void handlePlayerWallCollision(std::shared_ptr<Entity> player, int worldWidth);
 }
