@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 extern App *app;
 
@@ -26,6 +27,7 @@ public:
   bool isMovable = false;
   bool isHittable = false;
   bool isDashing = false;
+  bool isDrawable = true;
 
   std::unique_ptr<Shape> shape;
   SDL_Color color;
@@ -84,6 +86,9 @@ public:
 
   Vector2 getPosition();
   void setPosition(const Vector2 &ps);
+
+  std::unordered_map<std::string, std::string> serialize() const;
+  void deserialize(const std::unordered_map<std::string, std::string> &state);
 
 private:
   void updateSDLObject(float cameraX, float cameraY);
