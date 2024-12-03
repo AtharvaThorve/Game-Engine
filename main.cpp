@@ -206,7 +206,7 @@ void doClientGame() {
       for (auto &alien : aliens) {
         Vector2 alienPos = alien->getPosition();
         alien->velocity.x *= -1;
-        alien->setPosition(Vector2{alienPos.x, alienPos.y + 10});
+        alien->setPosition(Vector2{alienPos.x, alienPos.y + 5});
       }
     }
 
@@ -241,8 +241,8 @@ void doClientGame() {
       auto &playerBullet = *bulletIt;
       bool bulletRemoved = false;
 
-      std::list<std::shared_ptr<Entity>> aliensToRemove;
-      std::list<std::shared_ptr<Entity>> bulletsToRemove;
+      std::unordered_set<std::shared_ptr<Entity>> aliensToRemove;
+      std::unordered_set<std::shared_ptr<Entity>> bulletsToRemove;
 
       for (auto &alien : aliens) {
         if (alien->isColliding(*playerBullet)) {
@@ -253,15 +253,15 @@ void doClientGame() {
           EventManager &em = EventManager::getInstance();
           em.raise_event(collision_event);
 
-          aliensToRemove.push_back(alien);
-          bulletsToRemove.push_back(playerBullet);
+          aliensToRemove.insert(alien);
+          bulletsToRemove.insert(playerBullet);
           bulletRemoved = true;
           break;
         }
       }
 
       if (!bulletRemoved && playerBullet->position.y < 0) {
-        bulletsToRemove.push_back(playerBullet);
+        bulletsToRemove.insert(playerBullet);
       }
 
       for (auto &alien : aliensToRemove) {
