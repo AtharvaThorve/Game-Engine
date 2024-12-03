@@ -46,8 +46,6 @@ void ReplayRecorder::record_event(const Event &event) {
 
 void ReplayRecorder::play_recording() {
   if (!is_recording) {
-    replay_start_time = timeline->getTime();
-    EventManager &em = EventManager::getInstance();
 
     final_states.clear();
     for (const auto &manager : entityManagers) {
@@ -66,8 +64,10 @@ void ReplayRecorder::play_recording() {
       }
     }
 
+    EventManager &em = EventManager::getInstance();
     em.set_replay_only_mode(true);
 
+    replay_start_time = timeline->getTime();
     for (auto &event : recorded_events) {
       Event replay_event = event;
       replay_event.timestamp += replay_start_time;
@@ -91,12 +91,12 @@ void ReplayRecorder::replay_complete() {
 }
 
 std::shared_ptr<Entity> ReplayRecorder::find_entity_by_id(int64_t id) const {
-    for (const auto &manager : entityManagers) {
-        for (const auto &entity : manager->getEntities()) {
-            if (entity && entity->getID() == id) {
-                return entity;
-            }
-        }
+  for (const auto &manager : entityManagers) {
+    for (const auto &entity : manager->getEntities()) {
+      if (entity && entity->getID() == id) {
+        return entity;
+      }
     }
-    return nullptr;
+  }
+  return nullptr;
 }
