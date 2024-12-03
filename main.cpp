@@ -166,12 +166,14 @@ void doClientGame(bool isP2P = false) {
   EventManager &event_manager = EventManager::getInstance();
 
   std::vector<std::shared_ptr<EntityManager>> entityManagers = {
-      std::make_shared<EntityManager>(entityManager),
-      std::make_shared<EntityManager>(clientEntityManager)};
+      std::shared_ptr<EntityManager>(std::addressof(entityManager)),
+      std::shared_ptr<EntityManager>(std::addressof(clientEntityManager))};
 
   CollisionHandler collision_handler(&globalTimeline);
-  collision_handler.register_collision_handler("platform", collision_utils::handlePlatformCollision);
-  collision_handler.register_collision_handler("death_zone", collision_utils::handleDeathZoneCollision);
+  collision_handler.register_collision_handler(
+      "platform", collision_utils::handlePlatformCollision);
+  collision_handler.register_collision_handler(
+      "death_zone", collision_utils::handleDeathZoneCollision);
 
   event_manager.register_handler("collision", &collision_handler);
 
