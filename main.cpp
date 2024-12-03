@@ -149,7 +149,7 @@ void doClientGame() {
   EventManager &event_manager = EventManager::getInstance();
 
   std::vector<std::shared_ptr<EntityManager>> entityManagers = {
-      std::make_shared<EntityManager>(std::addressof(entityManager))};
+      std::shared_ptr<EntityManager>(std::addressof(entityManager))};
 
   CollisionHandler collision_handler(&globalTimeline);
   collision_handler.register_collision_handler(
@@ -174,8 +174,8 @@ void doClientGame() {
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
 
-  std::list<std::shared_ptr<Entity>> playerBullets;
-  std::list<std::shared_ptr<Entity>> alienBullets;
+  std::unordered_set<std::shared_ptr<Entity>> playerBullets;
+  std::unordered_set<std::shared_ptr<Entity>> alienBullets;
 
   while (!terminateThreads.load()) {
     doInput(player, &globalTimeline, entityManager, playerBullets, 200000.0f,
@@ -220,7 +220,7 @@ void doClientGame() {
         alienBullet->isMovable = true;
         alienBullet->velocity = Vector2{0, 200};
         entityManager.addEntity(alienBullet);
-        alienBullets.push_back(alienBullet);
+        alienBullets.insert(alienBullet);
       }
     }
 
@@ -229,20 +229,20 @@ void doClientGame() {
       if (alienBullet->isColliding(*player)) {
         exit(0);
       } else if (alienBullet->position.y >= worldHeight) {
-        it = alienBullets.erase(it);
         entityManager.removeEntity(alienBullet);
+        it = alienBullets.erase(it);
       } else {
         ++it;
       }
     }
 
+    std::unordered_set<std::shared_ptr<Entity>> aliensToRemove;
+    std::unordered_set<std::shared_ptr<Entity>> bulletsToRemove;
+
     for (auto bulletIt = playerBullets.begin();
          bulletIt != playerBullets.end();) {
       auto &playerBullet = *bulletIt;
       bool bulletRemoved = false;
-
-      std::unordered_set<std::shared_ptr<Entity>> aliensToRemove;
-      std::unordered_set<std::shared_ptr<Entity>> bulletsToRemove;
 
       for (auto &alien : aliens) {
         if (alien->isColliding(*playerBullet)) {
@@ -256,29 +256,30 @@ void doClientGame() {
           aliensToRemove.insert(alien);
           bulletsToRemove.insert(playerBullet);
           bulletRemoved = true;
-          break;
         }
       }
 
-      if (!bulletRemoved && playerBullet->position.y < 0) {
+      if (playerBullet->position.y < 0) {
         bulletsToRemove.insert(playerBullet);
       }
 
-      for (auto &alien : aliensToRemove) {
-        auto alienIt = std::find(aliens.begin(), aliens.end(), alien);
-        if (alienIt != aliens.end()) {
-          aliens.erase(alienIt);
-          entityManager.removeEntity(alien);
-        }
-      }
+      ++bulletIt;
+    }
 
-      for (auto &bullet : bulletsToRemove) {
+    for (auto &alien : aliensToRemove) {
+      auto alienIt = std::find(aliens.begin(), aliens.end(), alien);
+      if (alienIt != aliens.end()) {
+        aliens.erase(alienIt);
+        entityManager.removeEntity(alien);
+      }
+    }
+
+    for (auto &bullet : bulletsToRemove) {
+      auto bulletIt =
+          std::find(playerBullets.begin(), playerBullets.end(), bullet);
+      if (bulletIt != playerBullets.end()) {
+        playerBullets.erase(bulletIt);
         entityManager.removeEntity(bullet);
-        bulletIt = playerBullets.erase(bulletIt);
-      }
-
-      if (!bulletRemoved) {
-        ++bulletIt;
       }
     }
 

@@ -20,14 +20,12 @@ void MovementHandler::handle_movement(std::shared_ptr<Entity> entity) {
     entity->velocity.x += finalAcceleration.x * entity->deltaTime;
     entity->velocity.y += finalAcceleration.y * entity->deltaTime;
 
-    if (!entity->isDashing) {
-      entity->velocity.x =
-          std::max(std::min(entity->velocity.x, entity->maxVelocity.x),
-                   -entity->maxVelocity.x);
-      entity->velocity.y =
-          std::max(std::min(entity->velocity.y, entity->maxVelocity.y),
-                   -entity->maxVelocity.y);
-    }
+    entity->velocity.x =
+        std::max(std::min(entity->velocity.x, entity->maxVelocity.x),
+                 -entity->maxVelocity.x);
+    entity->velocity.y =
+        std::max(std::min(entity->velocity.y, entity->maxVelocity.y),
+                 -entity->maxVelocity.y);
 
     Vector2 position = entity->getPosition();
     position.x += entity->velocity.x * entity->deltaTime;

@@ -79,7 +79,7 @@ void processDashInput(std::shared_ptr<Entity> entity, Timeline *timeline,
 // Main input handler
 void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
              EntityManager &entityManager,
-             std::list<std::shared_ptr<Entity>> &playerBullets,
+             std::unordered_set<std::shared_ptr<Entity>> &playerBullets,
              float accelerationRate, float dash_speed, float dash_duration) {
   const Uint8 *state = SDL_GetKeyboardState(NULL);
   EventManager &em = EventManager::getInstance();
@@ -171,14 +171,15 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     bool isJPressed = state[SDL_SCANCODE_J];
     if (isJPressed && !wasJPressed) {
       auto bullet = std::make_shared<Entity>(
-          Vector2{entity->position.x + (entity->dimensions.x / 2),
-                  entity->position.y + entity->dimensions.y},
+          Vector2{entity->position.x + (entity->dimensions.x / 2) - 5,
+                  entity->position.y + (entity->dimensions.y / 2) - 20},
           Vector2{10, 20}, SDL_Color{0, 0, 0, 255}, globalTimeline, 1);
+
       bullet->position = entity->position;
       bullet->velocity = Vector2{0, -150};
       bullet->isMovable = true;
       entityManager.addEntity(bullet);
-      playerBullets.push_back(bullet);
+      playerBullets.insert(bullet);
       wasJPressed = true;
     }
 
