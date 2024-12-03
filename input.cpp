@@ -176,7 +176,8 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
           Vector2{10, 20}, SDL_Color{0, 0, 0, 255}, globalTimeline, 1);
 
       bullet->position = entity->position;
-      bullet->velocity = Vector2{0, -150};
+      bullet->velocity = {0, -100};
+      bullet->maxVelocity = {0, 100};
       bullet->isMovable = true;
       entityManager.addEntity(bullet);
       playerBullets.insert(bullet);

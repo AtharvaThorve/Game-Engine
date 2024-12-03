@@ -218,7 +218,8 @@ void doClientGame() {
                     shooter->position.y + shooter->dimensions.y},
             Vector2{10, 20}, SDL_Color{255, 0, 0, 255}, &globalTimeline, 1);
         alienBullet->isMovable = true;
-        alienBullet->velocity = Vector2{0, 200};
+        alienBullet->velocity = {0, 100};
+        alienBullet->maxVelocity = {0, 100};
         entityManager.addEntity(alienBullet);
         alienBullets.insert(alienBullet);
       }
