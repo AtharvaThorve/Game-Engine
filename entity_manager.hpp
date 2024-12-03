@@ -4,6 +4,7 @@
 #include "event_manager.hpp"
 #include "timeline.hpp"
 #include <memory>
+#include <mutex>
 #include <unordered_set>
 
 class EntityManager {
@@ -40,6 +41,8 @@ public:
 private:
   std::unordered_set<std::shared_ptr<Entity>> entities;
   std::unordered_set<std::shared_ptr<Entity>> deathZones;
+
+  std::mutex entityMutex;
 
   void addEntitiesHelper() {}
 

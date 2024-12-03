@@ -5,7 +5,7 @@ int64_t Entity::nextID = 0; // Start the unique ID from 0 or any other value.
 
 Entity::Entity(const Vector2 &position, const Vector2 &dimensions,
                const SDL_Color &color, Timeline *anchor, int64_t tic)
-    : position(position), shape(nullptr), color(color), timeline(anchor, tic),
+    : position(position), dimensions(dimensions), shape(nullptr), color(color), timeline(anchor, tic),
       lastUpdateTime(timeline.getTime()),
       lastGlobalTicSize(timeline.getAnchorTic()),
       id(nextID++) // Assign unique ID
