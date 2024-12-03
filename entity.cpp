@@ -132,8 +132,10 @@ std::unordered_map<std::string, std::string> Entity::serialize() const {
 }
 
 void Entity::deserialize(const std::unordered_map<std::string, std::string> &state) {
-  position.x = std::stof(state.at("position_x"));
-  position.y = std::stof(state.at("position_y"));
+  Vector2 pos;
+  pos.x = std::stof(state.at("position_x"));
+  pos.y = std::stof(state.at("position_y"));
+  setPosition(pos);
   dimensions.x = std::stof(state.at("dimensions_x"));
   dimensions.y = std::stof(state.at("dimensions_y"));
 

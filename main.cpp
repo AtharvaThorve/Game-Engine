@@ -1,5 +1,10 @@
 #include "main.hpp"
 
+constexpr int64_t TARGET_REFRESH_RATE = 120;
+constexpr int64_t NANOSECONDS_PER_SECOND = 1000000000;
+constexpr int64_t FRAME_DURATION_NS =
+    NANOSECONDS_PER_SECOND / TARGET_REFRESH_RATE;
+
 Timeline globalTimeline(nullptr, 2);
 PhysicsSystem physicsSystem(0.0f, 150.0f);
 std::atomic<bool> terminateThreads(false);
@@ -199,7 +204,19 @@ void doClientGame(bool isP2P = false) {
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
 
+  int64_t previousTime = globalTimeline.getTime();
+
   while (true) {
+    int64_t currentTime = globalTimeline.getTime();
+    int64_t elapsedTime = currentTime - previousTime;
+
+    if (elapsedTime < FRAME_DURATION_NS) {
+      int64_t sleepTime = FRAME_DURATION_NS - elapsedTime;
+      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepTime));
+    }
+
+    previousTime = globalTimeline.getTime();
+
     doInput(player, &globalTimeline, 50.0f, 200.0f);
 
     camera.update(*player, worldWidth, worldHeight);
