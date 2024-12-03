@@ -149,7 +149,7 @@ void doClientGame() {
   EventManager &event_manager = EventManager::getInstance();
 
   std::vector<std::shared_ptr<EntityManager>> entityManagers = {
-      std::make_shared<EntityManager>(entityManager)};
+      std::make_shared<EntityManager>(std::addressof(entityManager))};
 
   CollisionHandler collision_handler(&globalTimeline);
   collision_handler.register_collision_handler(
