@@ -108,6 +108,7 @@ void doClientGame() {
   float cached_scale = scale;
 
   EntityManager entityManager;
+  EntityManager clientEntityManager;
   int worldWidth = 1280;
   int worldHeight = 720;
 
@@ -121,8 +122,8 @@ void doClientGame() {
   entityManager.addEntity(player);
 
   std::vector<std::shared_ptr<Entity>> aliens;
-  int rows = 1;
-  int cols = 1;
+  int rows = 3;
+  int cols = 5;
 
   int alienWidth = 40;
   int alienHeight = 30;
@@ -177,6 +178,9 @@ void doClientGame() {
 
   ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
   event_manager.register_wildcard_handler(&replay_recorder);
+
+  std::thread networkThread(runClient, std::ref(entityManager),
+                            std::ref(clientEntityManager));
 
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
@@ -318,6 +322,7 @@ void doClientGame() {
   }
 
   gravityThread.join();
+  networkThread.join();
   clean_up_sdl();
   exit(0);
 }
