@@ -6,6 +6,15 @@ void MovementHandler::on_event(const Event &event) {
   if (event.type == move_event_hash) {
     std::shared_ptr<Entity> entity =
         std::get<std::shared_ptr<Entity>>(event.parameters.at("entity"));
+
+    EventManager &eventManager = EventManager::getInstance();
+    if (eventManager.get_replay_only_mode()) {
+      if (event.parameters.find("is_replay_event") == event.parameters.end()) {
+        if (entity->dimensions.x != 10 || entity->dimensions.y != 20) {
+          return;
+        }
+      }
+    }
     handle_movement(entity);
   }
 }

@@ -64,6 +64,15 @@ void ReplayRecorder::play_recording() {
       }
     }
 
+    for (const auto &manager : entityManagers) {
+      for (const auto &entity : manager->getEntities()) {
+        if (entity &&
+            initial_states.find(entity->getID()) == initial_states.end()) {
+          manager->removeEntity(entity);
+        }
+      }
+    }
+
     EventManager &em = EventManager::getInstance();
     em.set_replay_only_mode(true);
 

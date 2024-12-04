@@ -236,7 +236,7 @@ void doClientGame() {
       }
     }
 
-    if (std::rand() % 10 < 2 && !event_manager.get_replay_only_mode()) {
+    if (std::rand() % 150 < 1 && !event_manager.get_replay_only_mode()) {
       auto shooter = aliens[std::rand() % aliens.size()];
       if (shooter->isHittable) {
         Event bullet_event("bullet", globalTimeline.getTime());

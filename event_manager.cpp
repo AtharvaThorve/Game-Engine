@@ -32,9 +32,7 @@ void EventManager::set_replay_only_mode(bool mode) {
   }
 }
 
-bool EventManager::get_replay_only_mode() {
-  return replay_only_mode;
-}
+bool EventManager::get_replay_only_mode() { return replay_only_mode; }
 
 void EventManager::process_events(int64_t current_timestamp) {
   while (!event_queue.empty() &&
@@ -46,8 +44,10 @@ void EventManager::process_events(int64_t current_timestamp) {
     }
 
     if (replay_only_mode &&
-        event.parameters.find("is_replay_event") == event.parameters.end())
+        event.parameters.find("is_replay_event") == event.parameters.end() &&
+        event.type != std::hash<std::string>{}("move")) {
       continue;
+    }
 
     auto it = handlers.find(event.type);
     if (it != handlers.end()) {
@@ -64,7 +64,7 @@ void EventManager::process_events(int64_t current_timestamp) {
 
       if (replay_events_count == 0) {
         replay_only_mode = false;
-        
+
         Event replay_complete("replay_complete", current_timestamp);
         raise_event(replay_complete);
 
