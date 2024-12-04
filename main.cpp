@@ -275,251 +275,221 @@ void doServerEntities(Server &server) {
 //   clean_up_sdl();
 //   exit(0);
 // }
-
 void doClientGame(bool isP2P = false) {
-  initSDL();
-  float scale = 1.0f;
-  float cached_scale = scale;
+    initSDL();
+    float scale = 1.0f;
+    float cached_scale = scale;
 
-  const int GRID_SIZE = 20; // Size of each grid cell
-  const int GRID_WIDTH = SCREEN_WIDTH / GRID_SIZE;
-  const int GRID_HEIGHT = SCREEN_HEIGHT / GRID_SIZE;
+    // Paddles setup
+    Vector2 leftPaddlePos{50, SCREEN_HEIGHT/2};
+    Vector2 rightPaddlePos{SCREEN_WIDTH - 70, SCREEN_HEIGHT/2};
+    Vector2 paddleDimensions{20, 100};
+    SDL_Color paddleColor = {255, 255, 255, 255};
 
-  // Snake head setup
-  Vector2 playerPosition{GRID_SIZE * 5, GRID_SIZE * 5}; // Start at grid position (5,5)
-  Vector2 playerDimensions{GRID_SIZE - 2, GRID_SIZE - 2}; // Slightly smaller than grid
-  SDL_Color snakeColor = {0, 255, 0, 255}; // Green for snake
+    auto leftPaddle = std::make_shared<Entity>(leftPaddlePos, paddleDimensions, paddleColor, &globalTimeline, 2);
+    auto rightPaddle = std::make_shared<Entity>(rightPaddlePos, paddleDimensions, paddleColor, &globalTimeline, 2);
+    
+    // Ball setup
+    // Ball setup as rectangle
+    Vector2 ballPos{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
+    Vector2 ballDimensions{20, 20}; // Width and Height of the ball
+    SDL_Color ballColor = {255, 255, 255, 255};
 
-  auto player = std::make_shared<Entity>(playerPosition, playerDimensions,
-                                       snakeColor, &globalTimeline, 2);
-  player->maxVelocity = Vector2{GRID_SIZE, GRID_SIZE}; // Move one grid at a time
-  player->isMovable = true;
-  player->isHittable = true;
-  player->isAffectedByGravity = false; // No gravity in Snake
+    // Create the ball entity using dimensions instead of a center point and radius
+    auto ball = std::make_shared<Entity>(ballPos, ballDimensions, paddleColor, &globalTimeline, 2);
 
-  // Snake body segments
-  std::deque<std::shared_ptr<Entity>> snakeBody;
-  
-  // Food setup
-  SDL_Color foodColor = {255, 0, 0, 255}; // Red for food
-  auto food = std::make_shared<Entity>(
-      Vector2{GRID_SIZE * 10, GRID_SIZE * 10},
-      Vector2{GRID_SIZE - 2, GRID_SIZE - 2},
-      foodColor, &globalTimeline, 2);
-  food->isHittable = true;
+    // Set the velocity and other properties
+    ball->velocity = Vector2{200, 200};
+    ball->maxVelocity = Vector2{300, 300};
+    ball->isMovable = true;
+    ball->isHittable = true;
 
-  EntityManager playerEntityManager;
-  playerEntityManager.addEntities(player);
+    EntityManager playerEntityManager;
+    EntityManager entityManager;
+    EntityManager clientEntityManager;
 
-  EntityManager entityManager;
-  EntityManager clientEntityManager;
+    entityManager.addEntities(leftPaddle, rightPaddle, ball);
 
-  // Add initial entities
-  entityManager.addEntities(player);
-  entityManager.addEntities(food);
-
-  // Game boundaries
-  SDL_Color borderColor = {128, 128, 128, 255}; // Gray for borders
-  auto topWall = std::make_shared<Entity>(Vector2{0, 0}, 
-                                        Vector2{SCREEN_WIDTH, GRID_SIZE},
-                                        borderColor, &globalTimeline, 2);
-  auto bottomWall = std::make_shared<Entity>(Vector2{0, SCREEN_HEIGHT - GRID_SIZE},
-                                           Vector2{SCREEN_WIDTH, GRID_SIZE},
-                                           borderColor, &globalTimeline, 2);
-  auto leftWall = std::make_shared<Entity>(Vector2{0, 0},
-                                         Vector2{GRID_SIZE, SCREEN_HEIGHT},
-                                         borderColor, &globalTimeline, 2);
-  auto rightWall = std::make_shared<Entity>(Vector2{SCREEN_WIDTH - GRID_SIZE, 0},
-                                          Vector2{GRID_SIZE, SCREEN_HEIGHT},
-                                          borderColor, &globalTimeline, 2);
-
-  topWall->isHittable = true;
-  bottomWall->isHittable = true;
-  leftWall->isHittable = true;
-  rightWall->isHittable = true;
-
-  entityManager.addEntities(topWall, bottomWall, leftWall, rightWall);
-  entityManager.addDeathZones(topWall, bottomWall, leftWall, rightWall);
-
-  // Direction tracking
-  Vector2 currentDirection = {GRID_SIZE, 0}; // Start moving right
-  Vector2 nextDirection = currentDirection;
-
-  Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-  EventManager &event_manager = EventManager::getInstance();
-
+    EventManager &event_manager = EventManager::getInstance();
   std::vector<std::shared_ptr<EntityManager>> entityManagers = {
       std::shared_ptr<EntityManager>(std::addressof(entityManager)),
       std::shared_ptr<EntityManager>(std::addressof(clientEntityManager))};
 
-  CollisionHandler collision_handler(&globalTimeline);
-  collision_handler.register_collision_handler(
-      "death_zone", collision_utils::handleDeathZoneCollision);
-  collision_handler.register_collision_handler(
-      "food", [&](std::shared_ptr<Entity> snake, std::shared_ptr<Entity> food) {
-        // Add new body segment
-        auto newSegment = std::make_shared<Entity>(
-            snakeBody.empty() ? player->position : snakeBody.back()->position,
-            playerDimensions, snakeColor, &globalTimeline, 2);
-        snakeBody.push_back(newSegment);
-        entityManager.addEntities(newSegment);
+    // Event handlers
+    CollisionHandler collision_handler(&globalTimeline);
+    event_manager.register_handler("collision", &collision_handler);
+    event_manager.register_handler("input", new InputHandler(&globalTimeline));
+    event_manager.register_handler("move", new MovementHandler(&globalTimeline));
+    event_manager.register_handler("update_position", new PositionHandler(&globalTimeline));
 
-        // Move food to new random position
-        int newX = (rand() % (GRID_WIDTH - 2) + 1) * GRID_SIZE;
-        int newY = (rand() % (GRID_HEIGHT - 2) + 1) * GRID_SIZE;
-        food->position = Vector2{(float)newX, (float)newY};
-      });
+    // Replay recorder
+    ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
+    event_manager.register_wildcard_handler(&replay_recorder);
 
-  event_manager.register_handler("collision", &collision_handler);
-  event_manager.register_handler("death", new DeathHandler(&globalTimeline));
-  event_manager.register_handler("input", new InputHandler(&globalTimeline));
-  event_manager.register_handler("move", new MovementHandler(&globalTimeline));
-  event_manager.register_handler("update_position", new PositionHandler(&globalTimeline));
+    std::thread networkThread(runClient, std::ref(playerEntityManager), 
+                               std::ref(clientEntityManager));
 
-  ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
-  event_manager.register_wildcard_handler(&replay_recorder);
+    int64_t previousTime = globalTimeline.getTime();
 
-  std::thread networkThread(runClient, std::ref(playerEntityManager),
-                          std::ref(clientEntityManager));
+    while (true) {
+        int64_t currentTime = globalTimeline.getTime();
+        int64_t elapsedTime = currentTime - previousTime;
 
-  int64_t previousTime = globalTimeline.getTime();
-  int64_t moveTimer = 0;
-  const int64_t MOVE_DELAY = 150000000; // Snake movement speed (150ms)
-
-  while (true) {
-    int64_t currentTime = globalTimeline.getTime();
-    int64_t elapsedTime = currentTime - previousTime;
-
-    if (elapsedTime < FRAME_DURATION_NS) {
-      int64_t sleepTime = FRAME_DURATION_NS - elapsedTime;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepTime));
-    }
-
-    previousTime = currentTime;
-
-    // Process events
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        Client::disconnectRequested.store(true);
-        terminateThreads.store(true);
-        break;
-      }
-    }
-
-    // Handle input for direction changes and replay events
-    const Uint8* state = SDL_GetKeyboardState(NULL);
-    
-    // Add replay handling similar to the Breakout game
-    bool enterPressed = state[SDL_SCANCODE_RETURN];
-    static bool wasEnterPressed = false;
-    static bool isRecording = false;
-    
-    if (enterPressed && !wasEnterPressed) {
-      wasEnterPressed = true;
-    } else if (!enterPressed && wasEnterPressed) {
-      isRecording = !isRecording;
-      if (isRecording) {
-        std::cout << "Started Recording" << std::endl;
-        Event start_recording_event("start_recording", currentTime);
-        event_manager.raise_event(start_recording_event);
-      } else {
-        std::cout << "Stopped Recording" << std::endl;
-        Event stop_recording_event("stop_recording", currentTime);
-        event_manager.raise_event(stop_recording_event);
-      }
-      wasEnterPressed = false;
-    }
-
-    // Play recording with Right Shift
-    bool rShiftPressed = state[SDL_SCANCODE_RSHIFT];
-    static bool wasRShiftPressed = false;
-    if (rShiftPressed != wasRShiftPressed) {
-      if (rShiftPressed) {
-        std::cout << "Playing Recording" << std::endl;
-        Event play_recording_event("play_recording", currentTime);
-        event_manager.raise_event(play_recording_event);
-      }
-      wasRShiftPressed = rShiftPressed;
-    }
-    if (state[SDL_SCANCODE_W] && currentDirection.y == 0) {
-        nextDirection = Vector2{0, -GRID_SIZE};
-    } else if (state[SDL_SCANCODE_S] && currentDirection.y == 0) {
-        nextDirection = Vector2{0, GRID_SIZE};
-    } else if (state[SDL_SCANCODE_A] && currentDirection.x == 0) {
-        nextDirection = Vector2{-GRID_SIZE, 0};
-    } else if (state[SDL_SCANCODE_D] && currentDirection.x == 0) {
-        nextDirection = Vector2{GRID_SIZE, 0};
-    }
-
-    // Move snake at fixed intervals
-    moveTimer += elapsedTime;
-    if (moveTimer >= MOVE_DELAY) {
-        moveTimer = 0;
-        currentDirection = nextDirection;
-
-        // Store previous positions
-        Vector2 prevPos = player->position;
-
-        // Move head
-        player->position.x += currentDirection.x;
-        player->position.y += currentDirection.y;
-
-        // Move body segments
-        for (size_t i = 0; i < snakeBody.size(); i++) {
-            Vector2 currentPos = snakeBody[i]->position;
-            snakeBody[i]->position = prevPos;
-            prevPos = currentPos;
+        if (elapsedTime < FRAME_DURATION_NS) {
+            int64_t sleepTime = FRAME_DURATION_NS - elapsedTime;
+            std::this_thread::sleep_for(std::chrono::nanoseconds(sleepTime));
         }
 
-        // Check collision with food
-        if (player->isColliding(*food)) {
-            Event collision_event("collision", currentTime);
-            collision_event.parameters["entity1"] = player;
-            collision_event.parameters["entity2"] = food;
-            collision_event.parameters["collision_type"] = "food";
-            event_manager.raise_event(collision_event);
-        }
+        previousTime = currentTime;
 
-        // Check collision with body
-        for (const auto& segment : snakeBody) {
-            if (player->isColliding(*segment)) {
-                Event death_event("death", currentTime);
-                death_event.parameters["player"] = player;
-                event_manager.raise_event(death_event);
+        // Handle SDL events
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                Client::disconnectRequested.store(true);
+                terminateThreads.store(true);
                 break;
             }
         }
+
+        // Handle keyboard input
+        const Uint8* keystate = SDL_GetKeyboardState(NULL);
+        
+        // Replay recording controls
+        bool enterPressed = keystate[SDL_SCANCODE_RETURN];
+        static bool wasEnterPressed = false;
+        static bool isRecording = false;
+        
+        // Toggle recording
+        if (enterPressed && !wasEnterPressed) {
+            wasEnterPressed = true;
+        } else if (!enterPressed && wasEnterPressed) {
+            isRecording = !isRecording;
+            if (isRecording) {
+                std::cout << "Started Recording" << std::endl;
+                Event start_recording_event("start_recording", currentTime);
+                event_manager.raise_event(start_recording_event);
+            } else {
+                std::cout << "Stopped Recording" << std::endl;
+                Event stop_recording_event("stop_recording", currentTime);
+                event_manager.raise_event(stop_recording_event);
+            }
+            wasEnterPressed = false;
+        }
+
+        // Play recording with Right Shift
+        bool rShiftPressed = keystate[SDL_SCANCODE_RSHIFT];
+        static bool wasRShiftPressed = false;
+        if (rShiftPressed != wasRShiftPressed) {
+            if (rShiftPressed) {
+                std::cout << "Playing Recording" << std::endl;
+                Event play_recording_event("play_recording", currentTime);
+                event_manager.raise_event(play_recording_event);
+            }
+            wasRShiftPressed = rShiftPressed;
+        }
+        
+        // Paddle movement
+        if (keystate[SDL_SCANCODE_W]) {
+            leftPaddle->position.y -= 300.0f * leftPaddle->deltaTime;
+        } else if (keystate[SDL_SCANCODE_S]) {
+            leftPaddle->position.y += 300.0f * leftPaddle->deltaTime;
+        }
+
+        if (keystate[SDL_SCANCODE_UP]) {
+            rightPaddle->position.y -= 300.0f * rightPaddle->deltaTime;
+        } else if (keystate[SDL_SCANCODE_DOWN]) {
+            rightPaddle->position.y += 300.0f * rightPaddle->deltaTime;
+        }
+
+        // Keep paddles within screen bounds
+        leftPaddle->position.y = std::max(paddleDimensions.y/2.0f, 
+                                std::min(leftPaddle->position.y, 
+                                SCREEN_HEIGHT - paddleDimensions.y/2.0f));
+        rightPaddle->position.y = std::max(paddleDimensions.y/2.0f, 
+                                 std::min(rightPaddle->position.y, 
+                                 SCREEN_HEIGHT - paddleDimensions.y/2.0f));
+
+        prepareScene(SDL_Color{0, 0, 0, 255});
+        
+        entityManager.drawEntities(0, 0);
+        clientEntityManager.drawEntities(0, 0);
+
+        // Collision handling
+        // Collision handling
+        // Keep paddles within screen bounds - adjusted to consider full paddle height
+        leftPaddle->position.y = std::max(paddleDimensions.y/2.0f, 
+                                        std::min(leftPaddle->position.y, 
+                                        SCREEN_HEIGHT - paddleDimensions.y/2.0f));
+        rightPaddle->position.y = std::max(paddleDimensions.y/2.0f, 
+                                          std::min(rightPaddle->position.y, 
+                                          SCREEN_HEIGHT - paddleDimensions.y/2.0f));
+
+        // Collision handling with paddles
+        if (ball->isColliding(*leftPaddle) || ball->isColliding(*rightPaddle)) {
+            Event collision_event("collision", currentTime);
+            collision_event.parameters["entity1"] = ball;
+            collision_event.parameters["entity2"] = (ball->isColliding(*leftPaddle)) ? leftPaddle : rightPaddle;
+            collision_event.parameters["collision_type"] = "paddle";
+            
+            event_manager.raise_event(collision_event);
+            
+            // Handle immediate physics response
+            ball->velocity.x *= -1.1f;
+            
+            // Calculate paddle collision response
+            auto paddle = (ball->isColliding(*leftPaddle)) ? leftPaddle : rightPaddle;
+            float relativeIntersectY = (paddle->position.y - ball->position.y) / (paddleDimensions.y / 2.0f);
+            float bounceAngle = relativeIntersectY * 0.75f;
+            float speed = std::sqrt(ball->velocity.x * ball->velocity.x + ball->velocity.y * ball->velocity.y);
+            
+            ball->velocity.y = -speed * std::sin(bounceAngle);
+        }
+
+        // Ball boundary handling - adjusted to consider ball dimensions
+        if (ball->position.y <= ballDimensions.y/2.0f) {
+            ball->position.y = ballDimensions.y/2.0f;
+            ball->velocity.y *= -1;
+        } else if (ball->position.y >= SCREEN_HEIGHT - ballDimensions.y/2.0f) {
+            ball->position.y = SCREEN_HEIGHT - ballDimensions.y/2.0f;
+            ball->velocity.y *= -1;
+        }
+
+        // Ball scoring boundary handling
+        if (ball->position.x <= ballDimensions.x/2.0f) {
+            // Left boundary (right player scores)
+            ball->position = Vector2{SCREEN_WIDTH/2, SCREEN_HEIGHT/2};
+            ball->velocity = Vector2{200, 200};
+        } else if (ball->position.x >= SCREEN_WIDTH - ballDimensions.x/2.0f) {
+            // Right boundary (left player scores)
+            ball->position = Vector2{SCREEN_WIDTH/2, SCREEN_HEIGHT/2};
+            ball->velocity = Vector2{-200, 200};  // Start moving toward the other player
+        }
+        // Update scale factor
+        updateScaleFactor(scale);
+        if (allowScaling && cached_scale != scale) {
+            setRenderScale(scale, scale);
+            cached_scale = scale;
+        }
+
+        // Update entities and process events
+        entityManager.updateEntityDeltaTime();
+        entityManager.updateEntities(&globalTimeline);
+        event_manager.process_events(currentTime);
+
+        // Check for disconnect
+        if (Client::disconnectRequested.load()) {
+            terminateThreads.store(true);
+            break;
+        }
+
+        presentScene();
     }
 
-    // Background color (black)
-    prepareScene(SDL_Color{0, 0, 0, 255});
-
-    entityManager.drawEntities(camera.position.x, camera.position.y);
-    clientEntityManager.drawEntities(camera.position.x, camera.position.y);
-
-    updateScaleFactor(scale);
-    if (allowScaling && cached_scale != scale) {
-        setRenderScale(scale, scale);
-        cached_scale = scale;
-    }
-
-    event_manager.process_events(currentTime);
-
-    if (Client::disconnectRequested.load()) {
-        terminateThreads.store(true);
-        break;
-    }
-
-    presentScene();
-  }
-
-
-  networkThread.join();
-  clean_up_sdl();
-  exit(0);
+    networkThread.join();
+    clean_up_sdl();
+    exit(0);
 }
-
 
 int main(int argc, char *argv[]) {
 
