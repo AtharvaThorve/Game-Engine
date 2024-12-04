@@ -46,8 +46,6 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
   RectangleShape *rectA = dynamic_cast<RectangleShape *>(entityA->shape.get());
   RectangleShape *rectB = dynamic_cast<RectangleShape *>(entityB->shape.get());
 
-  // std::cout << direction << std::endl;
-
   if (direction == "up") {
     entityA->position.y = entityB->position.y + rectB->rect.h;
     if (entityA->velocity.y < 0)
@@ -73,10 +71,35 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
 
 void handleDeathZoneCollision(std::shared_ptr<Entity> entityA,
                               std::shared_ptr<Entity> entityB) {
-  Event death_event("death", globalTimeline.getTime() + 1);
+  Event death_event("death", globalTimeline.getTime());
   death_event.parameters["player"] = entityA;
   EventManager &em = EventManager::getInstance();
   em.raise_event(death_event);
+}
+
+void handleBallPaddle(std::shared_ptr<Entity> ball,
+                      std::shared_ptr<Entity> paddle) {
+  ball->velocity.y = -std::abs(ball->velocity.y);
+  ball->velocity.x += (ball->velocity.x >= 0 ? 1 : -1);
+}
+
+void handleBallBrick(std::shared_ptr<Entity> ball,
+                     std::shared_ptr<Entity> brick) {
+  brick->isHittable = brick->isDrawable = false;
+  std::string dir = checkCollisionDirection(ball, brick);
+  if (dir == "up" || dir == "down")
+    ball->velocity.y = -ball->velocity.y;
+  else if (dir == "left" || dir == "right")
+    ball->velocity.x = -ball->velocity.x;
+}
+
+void handleBallWall(std::shared_ptr<Entity> ball, int sW, int sH) {
+  if (ball->position.x <= 0 || ball->position.x + ball->dimensions.x >= sW) {
+    ball->velocity.x = -ball->velocity.x;
+  }
+  if (ball->position.y <= 0) {
+    ball->velocity.y = -ball->velocity.y;
+  }
 }
 
 } // namespace collision_utils

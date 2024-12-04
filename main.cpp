@@ -8,6 +8,7 @@ constexpr int64_t FRAME_DURATION_NS =
 Timeline globalTimeline(nullptr, 2);
 PhysicsSystem physicsSystem(0.0f, 150.0f);
 std::atomic<bool> terminateThreads(false);
+EntityManager clientEntityManager;
 
 // Assuming Server and Client are properly defined classes with start() method
 void runServer(Server &server) { server.start(); }
@@ -102,130 +103,112 @@ void doServerEntities(Server &server) {
   }
 }
 
-void doClientGame(bool isP2P = false) {
+void doClientGame() {
   initSDL();
+  Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
+  int worldWidth = 1280;
+  int worldHeight = 720;
+
   float scale = 1.0f;
   float cached_scale = scale;
 
-  // Player setup
-  Vector2 playerPosition{100, 400};
-  Vector2 playerDimensions{40, 40};
-  SDL_Color playerColor = {255, 0, 0, 255};
-
-  auto player = std::make_shared<Entity>(playerPosition, playerDimensions,
-                                         playerColor, &globalTimeline, 2);
-  player->maxVelocity = Vector2{100, 300};
-  player->isMovable = true;
-  player->isHittable = true;
-  player->isAffectedByGravity = true;
-
-  EntityManager playerEntityManager;
-  playerEntityManager.addEntities(player);
-
   EntityManager entityManager;
-  EntityManager clientEntityManager;
-
-  // Ground platforms
-  SDL_Color platformColor = {139, 69, 19, 255}; // Brown color for platforms
-  auto ground1 = std::make_shared<Entity>(Vector2{-500, 550}, Vector2{2000, 50},
-                                          platformColor, &globalTimeline, 2);
-  auto ground2 = std::make_shared<Entity>(Vector2{1600, 550}, Vector2{2000, 50},
-                                          platformColor, &globalTimeline, 2);
-  ground1->isHittable = true;
-  ground2->isHittable = true;
-
-  // Add all platforms to entityManager
-  entityManager.addEntities(ground1, ground2);
-  entityManager.addEntities(player);
-
-  // Death zones (lava pits and invisible gap)
-  SDL_Color lavaColor = {255, 69, 0, 255}; // Orange-red for lava
-  SDL_Color invisibleColor = {135, 206, 235, 255};
-
-  // Lava on top of a platform
-  auto lavaPlatform = std::make_shared<Entity>(
-      Vector2{1100, 500}, Vector2{200, 30}, lavaColor, &globalTimeline, 2);
-  lavaPlatform->isHittable = true;
-
-  // Invisible death zone in the gap between ground platforms
-  auto invisibleDeathZone =
-      std::make_shared<Entity>(Vector2{1500, 700}, Vector2{100, 200},
-                               invisibleColor, &globalTimeline, 2);
-
-  entityManager.addEntities(lavaPlatform);
-  entityManager.addDeathZones(invisibleDeathZone, lavaPlatform);
-
-  // Spawn points
-  auto spawnPoint1 =
-      std::make_shared<Entity>(Vector2{100, 400}, Vector2{1, 1},
-                               SDL_Color{0, 0, 0, 0}, &globalTimeline, 1);
-  auto spawnPoint2 =
-      std::make_shared<Entity>(Vector2{500, 200}, Vector2{1, 1},
-                               SDL_Color{0, 0, 0, 0}, &globalTimeline, 1);
-
-  int worldWidth = 5000;
-  int worldHeight = 2000;
-
-  Camera camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-  EventManager &event_manager = EventManager::getInstance();
-
   std::vector<std::shared_ptr<EntityManager>> entityManagers = {
-      std::shared_ptr<EntityManager>(std::addressof(entityManager)),
-      std::shared_ptr<EntityManager>(std::addressof(clientEntityManager))};
+      std::shared_ptr<EntityManager>(std::addressof(entityManager))};
+
+  auto paddle = std::make_shared<Entity>(Vector2{550, 550}, Vector2{150, 35},
+                                         SDL_Color{255, 255, 255, 255},
+                                         &globalTimeline, 1);
+  paddle->isMovable = paddle->isHittable = 1;
+  paddle->maxVelocity = {150, 0};
+
+  auto ball = std::make_shared<Entity>(Vector2{350, 500}, Vector2{30, 30},
+                                       SDL_Color{255, 255, 255, 255},
+                                       &globalTimeline, 1);
+  ball->isMovable = ball->isHittable = 1;
+  ball->velocity.x = ball->velocity.y = -50;
+  ball->maxVelocity.x = ball->maxVelocity.y = 80;
+
+  std::vector<std::shared_ptr<Entity>> bricks;
+  int rows = 4, cols = 19, bw = 75, bh = 75;
+  std::srand(static_cast<unsigned>(std::time(nullptr)));
+  for (int row = 0; row < rows; ++row) {
+    for (int col = 0; col < cols; ++col) {
+      if (row == 0) {
+        SDL_Color brickColor = SDL_Color{255, 0, 0, 255};
+        int x = col * (bw);
+        int y = row * (bh);
+        auto brick = std::make_shared<Entity>(Vector2{x, y}, Vector2{bw, bh},
+                                              brickColor, &globalTimeline, 1);
+        brick->isHittable = true;
+        bricks.push_back(brick);
+        entityManager.addEntity(brick);
+      } else if (row == 1) {
+        SDL_Color brickColor = SDL_Color{0, 255, 0, 255};
+        int x = col * (bw);
+        int y = row * (bh);
+        auto brick = std::make_shared<Entity>(Vector2{x, y}, Vector2{bw, bh},
+                                              brickColor, &globalTimeline, 1);
+        brick->isHittable = true;
+        bricks.push_back(brick);
+        entityManager.addEntity(brick);
+      } else if (row == 2) {
+        SDL_Color brickColor = SDL_Color{0, 0, 255, 255};
+        int x = col * (bw);
+        int y = row * (bh);
+        auto brick = std::make_shared<Entity>(Vector2{x, y}, Vector2{bw, bh},
+                                              brickColor, &globalTimeline, 1);
+        brick->isHittable = true;
+        bricks.push_back(brick);
+        entityManager.addEntity(brick);
+      } else {
+        SDL_Color brickColor = SDL_Color{255, 0, 255, 255};
+        int x = col * (bw);
+        int y = row * (bh);
+        auto brick = std::make_shared<Entity>(Vector2{x, y}, Vector2{bw, bh},
+                                              brickColor, &globalTimeline, 1);
+        brick->isHittable = true;
+        bricks.push_back(brick);
+        entityManager.addEntity(brick);
+      }
+    }
+  }
+
+  entityManager.addEntities(paddle, ball);
+  EventManager &event_manager = EventManager::getInstance();
 
   CollisionHandler collision_handler(&globalTimeline);
   collision_handler.register_collision_handler(
-      "platform", collision_utils::handlePlatformCollision);
+      "paddle", collision_utils::handleBallPaddle);
   collision_handler.register_collision_handler(
-      "death_zone", collision_utils::handleDeathZoneCollision);
+      "brick", collision_utils::handleBallBrick);
 
   event_manager.register_handler("collision", &collision_handler);
-
   event_manager.register_handler("death", new DeathHandler(&globalTimeline));
-
-  RespawnHandler respawn_handler(&globalTimeline);
-  respawn_handler.add_spawn_points(spawnPoint1, spawnPoint2);
-
-  event_manager.register_handler("respawn", &respawn_handler);
-
   event_manager.register_handler("input", new InputHandler(&globalTimeline));
-
   event_manager.register_handler("move", new MovementHandler(&globalTimeline));
-
   event_manager.register_handler("update_position",
                                  new PositionHandler(&globalTimeline));
 
   ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
   event_manager.register_wildcard_handler(&replay_recorder);
 
-  std::thread networkThread(runClient, std::ref(playerEntityManager),
-                            std::ref(clientEntityManager));
-  std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
-                            std::ref(entityManager));
-
-  int64_t previousTime = globalTimeline.getTime();
-
   while (true) {
-    int64_t currentTime = globalTimeline.getTime();
-    int64_t elapsedTime = currentTime - previousTime;
 
-    if (elapsedTime < FRAME_DURATION_NS) {
-      int64_t sleepTime = FRAME_DURATION_NS - elapsedTime;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepTime));
+    if (Client::disconnectRequested.load() || ball->position.y > worldHeight) {
+      terminateThreads.store(true);
+      break;
+    }
+    if (std::all_of(bricks.begin(), bricks.end(),
+                    [](auto &brick) { return !brick->isHittable; })) {
+      terminateThreads.store(true);
+      break;
     }
 
-    previousTime = globalTimeline.getTime();
-
-    doInput(player, &globalTimeline, 50.0f, 200.0f);
-
-    camera.update(*player, worldWidth, worldHeight);
-
-    // Sky blue background
-    prepareScene(SDL_Color{135, 206, 235, 255});
-
+    prepareScene(SDL_Color{0, 0, 0, 255});
+    doInput(paddle, &globalTimeline, 10000.0f, 0.0f);
+    camera.update(*paddle, worldWidth, worldHeight);
     entityManager.drawEntities(camera.position.x, camera.position.y);
-    clientEntityManager.drawEntities(camera.position.x, camera.position.y);
 
     updateScaleFactor(scale);
     if (allowScaling && cached_scale != scale) {
@@ -233,45 +216,36 @@ void doClientGame(bool isP2P = false) {
       cached_scale = scale;
     }
 
-    // Check death and respawn
-    if (entityManager.checkPlayerDeath(player)) {
-      Event death_event("death", globalTimeline.getTime());
-      death_event.parameters["player"] = player;
-      event_manager.raise_event(death_event);
-    }
-
-    if (player->isColliding(*ground1)) {
+    if (ball->isColliding(*paddle)) {
       Event collision_event("collision", globalTimeline.getTime());
-      collision_event.parameters["entity1"] = player;
-      collision_event.parameters["entity2"] = ground1;
-      collision_event.parameters["collision_type"] = "platform";
-      event_manager.raise_event(collision_event);
-    }
-    if (player->isColliding(*ground2)) {
-      Event collision_event("collision", globalTimeline.getTime());
-      collision_event.parameters["entity1"] = player;
-      collision_event.parameters["entity2"] = ground2;
-      collision_event.parameters["collision_type"] = "platform";
+      collision_event.parameters["collision_type"] = "paddle";
+      collision_event.parameters["entity1"] = ball;
+      collision_event.parameters["entity2"] = paddle;
       event_manager.raise_event(collision_event);
     }
 
-    // Need to do this after collision
+    for (auto &brick : bricks) {
+      if (brick->isHittable == false)
+        continue;
+      if (ball->isColliding(*brick)) {
+        Event collision_event("collision", globalTimeline.getTime());
+        collision_event.parameters["entity1"] = ball;
+        collision_event.parameters["entity2"] = brick;
+        collision_event.parameters["collision_type"] = "brick";
+        event_manager.raise_event(collision_event);
+      }
+    }
+
+    collision_utils::handleBallWall(ball, worldWidth, worldHeight);
+
     entityManager.updateEntityDeltaTime();
     entityManager.updateMovementPatternEntities();
     entityManager.updateEntities(&globalTimeline);
 
     event_manager.process_events(globalTimeline.getTime());
-
-    if (Client::disconnectRequested.load()) {
-      terminateThreads.store(true);
-      break;
-    }
-
     presentScene();
   }
 
-  gravityThread.join();
-  networkThread.join();
   clean_up_sdl();
   exit(0);
 }
