@@ -129,20 +129,16 @@ void doClientGame() {
   int worldHeight = 720;
 
   std::vector<std::shared_ptr<Entity>> bricks;
-  int rows = 5, cols = 10, brickWidth = 60, brickHeight = 20;
-  int padding =
-      (worldWidth - (cols * brickWidth)) / (cols + 1); // Dynamic padding
+  int rows = 3, cols = 5, brickWidth = 60, brickHeight = 20;
+  int padding = (worldWidth - (cols * brickWidth)) / (cols + 1);
   std::srand(static_cast<unsigned>(std::time(nullptr)));
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col < cols; ++col) {
-      SDL_Color brickColor = {
-          static_cast<Uint8>(std::rand() % 256), // Red
-          static_cast<Uint8>(std::rand() % 256), // Green
-          static_cast<Uint8>(std::rand() % 256), // Blue
-          255                                    // Alpha
-      };
-      int x = padding + col * (brickWidth + padding); // X position
-      int y = row * (brickHeight + padding);          // Y position
+      SDL_Color brickColor = {static_cast<Uint8>(std::rand() % 256),
+                              static_cast<Uint8>(std::rand() % 256),
+                              static_cast<Uint8>(std::rand() % 256), 255};
+      int x = padding + col * (brickWidth + padding);
+      int y = row * (brickHeight + padding);
 
       auto brick = std::make_shared<Entity>(Vector2{x, y},
                                             Vector2{brickWidth, brickHeight},
