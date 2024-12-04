@@ -73,7 +73,7 @@ void handlePlatformCollision(std::shared_ptr<Entity> entityA,
 
 void handleDeathZoneCollision(std::shared_ptr<Entity> entityA,
                               std::shared_ptr<Entity> entityB) {
-  Event death_event("death", globalTimeline.getTime() + 1);
+  Event death_event("death", globalTimeline.getTime());
   death_event.parameters["player"] = entityA;
   EventManager &em = EventManager::getInstance();
   em.raise_event(death_event);

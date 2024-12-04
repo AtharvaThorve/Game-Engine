@@ -193,7 +193,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (isSpacePressed && !wasSpacePressed && entity->standingPlatform) {
       // TODO: Update the jumpForce so that user provides it.
 
-      Event jump_event("input", globalTimeline->getTime() + 10);
+      Event jump_event("input", globalTimeline->getTime());
       jump_event.parameters["player"] = entity;
       jump_event.parameters["input_type"] = std::hash<std::string>{}("jump");
       jump_event.parameters["jump_force"] = -150.0f;

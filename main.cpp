@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-constexpr int64_t TARGET_REFRESH_RATE = 120;
+constexpr int64_t TARGET_REFRESH_RATE = 30;
 constexpr int64_t NANOSECONDS_PER_SECOND = 1000000000;
 constexpr int64_t FRAME_DURATION_NS =
     NANOSECONDS_PER_SECOND / TARGET_REFRESH_RATE;
