@@ -108,6 +108,7 @@ void doClientGame() {
   float cached_scale = scale;
 
   EntityManager entityManager;
+  EntityManager clientEntityManager;
 
   auto paddle =
       std::make_shared<Entity>(Vector2{300, 550}, Vector2{100, 20},
@@ -182,6 +183,9 @@ void doClientGame() {
   ReplayRecorder replay_recorder(&globalTimeline, entityManagers);
   event_manager.register_wildcard_handler(&replay_recorder);
 
+  std::thread networkThread(runClient, std::ref(entityManager),
+                            std::ref(clientEntityManager));
+
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
 
@@ -251,6 +255,7 @@ void doClientGame() {
   }
 
   gravityThread.join();
+  networkThread.join();
   clean_up_sdl();
   exit(0);
 }
