@@ -228,7 +228,6 @@ void doClientGame() {
         collision_event.parameters["entity2"] = brick;
         collision_event.parameters["collision_type"] = "brick";
         event_manager.raise_event(collision_event);
-        entityManager.removeEntity(brick);
       }
     }
 

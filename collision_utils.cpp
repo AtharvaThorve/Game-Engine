@@ -95,6 +95,7 @@ void handleBallBrickCollision(std::shared_ptr<Entity> ball,
     ball->velocity.x = -ball->velocity.x;
     
   brick->isHittable = false;
+  brick->isDrawable = false;
 }
 
 void handleBallWallCollision(std::shared_ptr<Entity> ball, int screenWidth,
