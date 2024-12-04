@@ -33,7 +33,8 @@ SRC = main.cpp \
       disconnectHandler.cpp \
       replay_recorder.cpp \
       movement_handler.cpp \
-      position_handler.cpp
+      position_handler.cpp \
+      bullet_handler.cpp \
 
 # Object directory
 OBJDIR = obj

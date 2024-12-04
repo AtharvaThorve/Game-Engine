@@ -16,7 +16,8 @@ using VariantType = std::variant<
         std::string, std::unordered_map<int, std::pair<float, float>>>>,
     std::shared_ptr<std::unordered_set<std::string>>,
     std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Entity>>>,
-    std::vector<std::shared_ptr<EntityManager>>>;
+    std::vector<std::shared_ptr<EntityManager>>,
+    std::shared_ptr<std::unordered_set<std::shared_ptr<Entity>>>>;
 
 class Event {
 public:

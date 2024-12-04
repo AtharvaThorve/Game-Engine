@@ -131,7 +131,7 @@ void doClientGame() {
   std::srand(static_cast<unsigned>(std::time(nullptr)));
   for (int row = 0; row < rows; ++row) {
     for (int col = 0; col < cols; ++col) {
-      SDL_Color brickColor = {static_cast<Uint8>(std::rand() % 256),
+      SDL_Color alienColor = {static_cast<Uint8>(std::rand() % 256),
                               static_cast<Uint8>(std::rand() % 256),
                               static_cast<Uint8>(std::rand() % 256), 255};
       int x = padding + col * (alienWidth + padding);
@@ -139,7 +139,7 @@ void doClientGame() {
 
       auto alien = std::make_shared<Entity>(Vector2{x, y},
                                             Vector2{alienWidth, alienHeight},
-                                            brickColor, &globalTimeline, 1);
+                                            alienColor, &globalTimeline, 1);
 
       alien->isHittable = true;
       alien->isMovable = true;
@@ -170,6 +170,8 @@ void doClientGame() {
 
   event_manager.register_handler("move", new MovementHandler(&globalTimeline));
 
+  event_manager.register_handler("bullet", new BulletHandler(&globalTimeline));
+
   event_manager.register_handler("update_position",
                                  new PositionHandler(&globalTimeline));
 
@@ -181,8 +183,11 @@ void doClientGame() {
 
   int64_t previousTime = globalTimeline.getTime();
 
-  std::unordered_set<std::shared_ptr<Entity>> playerBullets;
-  std::unordered_set<std::shared_ptr<Entity>> alienBullets;
+  std::shared_ptr<std::unordered_set<std::shared_ptr<Entity>>> playerBullets =
+      std::make_shared<std::unordered_set<std::shared_ptr<Entity>>>();
+
+  std::shared_ptr<std::unordered_set<std::shared_ptr<Entity>>> alienBullets =
+      std::make_shared<std::unordered_set<std::shared_ptr<Entity>>>();
 
   while (true) {
     int64_t currentTime = globalTimeline.getTime();
@@ -230,25 +235,21 @@ void doClientGame() {
     if (std::rand() % 150 < 1 && !event_manager.get_replay_only_mode()) {
       auto shooter = aliens[std::rand() % aliens.size()];
       if (shooter->isHittable) {
-        auto alienBullet = std::make_shared<Entity>(
-            Vector2{shooter->position.x + shooter->dimensions.x / 2 - 5,
-                    shooter->position.y + shooter->dimensions.y},
-            Vector2{10, 20}, SDL_Color{255, 0, 0, 255}, &globalTimeline, 1);
-        alienBullet->isMovable = true;
-        alienBullet->velocity = {0, 100};
-        alienBullet->maxVelocity = {0, 100};
-        entityManager.addEntity(alienBullet);
-        alienBullets.insert(alienBullet);
+        Event bullet_event("bullet", globalTimeline.getTime());
+        bullet_event.parameters["shooter"] = shooter;
+        bullet_event.parameters["bullets"] = alienBullets;
+        bullet_event.parameters["entityManagers"] = std::ref(entityManagers);
+        event_manager.raise_event(bullet_event);
       }
     }
 
-    for (auto it = alienBullets.begin(); it != alienBullets.end();) {
+    for (auto it = alienBullets->begin(); it != alienBullets->end();) {
       auto &alienBullet = *it;
       if (alienBullet->isColliding(*player)) {
         exit(0);
       } else if (alienBullet->position.y >= worldHeight) {
         alienBullet->isDrawable = false;
-        it = alienBullets.erase(it);
+        it = alienBullets->erase(it);
       } else {
         ++it;
       }
@@ -257,10 +258,9 @@ void doClientGame() {
     std::unordered_set<std::shared_ptr<Entity>> aliensToRemove;
     std::unordered_set<std::shared_ptr<Entity>> bulletsToRemove;
 
-    for (auto bulletIt = playerBullets.begin();
-         bulletIt != playerBullets.end();) {
+    for (auto bulletIt = playerBullets->begin();
+         bulletIt != playerBullets->end();) {
       auto &playerBullet = *bulletIt;
-      bool bulletRemoved = false;
 
       for (auto &alien : aliens) {
         if (alien->isColliding(*playerBullet)) {
@@ -273,7 +273,6 @@ void doClientGame() {
 
           aliensToRemove.insert(alien);
           bulletsToRemove.insert(playerBullet);
-          bulletRemoved = true;
         }
       }
 
@@ -293,9 +292,9 @@ void doClientGame() {
 
     for (auto &bullet : bulletsToRemove) {
       auto bulletIt =
-          std::find(playerBullets.begin(), playerBullets.end(), bullet);
-      if (bulletIt != playerBullets.end()) {
-        playerBullets.erase(bulletIt);
+          std::find(playerBullets->begin(), playerBullets->end(), bullet);
+      if (bulletIt != playerBullets->end()) {
+        playerBullets->erase(bulletIt);
       }
     }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "bullet_handler.hpp"
 #include "camera.hpp"
 #include "cleanup.hpp"
 #include "client.hpp"
