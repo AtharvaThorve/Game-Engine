@@ -23,12 +23,12 @@ void ReplayRecorder::start_recording() {
   is_recording = true;
   recording_start_time = timeline->getTime();
   recorded_events.clear();
-  initial_positions.clear();
+  initial_states.clear();
 
   for (const auto &manager : entityManagers) {
     for (const auto &entity : manager->getEntities()) {
       if (entity) {
-        initial_positions[entity] = entity->position;
+        initial_states[entity->getID()] = entity->serialize();
       }
     }
   }
@@ -46,29 +46,28 @@ void ReplayRecorder::record_event(const Event &event) {
 
 void ReplayRecorder::play_recording() {
   if (!is_recording) {
-    replay_start_time = timeline->getTime();
-    EventManager &em = EventManager::getInstance();
 
-    final_positions.clear();
+    final_states.clear();
     for (const auto &manager : entityManagers) {
       for (const auto &entity : manager->getEntities()) {
         if (entity) {
-          final_positions[entity] = entity->position;
+          final_states[entity->getID()] = entity->serialize();
         }
       }
     }
 
-    // Snap entities to the initial_positions they were at when recording
-    // started
-    for (const auto &pair : initial_positions) {
-      auto entity = pair.first;
-      entity->setPosition(pair.second);
-      entity->velocity = {0, 0};
-      entity->inputAcceleration = {0, 0};
+    for (const auto &pair : initial_states) {
+      int64_t id = pair.first;
+      auto entity = find_entity_by_id(id);
+      if (entity) {
+        entity->deserialize(pair.second);
+      }
     }
 
+    EventManager &em = EventManager::getInstance();
     em.set_replay_only_mode(true);
 
+    replay_start_time = timeline->getTime();
     for (auto &event : recorded_events) {
       Event replay_event = event;
       replay_event.timestamp += replay_start_time;
@@ -82,10 +81,22 @@ void ReplayRecorder::play_recording() {
 }
 
 void ReplayRecorder::replay_complete() {
-  for (const auto &pair : final_positions) {
-    auto entity = pair.first;
-    entity->setPosition(pair.second);
-    entity->velocity = {0, 0};
-    entity->inputAcceleration = {0, 0};
+  for (const auto &pair : final_states) {
+    int64_t id = pair.first;
+    auto entity = find_entity_by_id(id);
+    if (entity) {
+      entity->deserialize(pair.second);
+    }
   }
+}
+
+std::shared_ptr<Entity> ReplayRecorder::find_entity_by_id(int64_t id) const {
+  for (const auto &manager : entityManagers) {
+    for (const auto &entity : manager->getEntities()) {
+      if (entity && entity->getID() == id) {
+        return entity;
+      }
+    }
+  }
+  return nullptr;
 }

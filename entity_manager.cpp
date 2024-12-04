@@ -39,10 +39,12 @@ void EntityManager::updateEntityDeltaTime() {
 void EntityManager::drawEntities(float cameraX, float cameraY) {
   std::lock_guard<std::mutex> lock(entityMutex);
   for (auto &entity : entities) {
-    entity->draw(cameraX, cameraY);
+    if (entity->isDrawable)
+      entity->draw(cameraX, cameraY);
   }
   for (auto &deathZone : deathZones) {
-    deathZone->draw(cameraX, cameraY);
+    if (deathZone->isDrawable)
+      deathZone->draw(cameraX, cameraY);
   }
 }
 
