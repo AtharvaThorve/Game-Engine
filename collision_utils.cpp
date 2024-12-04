@@ -83,11 +83,14 @@ void handlePlayerBulletAlienCollision(std::shared_ptr<Entity> bullet,
                                       std::shared_ptr<Entity> alien) {
   alien->isHittable = false;
   bullet->isHittable = false;
+  bullet->isDrawable = false;
+  alien->isDrawable = false;
 }
 
 void handleAlienBulletPlayerCollision(std::shared_ptr<Entity> bullet,
                                       std::shared_ptr<Entity> player) {
   bullet->isHittable = false;
+  bullet->isDrawable = false;
   Event death_event("death", globalTimeline.getTime() + 1);
   death_event.parameters["player"] = player;
   EventManager &em = EventManager::getInstance();

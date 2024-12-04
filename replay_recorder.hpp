@@ -7,7 +7,8 @@
 
 class ReplayRecorder : public EventHandler {
 public:
-  ReplayRecorder(Timeline *timeline, std::vector<std::shared_ptr<EntityManager>> &entityManagers);
+  ReplayRecorder(Timeline *timeline,
+                 std::vector<std::shared_ptr<EntityManager>> &entityManagers);
   void on_event(const Event &event) override;
 
 private:
@@ -19,14 +20,19 @@ private:
   int64_t replay_start_time = 0;
 
   std::vector<Event> recorded_events;
-  std::unordered_map<std::shared_ptr<Entity>, Vector2> initial_positions;
-  std::unordered_map<std::shared_ptr<Entity>, Vector2> final_positions;
+  std::unordered_map<int64_t, std::unordered_map<std::string, std::string>>
+      initial_states;
+  std::unordered_map<int64_t, std::unordered_map<std::string, std::string>>
+      final_states;
 
   const size_t start_recording_hash =
       std::hash<std::string>{}("start_recording");
   const size_t stop_recording_hash = std::hash<std::string>{}("stop_recording");
   const size_t play_recording_hash = std::hash<std::string>{}("play_recording");
-  const size_t replay_complete_hash = std::hash<std::string>{}("replay_complete");
+  const size_t replay_complete_hash =
+      std::hash<std::string>{}("replay_complete");
+
+  std::shared_ptr<Entity>find_entity_by_id(int64_t id) const;
 
   void start_recording();
   void stop_recording();

@@ -1,5 +1,10 @@
 #include "main.hpp"
 
+constexpr int64_t TARGET_REFRESH_RATE = 120;
+constexpr int64_t NANOSECONDS_PER_SECOND = 1000000000;
+constexpr int64_t FRAME_DURATION_NS =
+    NANOSECONDS_PER_SECOND / TARGET_REFRESH_RATE;
+
 Timeline globalTimeline(nullptr, 2);
 PhysicsSystem physicsSystem(0.0f, 150.0f);
 std::atomic<bool> terminateThreads(false);
@@ -116,8 +121,8 @@ void doClientGame() {
   entityManager.addEntity(player);
 
   std::vector<std::shared_ptr<Entity>> aliens;
-  int rows = 3;
-  int cols = 5;
+  int rows = 1;
+  int cols = 1;
 
   int alienWidth = 40;
   int alienHeight = 30;
@@ -174,10 +179,22 @@ void doClientGame() {
   std::thread gravityThread(applyGravityOnEntities, std::ref(physicsSystem),
                             std::ref(entityManager));
 
+  int64_t previousTime = globalTimeline.getTime();
+
   std::unordered_set<std::shared_ptr<Entity>> playerBullets;
   std::unordered_set<std::shared_ptr<Entity>> alienBullets;
 
-  while (!terminateThreads.load()) {
+  while (true) {
+    int64_t currentTime = globalTimeline.getTime();
+    int64_t elapsedTime = currentTime - previousTime;
+
+    if (elapsedTime < FRAME_DURATION_NS) {
+      int64_t sleepTime = FRAME_DURATION_NS - elapsedTime;
+      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepTime));
+    }
+
+    previousTime = globalTimeline.getTime();
+
     doInput(player, &globalTimeline, entityManager, playerBullets, 200000.0f,
             0.0f, 0.0f);
 
@@ -210,7 +227,7 @@ void doClientGame() {
       }
     }
 
-    if (std::rand() % 150 < 1) {
+    if (std::rand() % 150 < 1 && !event_manager.get_replay_only_mode()) {
       auto shooter = aliens[std::rand() % aliens.size()];
       if (shooter->isHittable) {
         auto alienBullet = std::make_shared<Entity>(
@@ -230,7 +247,7 @@ void doClientGame() {
       if (alienBullet->isColliding(*player)) {
         exit(0);
       } else if (alienBullet->position.y >= worldHeight) {
-        entityManager.removeEntity(alienBullet);
+        alienBullet->isDrawable = false;
         it = alienBullets.erase(it);
       } else {
         ++it;
@@ -271,7 +288,6 @@ void doClientGame() {
       auto alienIt = std::find(aliens.begin(), aliens.end(), alien);
       if (alienIt != aliens.end()) {
         aliens.erase(alienIt);
-        entityManager.removeEntity(alien);
       }
     }
 
@@ -280,7 +296,6 @@ void doClientGame() {
           std::find(playerBullets.begin(), playerBullets.end(), bullet);
       if (bulletIt != playerBullets.end()) {
         playerBullets.erase(bulletIt);
-        entityManager.removeEntity(bullet);
       }
     }
 
