@@ -386,7 +386,7 @@ void doClientGame(bool isP2P = false) {
   int64_t moveTimer = 0;
   const int64_t MOVE_DELAY = 150000000; // Snake movement speed (150ms)
 
-while (true) {
+  while (true) {
     int64_t currentTime = globalTimeline.getTime();
     int64_t elapsedTime = currentTime - previousTime;
 
@@ -512,7 +512,7 @@ while (true) {
     }
 
     presentScene();
-}
+  }
 
 
   networkThread.join();
