@@ -108,7 +108,6 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     wasMinusPressed = true;
   }
 
-  // Handle Replay Events
   bool enterPressed = state[SDL_SCANCODE_RETURN];
   if (enterPressed && !wasEnterPressed) {
     wasEnterPressed = true;
@@ -117,7 +116,6 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     if (isRecording) {
       std::cout << "Started Recording" << std::endl;
       Event start_recording_event("start_recording", globalTimeline->getTime());
-      
       em.raise_event(start_recording_event);
     } else {
       std::cout << "Stopped Recording" << std::endl;
@@ -136,6 +134,7 @@ void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline,
     }
     wasRShiftPressed = rShiftPressed;
   }
+
 
   if (entity->isMovable) {
     bool l_shift_pressed = state[SDL_SCANCODE_LSHIFT];
