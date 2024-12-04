@@ -66,5 +66,13 @@ Different events being handled:
 3. Death
 4. Respawn
 5. Disconnect (Networked)
+6. Movement
+7. Replay
+8. Position (Networked)
 
 **Note:** We also have added a new type of movement (dash), which can be performed by pressing LShift and any direction key (WASD). The dash can also be performed in diagonal directions by pressing two directions at the same time.
+
+## Replay System has been added
+So we have `replay_recorder.cpp` that contains the logic for recording and replaying events. We also made changes to `event_manager.cpp` file to be able to register wildcard handlers and process replay events properly.
+
+**Note:** The recording can be started and stopped by pressing the ***Enter/Return*** key and the recording can be played back by pressing the ***RShift*** key.
