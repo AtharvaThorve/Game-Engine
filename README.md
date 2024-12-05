@@ -1,4 +1,4 @@
-# Game Engine
+# Game Engine - Bricks Game
 
 This is a C++ based project designed as a Visual Studio solution for a Game Engine. Detailed setup and usage instructions are provided below.
 
