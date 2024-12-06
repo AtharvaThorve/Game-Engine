@@ -6,21 +6,23 @@
 2. [Installation](#installation)
    - [Installing Dependencies on Linux](#installing-dependencies-on-linux)
    - [Building with Makefile](#building-with-makefile)
-3. [Timeline System](#timeline-system)
-4. [Networking Setup](#networking-setup)
+3. [Code Structure](#code-structure)
+4. [Game Object Model](#game-object-model)
+5. [Timeline System](#timeline-system)
+6. [Networking Setup](#networking-setup)
    - [Client-Server Architecture](#client-server-architecture)
    - [Peer-to-Peer (P2P) Architecture](#peer-to-peer-p2p-architecture)
-5. [Event Management](#event-driven-architecture)
+7. [Event Management](#event-driven-architecture)
    - [Events Handled](#events-handled)
-6. [Replay System](#replay-system)
-7. [JavaScript Scripting with V8](#javascript-scripting-with-v8)
+8. [Replay System](#replay-system)
+9. [JavaScript Scripting with V8](#javascript-scripting-with-v8)
    - [Setting Up V8](#setting-up-v8)
    - [Writing JavaScript Scripts](#writing-javascript-scripts)
    - [Example Usage](#example-usage)
-8. [Code Structure](#code-structure)
-9. [Usage Examples](#usage-examples)
-10. [Games](#games)
-11. [Future Scope](#future-scope)
+10. [Input Handling](#input-handling)
+11. [Movement System](#movement-system)
+12. [Games](#games)
+13. [Future Scope](#future-scope)
 
 ## Introduction
 
@@ -85,6 +87,75 @@ To run this project, ensure that the following dependencies are installed:
   ```
 
 **Note:** Scaling can be toggled by pressing the `Left Shift` key. By default, scaling is not enabled (constant size).
+
+## Code Structure
+
+The codebase is organized into several key components:
+
+- **Main Modules**
+  - `main.cpp` and `main.hpp`: Entry point of the application.
+  - `init.cpp` and `init.hpp`: Initialization routines for the game engine.
+  - `cleanup.cpp` and `cleanup.hpp`: Handles resource cleanup.
+
+- **Entities and Components**
+  - `Entity.hpp` and `Entity.cpp`: Defines the base entity class.
+  - `EntityManager.hpp` and `EntityManager.cpp`: Manages all entities within the game.
+  - `MovementPattern.hpp` and `MovementPattern.cpp`: Defines movement patterns for entities.
+
+- **Graphics and Rendering**
+  - `draw.cpp` and `draw.hpp`: Functions for rendering entities and shapes.
+  - `Shape.hpp` and `Shape.cpp`: Defines geometric shapes used in the game.
+  - `Camera.hpp` and `Camera.cpp`: Implements camera functionality.
+  - `scaling.hpp` and `scaling.cpp`: Handles scaling transformations.
+
+- **Input and Physics**
+  - `input.cpp` and `input.hpp`: Handles user input.
+  - `Physics.hpp` and `Physics.cpp`: Implements physics calculations.
+  - `collision_utils.hpp` and `collision_utils.cpp`: Contains collision detection utilities.
+
+- **Networking**
+  - `Server.hpp` and `Server.cpp`: Server-side networking implementation.
+  - `Client.hpp` and `Client.cpp`: Client-side networking implementation.
+  - **Note:** The P2P architecture is currently deprecated but remains in the codebase.
+
+- **Event Management**
+  - `event.hpp`: Contains generic event-related definitions.
+  - `event_manager.hpp` and `event_manager.cpp`: Manages event queueing and dispatching.
+
+- **Scripting**
+  - `script_manager.hpp` and `script_manager.cpp`: Manages JavaScript scripting with V8.
+  - `v8helpers.hpp` and `v8helpers.cpp`: Helper functions for integrating V8 scripts.
+
+- **Utilities**
+  - `.clang-format`: Coding style guidelines for consistent formatting.
+  - `defs.hpp`: Contains macro definitions and global constants.
+  - `structs.hpp` and `structs.cpp`: Defines common data structures.
+
+## Game Object Model
+
+The Game Object Model revolves around the **Entity** class, which serves as the core building block for all game objects. Each entity possesses various attributes such as position, velocity, maximum velocity, acceleration, color, shape, movement pattern, timeline, and flags indicating whether it is affected by gravity or is movable.
+
+### Composition Over Inheritance
+
+The design follows a component-based architecture, emphasizing composition over inheritance. This approach allows for greater flexibility and modularity.
+
+- **Has-A Relationship:**
+  - **Shape:** Each entity has a shape, defined by the `Shape` class.
+  - **Movement Pattern:** Entities can have movement patterns, defined by the `MovementPattern` class.
+  - **Timeline:** Each entity has its own timeline, anchored to the global timeline.
+
+- **Is-A Relationship:**
+  - The entity class does not inherit from other classes but interacts with various components to achieve desired behaviors.
+
+### Component Interaction
+
+While entities possess attributes, they do not directly manipulate them. Instead, specialized components handle specific aspects:
+
+- **Physics System:** Applies gravity and other physics-related effects to entities.
+- **EntityManager:** Manages entities and updates their movement patterns.
+- **Timeline:** Manages time for each entity, allowing for synchronized and independent time flows.
+
+This design ensures that entities remain lightweight and focused on their core responsibilities, while components handle complex behaviors.
 
 ## Timeline System
 
@@ -225,13 +296,111 @@ To integrate new events into the system:
 
 ## Replay System
 
-The replay system allows recording and replaying of events.
+The replay system enables recording and replaying of gameplay events, allowing players to capture their game sessions and replay them later. This feature is useful for debugging, analyzing player behavior, or creating gameplay videos.
 
-- **Recording Controls:**
-  - Start/Stop Recording: Press the `Enter` key.
-  - Playback Recording: Press the `Right Shift` key.
+### Implementation Details
 
-Relevant files include `replay_recorder.cpp` and updates to `event_manager.cpp` to support wildcard handlers and replay events.
+The replay system operates by:
+
+- **Event Recording:** Capturing all events during gameplay by registering a wildcard event handler using the `EventManager`. This ensures every event, regardless of type, is recorded.
+- **State Saving:** Storing the initial states of all entities at the start of recording. This includes positions, velocities, and any other relevant properties.
+- **Event Replaying:** Re-injecting the recorded events into the event queue at their original timestamps relative to the replay start time.
+- **State Restoration:** Before playback, entities are reset to their initial recorded states. After replaying, entities can be restored to their final states if needed.
+
+### Key Components
+
+#### `ReplayRecorder` Class
+
+- **Header File:** `replay_recorder.hpp`
+- **Source File:** `replay_recorder.cpp`
+
+The `ReplayRecorder` class manages the recording and replaying process.
+
+**Important Methods:**
+
+- `ReplayRecorder(Timeline *timeline, std::vector<std::shared_ptr<EntityManager>> &entityManagers);`
+  - Constructor that initializes the recorder with the main `Timeline` and a list of `EntityManager` instances.
+
+- `void on_event(const Event &event);`
+  - Handles events related to starting/stopping recording and playback. Also captures events when recording is active.
+
+- `void start_recording();`
+  - Begins recording events and saves the initial state of all entities.
+
+- `void stop_recording();`
+  - Stops the recording process.
+
+- `void record_event(const Event &event);`
+  - Records an individual event by adjusting its timestamp relative to the recording start time.
+
+- `void play_recording();`
+  - Initiates playback by restoring entities to their initial states and scheduling recorded events.
+
+- `void replay_complete();`
+  - Called when replaying is finished. Restores entities to their states at the end of the recording session.
+
+#### `EventManager` Modifications
+
+- **Files:** `event_manager.hpp` and `event_manager.cpp`
+
+Enhancements to the `EventManager` support the replay functionality:
+
+- **Wildcard Handlers:**
+  - Allows the `ReplayRecorder` to listen to all events without needing to register for each specific event type.
+
+- **Replay Mode:**
+  - A `replay_only_mode` flag ensures that during replay, only replay events are processed.
+  - Live events are ignored to prevent interference with the replayed events.
+
+- **Replay Event Counting:**
+  - Keeps track of how many replay events are left to process.
+  - Once all replay events have been handled, the system exits replay mode and triggers a `replay_complete` event.
+
+#### `Timeline` Class Usage
+
+- **Files:** `timeline.hpp` and `timeline.cpp`
+
+The `Timeline` class provides accurate timing for event scheduling:
+
+- **Time Management:**
+  - Ensures events are replayed at the correct times by using high-resolution timers.
+  - Handles pausing and unpausing, which is essential during recording and playback.
+
+- **Synchronization:**
+  - Both the recorder and the event manager use the same timeline to maintain synchronization between recording and replaying.
+
+### Usage Instructions
+
+- **Start Recording:**
+  - Press the `Enter` key to begin recording gameplay.
+  - The system saves the current state of all entities and starts capturing events.
+
+- **Stop Recording:**
+  - Press the `Enter` key again to stop recording.
+  - Recording can be stopped at any time, and events up to that point are saved.
+
+- **Play Recording:**
+  - Press the `Right Shift` key to start playback.
+  - Entities are reset to their initial states, and recorded events are replayed in order.
+
+### Important Notes
+
+- **Entity State Serialization:**
+  - Entity states are serialized and deserialized to capture their exact conditions during recording.
+  - This includes all necessary properties to fully restore an entity's state.
+
+- **Thread Safety:**
+  - Mutexes are used in classes like `Timeline` and `EventManager` to ensure thread-safe operations, as event processing and timing can occur across multiple threads.
+
+- **Replay Constraints:**
+  - The replay system is designed for single-session use. Recordings are not persisted to disk and will be lost when the application exits.
+  - Extending the system to save and load recordings from files would require additional implementation.
+
+### Relevant Files
+
+- `replay_recorder.hpp` and `replay_recorder.cpp`
+- `event_manager.hpp` and `event_manager.cpp`
+- `timeline.hpp` and `timeline.cpp`
 
 ## JavaScript Scripting with V8
 
@@ -287,68 +456,173 @@ Make sure there are proper bindings present between the V8 Javascript engine and
 
 By using JavaScript scripting with V8, you can easily modify game behavior without recompiling the entire project, making the development process more efficient and flexible.
 
-## Code Structure
+## Input Handling
 
-The codebase is organized into several key components:
+The game engine handles various types of inputs to control entity actions and game events. This section describes the different input types and how they are processed.
 
-- **Main Modules**
-  - `main.cpp` and `main.hpp`: Entry point of the application.
-  - `init.cpp` and `init.hpp`: Initialization routines for the game engine.
-  - `cleanup.cpp` and `cleanup.hpp`: Handles resource cleanup.
+### Input Types
 
-- **Entities and Components**
-  - `Entity.hpp` and `Entity.cpp`: Defines the base entity class.
-  - `EntityManager.hpp` and `EntityManager.cpp`: Manages all entities within the game.
-  - `MovementPattern.hpp` and `MovementPattern.cpp`: Defines movement patterns for entities.
+1. **Keyboard Inputs:**
+   - **Movement:** `W`, `A`, `S`, `D` keys for moving entities up, left, down, and right respectively.
+   - **Dash:** `Left Shift` key combined with direction keys for dashing.
+   - **Jump:** `Space` key for jumping.
+   - **Pause/Unpause:** `ESC` key to toggle pause.
+   - **Speed Control:** `P` key to speed up and `M` key to slow down the game.
+   - **Recording Controls:** `Enter` key to start/stop recording and `Right Shift` key to play recording.
+   - **Script Execution:** `H` key to run the `hello_world` script and `K` key to run the `player` script.
 
-- **Graphics and Rendering**
-  - `draw.cpp` and `draw.hpp`: Functions for rendering entities and shapes.
-  - `Shape.hpp` and `Shape.cpp`: Defines geometric shapes used in the game.
-  - `Camera.hpp` and `Camera.cpp`: Implements camera functionality.
-  - `scaling.hpp` and `scaling.cpp`: Handles scaling transformations.
+2. **Mouse Inputs:**
+   - Currently, mouse inputs are not implemented but can be added for future features like aiming or clicking.
 
-- **Input and Physics**
-  - `input.cpp` and `input.hpp`: Handles user input.
-  - `Physics.hpp` and `Physics.cpp`: Implements physics calculations.
-  - `collision_utils.hpp` and `collision_utils.cpp`: Contains collision detection utilities.
+### Input Handling Classes
 
-- **Networking**
-  - `Server.hpp` and `Server.cpp`: Server-side networking implementation.
-  - `Client.hpp` and `Client.cpp`: Client-side networking implementation.
-  - **Note:** The P2P architecture is currently deprecated but remains in the codebase.
+#### `InputHandler` Class
 
-- **Event Management**
-  - `event.hpp`: Contains generic event-related definitions.
-  - `event_manager.hpp` and `event_manager.cpp`: Manages event queueing and dispatching.
+- **Header File:** `input_handler.hpp`
+- **Source File:** `input_handler.cpp`
 
-- **Scripting**
-  - `script_manager.hpp` and `script_manager.cpp`: Manages JavaScript scripting with V8.
-  - `v8helpers.hpp` and `v8helpers.cpp`: Helper functions for integrating V8 scripts.
+The `InputHandler` class processes input events and updates entity states accordingly.
 
-- **Utilities**
-  - `.clang-format`: Coding style guidelines for consistent formatting.
-  - `defs.hpp`: Contains macro definitions and global constants.
-  - `structs.hpp` and `structs.cpp`: Defines common data structures.
+**Important Methods:**
 
-## Usage Examples
+- `InputHandler(Timeline *timeline);`
+  - Constructor that initializes the handler with the main `Timeline`.
 
-### Running the Game
+- `void on_event(const Event &event);`
+  - Handles input events and updates entity states.
 
-To start the game with default settings:
-```bash
-./main client
-```
+- `void handle_input(std::shared_ptr<Entity> player, size_t input_type, float acceleration_rate, float jump_force, Vector2 dash_vector);`
+  - Applies input logic to the specified entity based on the input type and parameters.
+
+#### `Input` Functions
+
+- **Header File:** `input.hpp`
+- **Source File:** `input.cpp`
+
+These functions handle the actual input polling and event raising.
+
+**Important Functions:**
+
+- `void doInput(std::shared_ptr<Entity> entity, Timeline *globalTimeline, ScriptManager *sm, float accelerationRate, float dash_speed, float dash_duration);`
+  - Polls for input states and raises corresponding events.
+
+- `void raiseMovementEvent(const std::string &input_type, std::shared_ptr<Entity> entity, float rate, Timeline *timeline);`
+  - Helper function to raise movement events based on input.
+
+### Usage
+
+The input handling system integrates with various components:
+
+- **Event Management:** Raises events based on input states, which are then processed by the `EventManager`.
+- **Movement System:** Updates entity positions and states based on input events.
+- **Scripting:** Allows running scripts based on specific key presses.
+
+### Relevant Files
+
+- `input_handler.hpp` and `input_handler.cpp`
+- `input.hpp` and `input.cpp`
+
+## Movement System
+
+The movement system in the game engine handles the movement of entities based on user input, predefined patterns, and physics calculations. This system ensures smooth and realistic movement for all game entities.
+
+### Movement Handling
+
+Movement is managed through the `MovementHandler` class, which processes movement-related events and updates entity positions accordingly.
+
+#### Key Components
+
+- **Header File:** `movement_handler.hpp`
+- **Source File:** `movement_handler.cpp`
+
+**Important Methods:**
+
+- `MovementHandler(Timeline *timeline);`
+  - Constructor that initializes the handler with the main `Timeline`.
+
+- `void on_event(const Event &event);`
+  - Handles movement events and updates entity positions.
+
+- `void handle_movement(std::shared_ptr<Entity> entity);`
+  - Applies movement logic to the specified entity, including velocity and acceleration updates.
+
+### Movement Patterns
+
+The `MovementPattern` class defines movement patterns for entities, allowing for complex and predefined movement behaviors.
+
+#### Key Components
+
+- **Header File:** `movement_pattern.hpp`
+- **Source File:** `movement_pattern.cpp`
+
+**Important Methods:**
+
+- `MovementPattern();`
+  - Constructor that initializes an empty movement pattern.
+
+- `void addStep(const MovementStep &step);`
+  - Adds a movement step to the pattern.
+
+- `void update(Entity &entity);`
+  - Updates the entity's position based on the current movement step and elapsed time.
+
+#### MovementStep Class
+
+The `MovementStep` class represents a single step in a movement pattern, including velocity, duration, and whether the step is a pause.
+
+**Important Methods:**
+
+- `MovementStep(const Vector2 &vel, float dur, bool pause = false);`
+  - Constructor that initializes a movement step with the specified velocity, duration, and pause flag.
+
+### Usage
+
+The movement system integrates with various components:
+
+- **Input Handling:** Processes user input to control entity movement.
+- **Physics Calculations:** Ensures realistic movement by applying physics-based calculations.
+- **Movement Patterns:** Allows entities to follow predefined movement patterns for complex behaviors.
+
+### Relevant Files
+
+- `movement_handler.hpp` and `movement_handler.cpp`
+- `movement_pattern.hpp` and `movement_pattern.cpp`
 
 ## Games
 
-Different games are present in different branches. Since the engine was built iteratively, the different games might not include all the functionalities.
+The game engine supports various games, each available in different branches. The games demonstrate the engine's capabilities and serve as examples for different genres and features.
 
-**Note:** Games that are marked with 4 are platformer games, that support event driven architecture but not the replay system. Games that are marked with 5 are non platformer games such as brick breaker, snake, space invaders, etc. These games support replay system.
+### Platformer Games
 
-**Note:** None of the games support scripting yet.
+Platformer games are marked with a `4` and support the event-driven architecture but do not include the replay system. These games showcase the engine's ability to handle complex movement patterns, collision detection, and platform-specific mechanics.
 
-## Future scope
-1. The main focus of this project would **always** be related to improvement of the engine by improving current codebase or by adding newer features. Features such as:
-    1. Input Abstraction
-    2. Adding more support for scripting
-    3. Adding support for different scripting languages
+### Non-Platformer Games
+
+Non-platformer games, such as brick breaker, snake, and space invaders, are marked with a `5`. These games support the replay system, allowing players to record and replay their gameplay sessions. They demonstrate the engine's versatility in handling different game mechanics and genres.
+
+**Note:** None of the games currently support scripting, but this feature is planned for future updates.
+
+## Future Scope
+
+The primary focus of this project is to continuously improve the game engine by enhancing the current codebase and adding new features. Future developments may include:
+
+1. **Input Abstraction:**
+   - Implementing a more flexible input system to support various input devices and configurations.
+
+2. **Enhanced Scripting Support:**
+   - Expanding the scripting capabilities to allow for more complex game logic and interactions.
+   - Adding support for additional scripting languages beyond JavaScript.
+
+3. **Performance Optimization:**
+   - Improving the engine's performance to handle larger and more complex game worlds.
+
+4. **Networking Enhancements:**
+   - Enhancing the networking architecture to support more robust and scalable multiplayer experiences.
+
+By focusing on these areas, the game engine aims to provide a powerful and flexible platform for creating a wide range of games.
+
+## Contributors
+
+- [Atharva Thorve](https://github.com/AtharvaThorve)
+- [Rushil Patel](https://github.com/rushildpatel)
+- [Divit Kalathil](https://github.com/divitkalathil)
