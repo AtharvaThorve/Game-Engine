@@ -2,10 +2,10 @@
 CXX = g++
 
 # Compiler Flags
-CXXFLAGS = -Wall -std=c++17 -O2 $(shell sdl2-config --cflags)
+CXXFLAGS = -Wall -std=c++17 -O2 $(shell sdl2-config --cflags) -I/usr/include/v8
 
 # Linker Flags (for SDL2)
-LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread
+LDFLAGS = $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lzmq -lpthread -lv8
 
 # Source files
 SRC = main.cpp \
@@ -30,8 +30,14 @@ SRC = main.cpp \
       death_handler.cpp \
       respawn_handler.cpp \
       input_handler.cpp \
-      disconnectHandler.cpp
-
+      disconnectHandler.cpp \
+      replay_recorder.cpp \
+      movement_handler.cpp \
+      position_handler.cpp \
+      v8helpers.cpp \
+      script_manager.cpp \
+      event_manager_bindings.cpp \
+      entity_bindings.cpp \
 # Object directory
 OBJDIR = obj
 

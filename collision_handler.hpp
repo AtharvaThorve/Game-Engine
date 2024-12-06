@@ -3,19 +3,27 @@
 #include "entity.hpp"
 #include "event_manager.hpp"
 #include "timeline.hpp"
+#include <functional>
+#include <unordered_map>
+
+using CollisionFunction =
+    std::function<void(std::shared_ptr<Entity>, std::shared_ptr<Entity>)>;
 
 class CollisionHandler : public EventHandler {
 public:
-  CollisionHandler(EventManager *em, Timeline *timeline);
+  CollisionHandler(Timeline *timeline);
   void on_event(const Event &event) override;
+  void register_collision_handler(const std::string &collision_type,
+                                  CollisionFunction collision_function);
 
 private:
-  EventManager *em;
   Timeline *timeline;
+
   const size_t collision_event_hash = std::hash<std::string>{}("collision");
-  const size_t platform_collision_hash = std::hash<std::string>{}("platform");
-  const size_t death_zone_collision_hash =
-      std::hash<std::string>{}("death_zone");
+
+  std::unordered_map<std::string, CollisionFunction> collision_handlers;
+
   void handle_collision(std::shared_ptr<Entity> entity1,
-                        std::shared_ptr<Entity> entity2, size_t collision_type);
+                        std::shared_ptr<Entity> entity2,
+                        std::string collision_type);
 };

@@ -5,11 +5,10 @@
 
 class InputHandler : public EventHandler {
 public:
-  InputHandler(EventManager *em, Timeline *timeline);
+  InputHandler(Timeline *timeline);
   void on_event(const Event &event) override;
 
 private:
-  EventManager *em;
   Timeline *timeline;
 
   const size_t input_event_hash = std::hash<std::string>{}("input");
@@ -19,6 +18,7 @@ private:
   const size_t stop_y = std::hash<std::string>{}("stop_y");
   const size_t jump = std::hash<std::string>{}("jump");
   const size_t dash = std::hash<std::string>{}("dash");
+  const size_t stop_dash = std::hash<std::string>{}("stop_dash");
 
   void handle_input(std::shared_ptr<Entity> player, size_t input_type,
                     float acceleration_rate = 5, float jump_force = -150,

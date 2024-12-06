@@ -1,0 +1,1 @@
+print('Hello World from V8 JavaScript Engine!');

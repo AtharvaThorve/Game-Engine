@@ -3,12 +3,13 @@
 #include "event_manager.hpp"
 #include "timeline.hpp"
 
-class DisconnectHandler : public EventHandler {
+class PositionHandler : public EventHandler {
 public:
-  DisconnectHandler(Timeline *timeline);
+  PositionHandler(Timeline *timeline);
   void on_event(const Event &event) override;
 
 private:
   Timeline *timeline;
-  const size_t disconnect_event_hash = std::hash<std::string>{}("disconnect");
+  const size_t position_event_hash =
+      std::hash<std::string>{}("update_position");
 };

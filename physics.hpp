@@ -10,4 +10,6 @@ public:
 	PhysicsSystem(float gravityX, float gravityY);
 
 	void applyGravity(Entity& entity);
+
+	~PhysicsSystem() = default;
 };

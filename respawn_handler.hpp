@@ -7,7 +7,7 @@
 
 class RespawnHandler : public EventHandler {
 public:
-  RespawnHandler(EventManager *em, Timeline *timeline);
+  RespawnHandler(Timeline *timeline);
   void on_event(const Event &event) override;
 
   void add_spawn_point(std::shared_ptr<Entity> spawnPoint);
@@ -16,7 +16,6 @@ public:
   }
 
 private:
-  EventManager *em;
   Timeline *timeline;
   const size_t respawn_event_hash = std::hash<std::string>{}("respawn");
   std::unordered_set<std::shared_ptr<Entity>> spawn_points;

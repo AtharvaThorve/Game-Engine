@@ -66,5 +66,67 @@ Different events being handled:
 3. Death
 4. Respawn
 5. Disconnect (Networked)
+6. Movement
+7. Replay
+8. Position (Networked)
 
 **Note:** We also have added a new type of movement (dash), which can be performed by pressing LShift and any direction key (WASD). The dash can also be performed in diagonal directions by pressing two directions at the same time.
+
+## Replay System has been added
+So we have `replay_recorder.cpp` that contains the logic for recording and replaying events. We also made changes to `event_manager.cpp` file to be able to register wildcard handlers and process replay events properly.
+
+**Note:** The recording can be started and stopped by pressing the ***Enter/Return*** key and the recording can be played back by pressing the ***RShift*** key.
+
+## JavaScript Scripting with V8
+
+We have integrated the V8 JavaScript engine to allow for scripting using JavaScript. This enables developers to write game logic in JavaScript, which can be loaded and executed at runtime. Additionally, we can pass player shared pointers, player positions, and raise new events from the scripts.
+
+### Setting Up V8
+
+1. Ensure that the V8 engine is included in your project. The necessary files are already included in the `third_party` directory.
+2. Include the V8 headers and libraries in your project.
+```bash
+sudo apt update && sudo apt -y install build-essential libnode-dev
+```
+
+### Writing JavaScript Scripts
+
+JavaScript scripts should be placed in the `scripts` directory. Here are examples of two simple JavaScript scripts:
+
+#### Example 1: Print Hello
+
+```javascript
+// scripts/hello_world.js
+print('Hello World from V8 JavaScript Engine!');
+```
+
+#### Example 2: Print Player Location and Raise Death Event
+
+```javascript
+// scripts/player.js
+function runScript() {
+    print(player.position.x);
+    print(player.position.y);
+
+    const params = {
+        player: player,
+    };
+
+    raise_event("death", params);
+}
+
+runScript();
+```
+
+### Example Usage
+
+Here is an example of how to use the JavaScript scripting system in the game engine:
+
+1. Create a JavaScript script in the `scripts` directory.
+2. Load and execute the script in your C++ code during the appropriate game events (e.g., start, update, end).
+```C++
+sm->addScript("player", "scripts/player.js");
+```
+Make sure there are proper bindings present between the V8 Javascript engine and C++ engine. Refer to the `entity_bindings.cpp` and `event_manager_bindings.cpp` files for more information on this.
+
+By using JavaScript scripting with V8, you can easily modify game behavior without recompiling the entire project, making the development process more efficient and flexible.

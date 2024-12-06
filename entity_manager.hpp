@@ -1,7 +1,10 @@
 #pragma once
 #include "entity.hpp"
 #include "physics.hpp"
+#include "event_manager.hpp"
+#include "timeline.hpp"
 #include <memory>
+#include <mutex>
 #include <unordered_set>
 
 class EntityManager {
@@ -14,7 +17,7 @@ public:
 
   void removeEntity(std::shared_ptr<Entity> entity);
 
-  void updateEntities();
+  void updateEntities(Timeline *timeline);
 
   void applyGravityOnEntities(PhysicsSystem &physicsSystem);
 
@@ -33,19 +36,13 @@ public:
     addDeathZonesHelper(std::forward<Args>(args)...);
   }
 
-  void addSpawnPoint(std::shared_ptr<Entity> spawnPoint);
-  template <typename... Args> void addSpawnPoints(Args &&...args) {
-    addSpawnPointsHelper(std::forward<Args>(args)...);
-  }
-
   bool checkPlayerDeath(std::shared_ptr<Entity> player);
-
-  void respawn(std::shared_ptr<Entity> player);
 
 private:
   std::unordered_set<std::shared_ptr<Entity>> entities;
   std::unordered_set<std::shared_ptr<Entity>> deathZones;
-  std::unordered_set<std::shared_ptr<Entity>> spawnPoints;
+
+  std::mutex entityMutex;
 
   void addEntitiesHelper() {}
 
@@ -60,12 +57,5 @@ private:
   void addDeathZonesHelper(T &&firstZone, Args &&...restZones) {
     addDeathZone(std::forward<T>(firstZone));
     addDeathZonesHelper(std::forward<Args>(restZones)...);
-  }
-
-  void addSpawnPointsHelper() {}
-  template <typename T, typename... Args>
-  void addSpawnPointsHelper(T &&firstPoint, Args &&...restPoints) {
-    addSpawnPoint(std::forward<T>(firstPoint));
-    addSpawnPointsHelper(std::forward<Args>(restPoints)...);
   }
 };

@@ -2,8 +2,6 @@
 #include <iostream>
 #include <thread>
 
-std::unordered_map<std::string, std::shared_ptr<Entity>> dict;
-std::unordered_set<std::string> activeEntities;
 std::atomic<bool> Client::disconnectRequested = false;
 
 Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
@@ -13,7 +11,10 @@ Client::Client(EntityManager &entityManager, EntityManager &clientEntityManager)
       peerPublisher(context, zmq::socket_type::pub),
       peerSubscriber1(context, zmq::socket_type::sub),
       peerSubscriber2(context, zmq::socket_type::sub),
-      entityManager(entityManager), clientEntityManager(clientEntityManager) {}
+      entityManager(entityManager), clientEntityManager(clientEntityManager) {
+  dict = std::make_shared<
+      std::unordered_map<std::string, std::shared_ptr<Entity>>>();
+}
 
 void Client::connectRequester(const std::string &address, int port) {
   requester.connect(address + ":" + std::to_string(port));
@@ -76,7 +77,7 @@ bool Client::connectServer(bool isP2P) {
     std::cerr << "Failed to receive reply from server. Check if the server is "
                  "running."
               << std::endl;
-    
+
     return false;
   }
 }
@@ -117,7 +118,7 @@ void Client::receiveSubMsg() {
     deserializeClientEntityMap(recvMsg);
     // update the entities according to the subMsg
     updateOtherEntities();
-    // printEntityMap();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
 
@@ -129,9 +130,12 @@ void Client::start(bool isP2P) {
   } else {
     // Serialize positions of all entities in the EntityManager
     for (const auto &entity : entityManager.getEntities()) {
+      Vector2 position = EventManager::getInstance().get_replay_only_mode()
+          ? Vector2{10000, 10000}:
+              entity->getPosition();
       message += std::to_string(entity->getID()) + " " +
-                 std::to_string(entity->position.x) + " " +
-                 std::to_string(entity->position.y) + " ";
+                 std::to_string(position.x) + " " + std::to_string(position.y) +
+                 " ";
     }
   }
 
@@ -146,7 +150,7 @@ void Client::start(bool isP2P) {
     peerPublisher.send(peerMessage, zmq::send_flags::none);
   }
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(45));
 }
 
 void Client::deserializeClientEntityMap(const std::string &pubMsg) {
@@ -219,25 +223,36 @@ void Client::updateOtherEntities() {
       activeEntities.insert(identifier);
 
       // Add or update entity in the dictionary
-      if (dict.find(identifier) == dict.end()) {
+      if (dict->find(identifier) == dict->end()) {
         Vector2 position{100, 100};
-        Vector2 dimensions{50, 50};
-        SDL_Color color = {255, 0, 0, 255};
+        Vector2 dimensions{40, 40};
+        SDL_Color color = {0, 0, 0, 255};
         auto newEntity = std::make_shared<Entity>(position, dimensions, color,
                                                   &globalTimeline, 2);
-        dict[identifier] = newEntity;
+        (*dict)[identifier] = newEntity;
         clientEntityManager.addEntities(newEntity);
       }
-      dict[identifier]->position = newPosition;
+      if ((*dict)[identifier]->position.x != newPosition.x ||
+          (*dict)[identifier]->position.y != newPosition.y) {
+
+        // (*dict)[identifier]->position = newPosition;
+        Event update_position_event("update_position",
+                                    globalTimeline.getTime());
+        update_position_event.parameters["dict"] = dict;
+        update_position_event.parameters["identifier"] = identifier;
+        update_position_event.parameters["newPosition"] = newPosition;
+        EventManager &em = EventManager::getInstance();
+        em.raise_event(update_position_event);
+      }
     }
   }
 
   // Now remove entities not in the current active set
-  for (auto it = dict.begin(); it != dict.end();) {
+  for (auto it = dict->begin(); it != dict->end();) {
     if (activeEntities.find(it->first) == activeEntities.end()) {
       // Entity is no longer active, remove it
       clientEntityManager.removeEntity(it->second);
-      it = dict.erase(it); // Erase returns the next iterator
+      it = dict->erase(it); // Erase returns the next iterator
     } else {
       ++it; // Move to the next entity
     }

@@ -7,12 +7,15 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <unordered_map>
 
 extern App *app;
 
 class Entity {
 public:
   Vector2 position = {0, 0};
+  Vector2 dimensions = {0, 0};
 
   Vector2 velocity = {0, 0};
   Vector2 maxVelocity = {50, 50};
@@ -24,6 +27,7 @@ public:
   bool isMovable = false;
   bool isHittable = false;
   bool isDashing = false;
+  bool isDrawable = true;
 
   std::unique_ptr<Shape> shape;
   SDL_Color color;
@@ -64,8 +68,6 @@ public:
 
   void updateDeltaTime();
 
-  void updatePosition();
-
   // Method to draw the entity
   void draw(float cameraX, float cameraY);
 
@@ -82,6 +84,14 @@ public:
   // Clearing platform's reference
   void clearPlatformReference();
 
+  Vector2 getPosition();
+  void setPosition(const Vector2 &ps);
+
+  std::unordered_map<std::string, std::string> serialize() const;
+  void deserialize(const std::unordered_map<std::string, std::string> &state);
+
 private:
   void updateSDLObject(float cameraX, float cameraY);
+
+  std::mutex positionMutex;
 };
