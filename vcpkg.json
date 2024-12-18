@@ -1,6 +1,0 @@
-{
-  "dependencies": [
-    "cppzmq",
-    "sdl2"
-  ]
-}
