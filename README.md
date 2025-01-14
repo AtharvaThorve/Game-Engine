@@ -147,6 +147,46 @@ The design follows a component-based architecture, emphasizing composition over 
 - **Is-A Relationship:**
   - The entity class does not inherit from other classes but interacts with various components to achieve desired behaviors.
 
+### Creation
+
+Entities can be created in two ways:
+
+1. **Direct Creation in C++:**
+   ```cpp
+   Vector2 playerPosition{100, 400};
+   Vector2 playerDimensions{40, 40};
+   SDL_Color playerColor = {255, 0, 0, 255};
+
+   auto player = std::make_shared<Entity>(playerPosition, playerDimensions, playerColor, &globalTimeline, 2);
+   ```
+
+2. **Using a JSON Config File:**
+   ```json
+   {
+       "position": {
+           "x": 100,
+           "y": 400
+       },
+       "color": {
+           "r": 255,
+           "g": 0,
+           "b": 0,
+           "a": 255
+       },
+       "tic": 2,
+       "shape": {
+           "type": "rectangle",
+           "dimensions": {
+               "x": 40,
+               "y": 40
+           }
+       }
+   }
+   ```
+   ```cpp
+   auto player = std::make_shared<Entity>("entities/player.json", &globalTimeline);
+   ```
+
 ### Component Interaction
 
 While entities possess attributes, they do not directly manipulate them. Instead, specialized components handle specific aspects:
