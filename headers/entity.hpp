@@ -1,10 +1,12 @@
 #pragma once
 #include "defs.hpp"
+#include "json.hpp"
 #include "movement_pattern.hpp"
 #include "shape.hpp"
 #include "structs.hpp"
 #include "timeline.hpp"
 #include <SDL2/SDL.h>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -54,6 +56,7 @@ public:
          const SDL_Color &color, Timeline *anchor, int64_t tic = 1);
   Entity(const Vector2 &position, const SDL_Point &center, int radius,
          const SDL_Color &color, Timeline *anchor, int64_t tic = 1);
+  Entity(const std::string &file_path, Timeline *anchor);
 
   // Destructor
   ~Entity() = default;

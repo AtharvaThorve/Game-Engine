@@ -25,6 +25,55 @@ Entity::Entity(const Vector2 &position, const SDL_Point &center, int radius,
       id(nextID++) // Assign unique ID
 {
   shape = std::make_unique<CircleShape>(radius, center);
+  isDrawable = true;
+}
+
+Entity::Entity(const std::string &file_path, Timeline *anchor)
+    : timeline(anchor, 1) {
+  std::ifstream file(file_path);
+  if (!file.is_open()) {
+    throw std::runtime_error("Failed to open file: " + file_path);
+  }
+
+  nlohmann::json json_data;
+  file >> json_data;
+
+  position.x = json_data.at("position").at("x").get<float>();
+  position.y = json_data.at("position").at("y").get<float>();
+
+  color.r = json_data.at("color").at("r").get<Uint8>();
+  color.g = json_data.at("color").at("g").get<Uint8>();
+  color.b = json_data.at("color").at("b").get<Uint8>();
+  color.a = json_data.at("color").at("a").get<Uint8>();
+
+  int64_t tic = json_data.at("tic").get<int64_t>();
+  new (&timeline) Timeline(anchor, tic);
+  lastUpdateTime = timeline.getTime();
+  lastGlobalTicSize = timeline.getAnchorTic();
+
+  std::string shapeType = json_data.at("shape").at("type").get<std::string>();
+  if (shapeType == "rectangle") {
+    dimensions.x = json_data.at("shape").at("dimensions").at("x").get<float>();
+    dimensions.y = json_data.at("shape").at("dimensions").at("y").get<float>();
+
+    SDL_Rect rect = {static_cast<int>(position.x), static_cast<int>(position.y),
+                     static_cast<int>(dimensions.x),
+                     static_cast<int>(dimensions.y)};
+    shape = std::make_unique<RectangleShape>(rect);
+  } else if (shapeType == "circle") {
+    int radius = json_data.at("shape").at("radius").get<int>();
+    SDL_Point center;
+    center.x = json_data.at("shape").at("center").at("x").get<int>();
+    center.y = json_data.at("shape").at("center").at("y").get<int>();
+
+    shape = std::make_unique<CircleShape>(radius, center);
+  } else {
+    throw std::runtime_error("Unsupported shape type: " + shapeType);
+  }
+
+  id = nextID++;
+
+  isDrawable = true;
 }
 
 void Entity::updateDeltaTime() {
@@ -131,7 +180,8 @@ std::unordered_map<std::string, std::string> Entity::serialize() const {
   return state;
 }
 
-void Entity::deserialize(const std::unordered_map<std::string, std::string> &state) {
+void Entity::deserialize(
+    const std::unordered_map<std::string, std::string> &state) {
   Vector2 pos;
   pos.x = std::stof(state.at("position_x"));
   pos.y = std::stof(state.at("position_y"));
