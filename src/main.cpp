@@ -152,12 +152,7 @@ void doClientGame() {
     float cached_scale = scale;
 
     // Player setup
-    Vector2 playerPosition{100, 400};
-    Vector2 playerDimensions{40, 40};
-    SDL_Color playerColor = {255, 0, 0, 255};
-
-    auto player = std::make_shared<Entity>(playerPosition, playerDimensions,
-                                           playerColor, &globalTimeline, 2);
+    auto player = std::make_shared<Entity>("entities/player.json", &globalTimeline);
     player->maxVelocity = Vector2{100, 300};
     player->isMovable = true;
     player->isHittable = true;
