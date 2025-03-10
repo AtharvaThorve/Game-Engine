@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y libsdl2-dev libzmq3-dev libnode-dev
+          sudo apt install -y libsdl2-dev libzmq3-dev libnode-dev=12.22.9~dfsg-1ubuntu3.6
 
       - name: Build project
         run: make
