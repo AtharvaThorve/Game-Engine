@@ -70,8 +70,8 @@ exposeToV8(std::string object_name, R *object_ref,
       object_template->NewInstance(context).ToLocalChecked();
   object->SetInternalField(0, v8::External::New(isolate, object_ref));
 
-  context->Global()->Set(v8::String::NewFromUtf8(isolate, object_name.c_str()),
-                         object);
+  context->Global()->Set(
+      context, v8::String::NewFromUtf8(isolate, object_name.c_str()), object);
   return handle_scope.Escape(object);
 }
 
