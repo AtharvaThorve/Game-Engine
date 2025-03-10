@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-11 libsdl2-dev libzmq3-dev libnode-dev
+          sudo apt-get install -y g++-11 libsdl2-dev libzmq3-dev build-essential libnode-dev
           dpkg -l | grep libnode
 
       - name: Set GCC to g++-11
